@@ -22,6 +22,20 @@ class Parte_usada(db.Model):
     plantas = db.relationship('Planta_parte', backref='parte', lazy=True)
     indicacoes = db.relationship('Parte_indicacao', backref='parte', lazy=True)
     
+    metodos_preparacao = db.relationship(
+        'Metodo_preparacao_trad',
+        secondary='Planta_metodo_trad',
+        backref='partes',
+        lazy='dynamic'
+    )
+    
+    metodos_extracao = db.relationship(
+        'Metodo_extraccao_cientif',
+        secondary='Parte_metodo',
+        backref='partes',
+        lazy='dynamic'
+    )
+
     def to_dict(self):
         return {
             'id_parte': self.id_parte,

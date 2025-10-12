@@ -79,11 +79,19 @@ def get_plantas():
                 Local_colheita
             ).filter(Local_colheita.id_provincia == provincia_id)
         
-        # Filtro por parte usada (ADAPTADO: nova estrutura)
+# Filtro por parte usada - CORRIGIDO
         if parte_usada:
-            query = query.join(Planta_medicinal.partes_usadas).join(
-                Parte_usada
-            ).filter(Parte_usada.nome_parte.ilike(f'%{parte_usada}%'))
+            try:
+                # Se vier ID (número), buscar por ID
+                parte_id = int(parte_usada)
+                query = query.join(Planta_medicinal.partes_usadas).join(
+                    Parte_usada
+                ).filter(Parte_usada.id_parte == parte_id)
+            except ValueError:
+                # Se vier texto, buscar por nome
+                query = query.join(Planta_medicinal.partes_usadas).join(
+                    Parte_usada
+                ).filter(Parte_usada.nome_parte.ilike(f'%{parte_usada}%'))
         
         # Filtro por indicação (ADAPTADO: nova estrutura)
         if indicacao_id:

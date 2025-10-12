@@ -29,6 +29,13 @@ interface Familia {
   total_plantas?: number; // Opcional: quantas plantas tem
 }
 
+interface ParteUsada {
+  id_parte: number;
+  nome_parte: string;
+  label?: string;
+  value?: string;
+}
+
 // URL base da API
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
 
@@ -248,8 +255,7 @@ export function SearchForm() {
   const [autores, setAutores] = useState<Autor[]>([])
   const [indicacoes, setIndicacoes] = useState<Indicacao[]>([])
   const [familias, setFamilias] = useState<Familia[]>([])
-  const [partesUsadas, setPartesUsadas] = useState<string[]>([])
-  
+  const [partesUsadas, setPartesUsadas] = useState<ParteUsada[]>([])
   // Estados de loading
   const [loadingProvincias, setLoadingProvincias] = useState(true)
   const [loadingAutores, setLoadingAutores] = useState(true)
@@ -309,10 +315,11 @@ export function SearchForm() {
   }
 
   // CORRIGIDO: Função para buscar partes usadas com melhor tratamento
+  // Função para buscar partes usadas - SIMPLIFICADA
   const fetchPartesUsadas = async () => {
     try {
       setLoadingPartesUsadas(true)
-      console.log('Buscando partes usadas de:', `${API_BASE_URL}/partes-usadas`)
+      console.log('🔍 Buscando partes usadas de:', `${API_BASE_URL}/partes-usadas`)
       
       const response = await fetch(`${API_BASE_URL}/partes-usadas`, {
         method: 'GET',
@@ -324,55 +331,22 @@ export function SearchForm() {
       
       if (response.ok) {
         const data = await response.json()
-        console.log('Partes usadas recebidas:', data)
+        console.log('✅ Partes usadas recebidas:', data)
         
         if (Array.isArray(data)) {
-          // Extrair partes únicas
-          const partesSet = new Set<string>()
-          
-          data.forEach((item: any) => {
-            let parteText = ''
-            
-            // Verificar diferentes possíveis estruturas
-            if (typeof item === 'string') {
-              parteText = item
-            } else if (item.parte_usada) {
-              parteText = item.parte_usada
-            } else if (item.nome) {
-              parteText = item.nome
-            }
-            
-            if (parteText && parteText.trim()) {
-              // Dividir por vírgulas e outros separadores comuns
-              const partes = parteText
-                .split(/[,;\/\+\&]/)
-                .map((p: string) => p.trim())
-                .filter((p: string) => p.length > 0)
-              
-              partes.forEach((p: string) => {
-                if (p) partesSet.add(p)
-              })
-            }
-          })
-          
-          const partesArray = Array.from(partesSet).sort()
-          setPartesUsadas(partesArray)
-          console.log('Partes únicas extraídas:', partesArray)
+          setPartesUsadas(data)
         } else {
-          console.warn('Dados de partes usadas não são um array:', data)
+          console.warn('⚠️ Dados não são array:', data)
           setPartesUsadas([])
         }
       } else {
         const errorText = await response.text()
-        console.error('Erro ao buscar partes usadas:', errorText)
-        throw new Error(`Erro ${response.status}: ${errorText}`)
+        console.error('❌ Erro ao buscar partes usadas:', errorText)
+        setPartesUsadas([])
       }
     } catch (error) {
-      console.error('Erro na requisição de partes usadas:', error)
+      console.error('❌ Erro na requisição:', error)
       setPartesUsadas([])
-      if (!error) {
-        setError(`Erro ao carregar partes usadas: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
-      }
     } finally {
       setLoadingPartesUsadas(false)
     }
@@ -541,10 +515,34 @@ export function SearchForm() {
     }))
   }, [familias])
 
+    useEffect(() => {
+    const loadPartesUsadas = async () => {
+      try {
+        setLoadingPartesUsadas(true)
+        const data = await fetchData<any>(
+          '/partes-usadas',
+          setPartesUsadas,
+          setLoadingPartesUsadas,
+          'partes usadas'
+        )
+        
+        console.log('✅ Partes usadas carregadas:', data)
+      } catch (error) {
+        console.error('❌ Erro ao carregar partes usadas:', error)
+      } finally {
+        setLoadingPartesUsadas(false)
+      }
+    }
+    
+    loadPartesUsadas()
+  }, [])
+
   const parteUsadaOptions = useMemo(() => {
+    if (!Array.isArray(partesUsadas)) return []
+    
     return partesUsadas.map(parte => ({
-      value: parte,
-      label: parte
+      value: String(parte.id_parte),  // Enviar ID como string
+      label: parte.nome_parte || parte.label || 'Sem nome'
     }))
   }, [partesUsadas])
 

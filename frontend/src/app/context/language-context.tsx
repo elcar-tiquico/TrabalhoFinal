@@ -19,7 +19,7 @@ const translations = {
     "search.author": "Autor",
     "search.location": "Local de Observação",
     "search.placeholder.popular": "Ex: Moringa...",
-    "search.placeholder.scientific": "Ex: Lamiaceae...",
+    "search.placeholder.scientific": "Ex: Moringa oleifera...",
     "search.placeholder.author": "Ex: Silva, Oliveira...",
     "search.recording": "Gravando...",
     "search.empty": "Deixe os campos vazios para buscar todas as plantas.",

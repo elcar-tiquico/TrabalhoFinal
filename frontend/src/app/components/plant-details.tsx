@@ -286,7 +286,9 @@ function ReferenciasDetalhadas({ plant }: { plant: Plant }) {
               .sort((a, b) => {
                 // Ordenar por ano (mais recente primeiro), depois por título
                 if (a.ano && b.ano) {
-                  return parseInt(b.ano) - parseInt(a.ano)
+                  const anoA = typeof a.ano === 'number' ? a.ano : parseInt(String(a.ano), 10)
+                  const anoB = typeof b.ano === 'number' ? b.ano : parseInt(String(b.ano), 10)
+                  return anoB - anoA
                 }
                 if (a.ano && !b.ano) return -1
                 if (!a.ano && b.ano) return 1
@@ -340,12 +342,26 @@ export function PlantDetails({ plant }: PlantDetailsProps) {
   const [showArticle, setShowArticle] = useState(false)
   const [imageGalleryError, setImageGalleryError] = useState<string | null>(null)
 
+  console.log('🔍 DEBUG PlantDetails - Dados recebidos:', {
+    id: plant.id,
+    nome: plant.nomeCientifico,
+    infosAdicionais: plant.infosAdicionais,
+    composicaoQuimica: plant.composicaoQuimica,
+    propriedadesFarmacologicas: plant.propriedadesFarmacologicas,
+    autores: plant.autores_detalhados?.length || 0,
+    usos: plant.usos_especificos?.length || 0,
+    metodos_preparacao_total: plant.usos_especificos?.reduce((acc, uso) => 
+      acc + (uso.metodos_preparacao?.length || 0), 0) || 0,
+    metodos_extracao_total: plant.usos_especificos?.reduce((acc, uso) => 
+      acc + (uso.metodos_extracao?.length || 0), 0) || 0
+  })
+
   // 🔥 CORREÇÃO: Verificar e processar imagens da planta
   const plantImages: PlantImage[] = plant.imagens?.map(img => ({
     id_imagem: img.id_imagem,
     nome_arquivo: img.nome_arquivo,
-    ordem: img.ordem,
-    legenda: img.legenda || '',
+    ordem: img.ordem ?? 0,  // ✅ Se undefined, usa 0
+    legenda: img.legenda || '',  // ✅ Garante string vazia se null/undefined
     url: img.url,
     data_upload: img.data_upload
   })) || []
@@ -481,27 +497,47 @@ export function PlantDetails({ plant }: PlantDetailsProps) {
                   value={plant.nomeCientifico}
                   isScientific={true}
                 />
-                
+
                 <DetailRow 
                   label={translate("plant.family")} 
                   value={plant.familia?.toUpperCase() || plant.familia}
                 />
-                
+
                 <DetailRow 
                   label={translate("plant.commonName")} 
                   value={plant.nomes_comuns?.join(', ') || plant.nome}
                 />
-                
+
                 <DetailRow label={translate("plant.location")} value={plant.localColheita} />
-                <DetailRow label={translate("plant.specimenNumber")} value={plant.numeroExcicata} />
-                
-                <DetailRow label={translate("plant.composition")} value={plant.composicaoQuimica} />
-                <DetailRow label={translate("plant.properties")} value={plant.propriedadesFarmacologicas} />
-                
+
+                {/* ✅ ADICIONAR: Informações Adicionais */}
+                {plant.infosAdicionais && (
+                  <DetailRow 
+                    label="Informações Adicionais" 
+                    value={plant.infosAdicionais}
+                  />
+                )}
+
+                {/* ✅ ADICIONAR: Composição Química */}
+                {plant.composicaoQuimica && (
+                  <DetailRow 
+                    label={translate("plant.composition")} 
+                    value={plant.composicaoQuimica}
+                  />
+                )}
+
+                {/* ✅ ADICIONAR: Propriedades Farmacológicas */}
+                {plant.propriedadesFarmacologicas && (
+                  <DetailRow 
+                    label={translate("plant.properties")} 
+                    value={plant.propriedadesFarmacologicas}
+                  />
+                )}
+
                 {/* Seções melhoradas */}
                 <ParteUsadaCorrelacao plant={plant} />
                 <AutoresDetalhados plant={plant} />
-                
+
                 {/* Nova seção de referências detalhadas */}
                 <ReferenciasDetalhadas plant={plant} />
               </div>

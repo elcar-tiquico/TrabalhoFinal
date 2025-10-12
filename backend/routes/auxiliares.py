@@ -158,10 +158,18 @@ def get_familias():
 # =====================================================
 @auxiliares_bp.route('/partes-usadas', methods=['GET'])
 def get_partes_usadas():
-    """Listar partes usadas"""
+    """Listar partes usadas com formato esperado pelo frontend"""
     try:
-        partes = Parte_usada.query.all()
-        return jsonify([p.to_dict() for p in partes])
+        partes = Parte_usada.query.order_by(Parte_usada.nome_parte).all()
+        return jsonify([
+            {
+                'id_parte': p.id_parte,
+                'nome_parte': p.nome_parte,
+                'label': p.nome_parte,  # ✅ ADICIONADO
+                'value': str(p.id_parte)  # ✅ ADICIONADO como string
+            }
+            for p in partes
+        ])
     except Exception as e:
         return handle_error(e, "Erro ao buscar partes usadas")
 
