@@ -1,0 +1,393 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+@media (min-width: 640px) {
+  .header {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.addButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  margin-top: 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  background-color: #9333ea;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: background-color 0.2s;
+}
+
+.addButton:hover {
+  background-color: #7e22ce;
+}
+
+.addButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #f9fafb, 0 0 0 4px #9333ea;
+}
+
+@media (min-width: 640px) {
+  .addButton {
+    margin-top: 0;
+  }
+}
+
+.icon {
+  margin-right: 0.5rem;
+}
+
+.filterCard {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.filterGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .filterGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.filterItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.filterItemCheckbox {
+  display: flex;
+  align-items: flex-end;
+  height: 2.5rem;
+}
+
+.filterLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+
+.searchInputContainer {
+  position: relative;
+}
+
+.input {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #9333ea;
+  box-shadow: 0 0 0 1px #9333ea;
+}
+
+.searchIcon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.checkboxContainer {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox {
+  height: 1rem;
+  width: 1rem;
+  color: #9333ea;
+  border-radius: 0.25rem;
+  border: 1px solid #d1d5db;
+}
+
+.checkbox:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #f9fafb, 0 0 0 4px #9333ea;
+}
+
+.checkboxLabel {
+  margin-left: 0.5rem;
+  display: block;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.tableCard {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.tableContainer {
+  overflow-x: auto;
+}
+
+.table {
+  min-width: 100%;
+  border-collapse: collapse;
+}
+
+.tableHeader {
+  background-color: #f9fafb;
+}
+
+.tableHeaderCell {
+  padding: 0.75rem 1.5rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tableRow {
+  border-top: 1px solid #e5e7eb;
+}
+
+.tableRow:hover {
+  background-color: #f9fafb;
+}
+
+.inactiveRow {
+  background-color: #f9fafb;
+}
+
+.tableCell {
+  padding: 1rem 1.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.tableCellLanguage {
+  padding: 1rem 1.5rem;
+  white-space: nowrap;
+}
+
+.tableCellActions {
+  padding: 1rem 1.5rem;
+  font-size: 0.875rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.languageInfo {
+  display: flex;
+  align-items: center;
+}
+
+.flagContainer {
+  flex-shrink: 0;
+  height: 2.5rem;
+  width: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.languageNames {
+  margin-left: 1rem;
+}
+
+.languageName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827;
+}
+
+.languageNative {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.defaultBadge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.activeBadge {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.inactiveBadge {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.progressContainer {
+  display: flex;
+  align-items: center;
+}
+
+.progressBar {
+  flex-grow: 1;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  height: 0.625rem;
+  margin-right: 0.5rem;
+  max-width: 9rem;
+}
+
+.progressFill {
+  background-color: #9333ea;
+  height: 0.625rem;
+  border-radius: 9999px;
+}
+
+.progressText {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.progressDetails {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.dictionaryInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.dictionaryCount {
+  font-size: 0.875rem;
+  color: #111827;
+}
+
+.dictionaryLink {
+  font-size: 0.75rem;
+  color: #9333ea;
+  margin-top: 0.25rem;
+}
+
+.dictionaryLink:hover {
+  color: #7e22ce;
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.translateButton {
+  color: #4f46e5;
+}
+
+.translateButton:hover {
+  color: #4338ca;
+}
+
+.editButton {
+  color: #9333ea;
+}
+
+.editButton:hover {
+  color: #7e22ce;
+}
+
+.deactivateButton {
+  color: #dc2626;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.deactivateButton:hover {
+  color: #b91c1c;
+}
+
+.activateButton {
+  color: #16a34a;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.activateButton:hover {
+  color: #15803d;
+}
+
+.emptyMessage {
+  padding: 1rem 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

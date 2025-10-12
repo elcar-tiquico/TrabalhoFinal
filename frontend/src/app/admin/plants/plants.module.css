@@ -1,0 +1,1015 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+@media (min-width: 640px) {
+  .header {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #002856;
+}
+
+.addButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  margin-top: 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #002856;
+  background-color: #eba900;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: background-color 0.2s;
+}
+
+.addButton:hover {
+  background-color: #d19700;
+}
+
+.addButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #f9fafb, 0 0 0 4px rgba(235, 169, 0, 0.4);
+}
+
+@media (min-width: 640px) {
+  .addButton {
+    margin-top: 0;
+  }
+}
+
+.icon {
+  margin-right: 0.5rem;
+}
+
+.filterCard {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.filterGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .filterGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .filterGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.filterItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.filterLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #002856;
+  margin-bottom: 0.25rem;
+}
+
+.searchInputContainer {
+  position: relative;
+}
+
+.input {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #002856;
+  box-shadow: 0 0 0 1px rgba(0, 40, 86, 0.3);
+}
+
+.searchIcon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(0, 40, 86, 0.5);
+  pointer-events: none;
+}
+
+.select {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #9333ea;
+  box-shadow: 0 0 0 1px #9333ea;
+}
+
+.filterActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.clearButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  background-color: white;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: background-color 0.2s;
+}
+
+.clearButton:hover {
+  background-color: #f9fafb;
+}
+
+.clearButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #f9fafb, 0 0 0 4px #9333ea;
+}
+
+.tableCard {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.tableContainer {
+  overflow-x: auto;
+}
+
+.table {
+  min-width: 100%;
+  border-collapse: collapse;
+}
+
+.tableHeader {
+  background-color: #f9fafb;
+}
+
+.tableHeaderCell {
+  padding: 0.75rem 1.5rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #002856;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tableRow {
+  border-top: 1px solid #e5e7eb;
+}
+
+.tableRow:hover {
+  background-color: rgba(235, 169, 0, 0.04);
+}
+
+.tableCell {
+  padding: 1rem 1.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.tableCellName {
+  padding: 1rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827;
+  white-space: nowrap;
+}
+
+.tableCellActions {
+  padding: 1rem 1.5rem;
+  font-size: 0.875rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.badgeContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badgeBlue {
+  background-color: rgba(0, 40, 86, 0.1); 
+  color: #002856;
+}
+
+.badgeGreen {
+  background-color: rgba(235, 169, 0, 0.1);
+  color: #eba900;
+}
+
+.badgePurple {
+  background-color: rgba(0, 40, 86, 0.06);
+  color: #002856;
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.viewButton {
+  color: #002856;
+  background: none; /* ✅ ADICIONAR ESTA LINHA */
+  border: none;     /* ✅ ADICIONAR ESTA LINHA */
+  padding: 0;       /* ✅ ADICIONAR ESTA LINHA */
+  font: inherit;    /* ✅ ADICIONAR ESTA LINHA */
+  cursor: pointer;
+}
+
+.viewButton:hover {
+  color: #eba900;
+  background-color: transparent;
+}
+
+.editButton {
+  color: #002856;
+}
+
+.editButton:hover {
+  color: #eba900;
+}
+
+.deleteButton {
+  color: #dc2626;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.deleteButton:hover {
+  color: #b91c1c;
+}
+
+.emptyMessage {
+  padding: 1rem 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.pagination {
+  /* background-color: white; */
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #002856; 
+  color: #002856;
+  background-color: rgba(0, 40, 86, 0.06);
+  border-radius: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .pagination {
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+.paginationMobile {
+  display: flex;
+  flex: 1;
+  justify-content: space-between;
+}
+
+@media (min-width: 640px) {
+  .paginationMobile {
+    display: none;
+  }
+}
+
+.paginationDesktop {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .paginationDesktop {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.paginationButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  background-color: white;
+  transition: background-color 0.2s;
+}
+
+.paginationButton:hover {
+  background-color: #f9fafb;
+}
+
+.paginationText {
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.paginationBold {
+  font-weight: 500;
+}
+
+.paginationNav {
+  display: flex;
+  position: relative;
+  z-index: 0;
+  display: inline-flex;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.paginationNavButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  background-color: white;
+}
+
+.paginationNavButton:hover {
+  background-color: #f9fafb;
+}
+
+.paginationNavButtonLeft {
+  border-top-left-radius: 0.375rem;
+  border-bottom-left-radius: 0.375rem;
+}
+
+.paginationNavButtonRight {
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+}
+
+.paginationNavButtonCurrent {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid #9333ea;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #9333ea;
+  background-color: #f5f3ff;
+  z-index: 10;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* === MELHORIAS CSS SEM CORES AZUIS === */
+/* Adicionar ao plants.module.css existente */
+
+/* Melhorias para ordenação - MANTENDO CORES ORIGINAIS */
+.tableHeaderCell {
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.tableHeaderCell[style*="cursor: pointer"] {
+  user-select: none;
+}
+
+/* Paginação melhorada - CORES ORIGINAIS APENAS */
+.paginationEllipsis {
+  padding: 0.5rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.paginationNavButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.paginationNavButton:disabled:hover {
+  background-color: white;
+}
+
+/* Melhorias visuais para dados - SEM CORES ADICIONAIS */
+.tableCell em {
+  font-style: italic;
+}
+
+.tableCell strong {
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+/* Informações adicionais (exsicata) */
+.tableCell div {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* Estados vazios */
+.emptyMessage {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Loading animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Placeholder melhorado */
+.input::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Indicador visual para colunas ordenáveis - CINZA APENAS */
+.tableHeaderCell[style*="cursor: pointer"]::after {
+  content: "⇅";
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #d1d5db;
+  font-size: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.tableHeaderCell[style*="cursor: pointer"]:hover::after {
+  opacity: 1;
+}
+
+/* Animação para carregamento */
+.tableRow {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading spinner - USANDO APENAS COR ORIGINAL (PURPLE) */
+.loadingSpinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #eba900;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+/* Responsividade - mobile */
+@media (max-width: 640px) {
+  .table {
+    font-size: 0.75rem;
+  }
+  
+  .tableHeaderCell,
+  .tableCell,
+  .tableCellName,
+  .tableCellActions {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .tableHeaderCell {
+    font-size: 0.625rem;
+  }
+  
+  /* Ocultar colunas em mobile */
+  .table th:nth-child(4),
+  .table td:nth-child(4),
+  .table th:nth-child(5),
+  .table td:nth-child(5) {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Telas muito pequenas */
+  .table th:nth-child(3),
+  .table td:nth-child(3) {
+    display: none;
+  }
+  
+  .filterGrid {
+    gap: 0.75rem;
+  }
+  
+  .container {
+    gap: 1rem;
+  }
+  
+  .header {
+    gap: 0.75rem;
+  }
+  
+  .addButton {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+  }
+}
+
+/* Transições suaves */
+.tableRow,
+.paginationNavButton,
+.filterItem select,
+.filterItem input {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Focus states - USANDO APENAS PURPLE ORIGINAL */
+.tableHeaderCell:focus {
+  outline: 2px solid #9333ea;
+  outline-offset: -2px;
+}
+
+.paginationNavButton:focus,
+.paginationButton:focus {
+  outline: 2px solid #9333ea;
+  outline-offset: 2px;
+}
+
+/* Melhorias para filtros avançados */
+.advancedFilters {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.filterInfo {
+  font-size: 0.875rem;
+  color: #6b7280;
+  padding: 0.5rem;
+  background-color: #f9fafb;
+  border-radius: 0.375rem;
+}
+
+.filterInfo ul {
+  margin: 0.5rem 0;
+  padding-left: 1rem;
+}
+
+.filterInfo p {
+  margin: 0.5rem 0 0 0;
+  font-style: italic;
+}
+
+/* Botão filtros avançados */
+.toggleAdvancedButton {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.5rem;
+}
+
+.toggleAdvancedButton .icon {
+  transition: transform 0.2s ease;
+}
+
+.toggleAdvancedButton:hover .icon {
+  transform: scale(1.1);
+}
+
+/* Responsividade para filtros */
+@media (max-width: 768px) {
+  .filterGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .filterActions {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+  
+  .toggleAdvancedButton,
+  .clearButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Estados de erro */
+.errorMessage {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  color: #dc2626;
+  margin: 1rem 0;
+}
+
+.errorMessage h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.errorMessage p {
+  margin: 0 0 1rem 0;
+  font-size: 0.875rem;
+}
+
+.errorMessage button {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.errorMessage button:hover {
+  background-color: #b91c1c;
+}
+
+/* Informações de resultados */
+.resultsInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 0.5rem;
+}
+
+/* Indicador de filtros ativos - USANDO PURPLE ORIGINAL */
+.filterActive {
+  position: relative;
+}
+
+.filterActive::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background-color: #9333ea;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+/* Rotação do ícone limpar */
+.clearButton:hover .icon {
+  transform: rotate(90deg);
+  transition: transform 0.2s ease;
+}
+
+/* Estados de carregamento */
+.buttonLoading {
+  position: relative;
+  pointer-events: none;
+}
+
+.buttonLoading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Indicadores visuais - USANDO PURPLE ORIGINAL */
+.sortIndicator {
+  margin-left: 0.25rem;
+  font-size: 0.75rem;
+  color: #9333ea;
+}
+
+/* Tipos de pesquisa */
+.searchTypeSelector {
+  display: flex;
+  flex-direction: column;
+}
+
+.searchTypeInfo {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Indicação do tipo ativo - USANDO PURPLE ORIGINAL */
+.searchTypeActive {
+  position: relative;
+}
+
+.searchTypeActive::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 6px;
+  height: 6px;
+  background-color: #9333ea;
+  border-radius: 50%;
+  border: 1px solid white;
+}
+
+/* === REMOVER COMPLETAMENTE QUALQUER AZUL === */
+/* Override para garantir que não há azul */
+.badgeBlue {
+  background-color: #f3f4f6 !important;
+  color: #374151 !important;
+}
+
+/* Placeholder focus states */
+.input[placeholder*="comum"]:focus::placeholder,
+.input[placeholder*="autor"]:focus::placeholder,
+.input[placeholder*="folha"]:focus::placeholder,
+.input[placeholder*="diabetes"]:focus::placeholder,
+.input[placeholder*="flavonoides"]:focus::placeholder,
+.input[placeholder*="anti-inflamatório"]:focus::placeholder {
+  opacity: 0.7;
+}
+
+/* .highlighted {
+  background-color: #fef3c7 !important;
+  border: 2px solid #f59e0b !important;
+  border-radius: 0.375rem;
+  animation: highlightPulse 2s ease-in-out;
+}
+
+@keyframes highlightPulse {
+  0%, 100% { 
+    background-color: #fef3c7; 
+  }
+  50% { 
+    background-color: #fde68a; 
+  }
+}
+
+.highlighted {
+  background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+  border: 3px solid #f59e0b !important;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4) !important;
+  animation: highlightPulse 2s ease-in-out infinite;
+  position: relative;
+  z-index: 10;
+}
+
+@keyframes highlightPulse {
+  0%, 100% { 
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+  }
+  50% { 
+    background: linear-gradient(135deg, #fde68a, #fcd34d);
+    transform: scale(1.02);
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.6);
+  }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+} */
+
+/* =====================================================
+   ESTILOS PARA HIGHLIGHT DE ELEMENTOS ENCONTRADOS
+   Adicionar aos arquivos CSS existentes
+   ===================================================== */
+
+/* 🎯 ANIMAÇÃO PARA HIGHLIGHT */
+/* ===== HIGHLIGHT AJUSTADO PARA CORES DA PÁGINA ===== */
+
+.highlighted {
+  background: linear-gradient(135deg, #002856, #001f45) !important;
+  box-shadow: 0 0 20px rgba(235, 169, 0, 0.4) !important;
+  border: 2px solid #eba900 !important;
+  border-radius: 8px !important;
+  animation: highlightPulse 2s infinite !important;
+  transition: all 0.3s ease !important;
+}
+
+@keyframes highlightPulse {
+  0% {
+    box-shadow: 0 0 20px rgba(147, 51, 234, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(147, 51, 234, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(147, 51, 234, 0.4);
+  }
+}
+
+@keyframes slideInRight {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ✅ ADICIONAR ao arquivo plants.module.css */
+
+/* Animações para indicadores visuais */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+/* Destaque para plantas encontradas */
+.highlighted {
+  background-color: #fef3cd !important;
+  border-left: 4px solid #f59e0b !important;
+  animation: pulse 2s ease-in-out 3;
+  transition: all 0.3s ease;
+}
+
+/* Destaque para o filtro de família quando selecionado via URL */
+.familyFilterHighlight {
+  border-color: #9333ea !important;
+  box-shadow: 0 0 0 2px rgba(147, 51, 234, 0.2) !important;
+  background-color: #faf5ff !important;
+  transition: all 0.3s ease;
+}

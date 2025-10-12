@@ -1,0 +1,475 @@
+/* PlantImageUploader.module.css - CORES ATUALIZADAS PARA COMBINAR COM O SISTEMA */
+
+.imageUploader {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+/* Área de Upload */
+.uploadArea {
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 20px;
+}
+
+.uploadArea:hover {
+  border-color: #002856;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+}
+
+.uploadAreaActive {
+  border-color: #002856;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  box-shadow: 0 0 0 3px rgba(0, 40, 86, 0.1);
+}
+
+.uploadIcon {
+  font-size: 3rem;
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.uploadText {
+  color: #374151;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.uploadSubtext {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+/* Grid de Imagens */
+.imagesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.imageCard {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.imageCard:hover {
+  border-color: #002856;
+  box-shadow: 0 8px 12px -2px rgba(0, 40, 86, 0.15);
+  transform: translateY(-2px);
+}
+
+.imagePreview {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.imageOrder {
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  box-shadow: 0 2px 4px rgba(0, 40, 86, 0.2);
+  z-index: 10;
+}
+
+.legendaInput {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.legendaInput:focus {
+  outline: none;
+  border-color: #002856;
+  box-shadow: 0 0 0 3px rgba(0, 40, 86, 0.1);
+}
+
+.legendaInput::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Ações das Imagens */
+.imageActions {
+  display: flex;
+  gap: 8px;
+}
+
+.moveButton {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+}
+
+.moveButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.moveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.moveButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.5);
+}
+
+.removeButton {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 32px;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
+.removeButton:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+.removeButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.5);
+}
+
+/* Overlay de Upload */
+.uploadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 40, 86, 0.9);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  z-index: 20;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Texto de Ajuda */
+.helpText {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.helpText p {
+  margin: 0 0 8px 0;
+}
+
+.helpText p:last-child {
+  margin-bottom: 0;
+}
+
+.helpText ul {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.helpText li {
+  margin-bottom: 4px;
+}
+
+.helpText strong {
+  color: #374151;
+  font-weight: 600;
+}
+
+.helpText em {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* Contador de Imagens */
+.imageCounter {
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+/* Estados de erro */
+.imageUploader.error .uploadArea {
+  border-color: #dc2626;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+}
+
+.imageUploader.error .uploadArea:hover {
+  border-color: #b91c1c;
+}
+
+/* Estados de sucesso */
+.imageUploader.success .uploadArea {
+  border-color: #059669;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+/* Animações */
+.imageCard {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.uploadArea {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .imagesGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .imageCard {
+    padding: 12px;
+  }
+  
+  .uploadArea {
+    padding: 32px 16px;
+  }
+  
+  .uploadIcon {
+    font-size: 2.5rem;
+  }
+  
+  .uploadText {
+    font-size: 1rem;
+  }
+  
+  .uploadSubtext {
+    font-size: 0.85rem;
+  }
+  
+  .imageActions {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .moveButton {
+    font-size: 0.8rem;
+    padding: 8px;
+  }
+  
+  .removeButton {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .uploadArea {
+    padding: 24px 12px;
+  }
+  
+  .uploadIcon {
+    font-size: 2rem;
+    margin-bottom: 12px;
+  }
+  
+  .uploadText {
+    font-size: 0.95rem;
+  }
+  
+  .uploadSubtext {
+    font-size: 0.8rem;
+  }
+  
+  .imagePreview {
+    height: 120px;
+  }
+  
+  .imageOrder {
+    width: 24px;
+    height: 24px;
+    font-size: 0.8rem;
+  }
+  
+  .legendaInput {
+    font-size: 0.85rem;
+    padding: 6px 10px;
+  }
+  
+  .helpText {
+    font-size: 0.85rem;
+    padding: 12px;
+  }
+  
+  .imageCounter {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+  }
+}
+
+/* Estados de loading */
+.imageUploader.loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.imageUploader.loading .uploadArea {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  cursor: not-allowed;
+}
+
+/* Melhorias de acessibilidade */
+.moveButton:focus-visible,
+.removeButton:focus-visible {
+  outline: 2px solid #002856;
+  outline-offset: 2px;
+}
+
+.uploadArea:focus-visible {
+  outline: 2px solid #002856;
+  outline-offset: 2px;
+}
+
+/* Estados para diferentes tipos de arquivo */
+.imageCard.uploading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.imageCard.error {
+  border-color: #dc2626;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+}
+
+.imageCard.success {
+  border-color: #059669;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+/* Scroll customizado para áreas com overflow */
+.helpText::-webkit-scrollbar {
+  width: 4px;
+}
+
+.helpText::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 2px;
+}
+
+.helpText::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  border-radius: 2px;
+}
+
+.helpText::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+}

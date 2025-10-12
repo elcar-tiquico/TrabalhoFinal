@@ -1,0 +1,515 @@
+/* AuthorManager.module.css - CORES ATUALIZADAS */
+
+.authorManager {
+  width: 100%;
+}
+
+/* Lista de Autores */
+.authorsList {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+}
+
+.authorsList h4 {
+  margin: 0 0 16px 0;
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.authorItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.authorItem:hover {
+  border-color: #002856;
+  box-shadow: 0 4px 8px rgba(0, 40, 86, 0.1);
+  transform: translateY(-1px);
+}
+
+.authorOrder {
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 40, 86, 0.2);
+}
+
+.authorContent {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Modo de Visualização */
+.authorDisplay {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.authorName {
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.newTag {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.authorAffiliation {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.authorRole {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.authorRole.primeiro {
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.authorRole.correspondente {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.authorRole.coautor {
+  color: #6b7280;
+}
+
+/* Modo de Edição */
+.authorEdit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.editRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.editInput {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.editInput:focus {
+  outline: none;
+  border-color: #002856;
+  box-shadow: 0 0 0 2px rgba(0, 40, 86, 0.1);
+}
+
+.editInputSmall {
+  flex: 0 0 120px;
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.editInputSmall:focus {
+  outline: none;
+  border-color: #002856;
+  box-shadow: 0 0 0 2px rgba(0, 40, 86, 0.1);
+}
+
+.editSelect {
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  min-width: 140px;
+}
+
+.editSelect:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.editActions {
+  display: flex;
+  gap: 4px;
+}
+
+.saveButton {
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(102, 126, 234, 0.2);
+}
+
+.saveButton:hover {
+  background: linear-gradient(135deg, #001f45 0%, #001a3c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 40, 86, 0.3);
+}
+
+/* Ações dos Autores */
+.authorActions {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+
+.actionButton {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+  min-width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  border-color: #cbd5e1;
+  transform: scale(0.95);
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.actionButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 40, 86, 0.5);
+}
+
+.removeButton {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  min-width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(239, 68, 68, 0.2);
+}
+
+.removeButton:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+.removeButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.5);
+}
+
+/* Seção de Adicionar Autor */
+.addAuthorSection {
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 16px;
+  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+}
+
+.searchContainer {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #002856;
+  box-shadow: 0 0 0 3px rgba(0, 40, 86, 0.1);
+}
+
+.loadingIndicator {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e2e8f0;
+  border-top: 2px solid #002856;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Sugestões */
+.suggestions {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.suggestion {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.suggestion:hover:not(.disabled) {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.suggestion:last-child {
+  border-bottom: none;
+}
+
+.suggestion.disabled {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.suggestionName {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 2px;
+}
+
+.suggestionAffiliation {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.alreadyAddedTag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  color: #64748b;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Criar Novo Autor */
+.createNewOption {
+  margin-top: 8px;
+}
+
+.createNewButton {
+  width: 100%;
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-align: left;
+  box-shadow: 0 2px 4px rgba(0, 40, 86, 0.2);
+}
+
+.createNewButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #001f45 0%, #001a3c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 40, 86, 0.3);
+}
+
+.createNewButton:disabled {
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Texto de ajuda */
+.helpText {
+  padding: 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.helpText p {
+  margin: 0 0 8px 0;
+}
+
+.helpText p:last-child {
+  margin-bottom: 0;
+}
+
+.roleHelp {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.roleHelp ul {
+  margin: 8px 0 0 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.roleHelp li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+}
+
+.roleHelp li:last-child {
+  margin-bottom: 0;
+}
+
+/* Estados de acessibilidade e UX */
+.authorItem:focus-within {
+  border-color: #002856;
+  box-shadow: 0 0 0 2px rgba(0, 40, 86, 0.1);
+}
+
+/* Estados de loading e disabled */
+.authorManager.disabled {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.authorManager.disabled .addAuthorSection {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border-color: #e5e7eb;
+}
+
+/* Scroll customizado */
+.suggestions::-webkit-scrollbar {
+  width: 6px;
+}
+
+.suggestions::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.suggestions::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  border-radius: 3px;
+}
+
+.suggestions::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #001f45 0%, #001a3c 100%);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .authorItem {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .authorOrder {
+    align-self: flex-start;
+  }
+
+  .authorActions {
+    align-self: flex-end;
+    margin-top: 8px;
+  }
+
+  .editRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .editSelect {
+    min-width: auto;
+  }
+
+  .actionButton {
+    min-width: 32px;
+    height: 32px;
+  }
+}
+
+/* Melhorias para modo escuro - REMOVIDO COMPLETAMENTE */

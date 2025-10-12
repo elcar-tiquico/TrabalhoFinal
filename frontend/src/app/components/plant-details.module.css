@@ -1,0 +1,1276 @@
+/* plant-details.module.css */
+.plantDetails {
+  background-color: #f8f9fa;
+  padding: var(--spacing-6);
+  border-top: 1px solid #e2e8f0;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-8);
+}
+
+.plantImageSection {
+  width: 100%;
+}
+
+.plantImageCard {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.plantImagePlaceholder {
+  width: 100%;
+  height: 24rem;
+  background-color: var(--color-gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .plantImagePlaceholder {
+    height: 28rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .plantImagePlaceholder {
+    height: 32rem;
+  }
+}
+
+.placeholderText {
+  color: var(--color-gray-400);
+}
+
+.plantImageInfo {
+  padding: var(--spacing-4);
+}
+
+.plantName {
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-2);
+}
+
+.plantFamily {
+  font-size: var(--font-size-sm);
+  color: #002856;
+  margin-bottom: var(--spacing-4);
+}
+
+.plantScientific {
+  font-style: italic;
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.dark .plantScientific {
+  color: #9ca3af;
+}
+
+
+
+.plantInfoSection {
+  width: 100%;
+}
+
+.infoCard {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.infoHeader {
+  padding: var(--spacing-4) var(--spacing-6);
+  background: #002856;
+}
+
+.infoTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  color: #ffffff; 
+}
+
+.infoList {
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.detailRow {
+  padding: var(--spacing-4) var(--spacing-6);
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.detailRow:last-child {
+  border-bottom: none;
+}
+
+.detailLabel {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-gray-500);
+  margin-bottom: var(--spacing-1);
+}
+
+.detailValue {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-900);
+}
+
+.scientificName {
+  font-style: italic;
+}
+
+
+
+/* ===============================================
+   SEÇÕES MELHORADAS - CONSISTENTES COM O RESTO
+   =============================================== */
+
+/* Seção de Partes Usadas - como DetailRow */
+.partesUsadasSection {
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.partesUsadasRow {
+  padding: var(--spacing-4) var(--spacing-6);
+  display: flex;
+  flex-direction: column;
+}
+
+.partesUsadasLabel {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-gray-500);
+  margin-bottom: var(--spacing-3);
+}
+
+.partesUsadasContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.parteItem {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.parteItem:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-color: var(--color-gray-300);
+}
+
+.dark .parteItem {
+  background-color: #374151;
+  border-color: #4b5563;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.dark .parteItem:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border-color: #6b7280;
+}
+
+.parteHeader {
+  padding: var(--spacing-4);
+  background-color: transparent;
+  border-bottom: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.parteHeader:hover {
+  background-color: rgba(249, 250, 251, 0.8);
+}
+
+.dark .parteHeader {
+  background-color: transparent;
+}
+
+.dark .parteHeader:hover {
+  background-color: rgba(55, 65, 81, 0.7);
+}
+
+.parteHeaderContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.parteNome {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-gray-900);
+  flex: 1;
+}
+
+.dark .parteNome {
+  color: var(--color-white);
+}
+
+.parteToggle {
+  font-size: var(--font-size-base);
+  color: var(--color-gray-400);
+  margin-left: var(--spacing-2);
+  font-weight: 300;
+  transition: all 0.2s ease;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: var(--color-gray-100);
+}
+
+.parteToggle:hover {
+  background-color: var(--color-gray-200);
+  color: var(--color-gray-600);
+}
+
+.dark .parteToggle {
+  color: var(--color-gray-400);
+  background-color: #4b5563;
+}
+
+.dark .parteToggle:hover {
+  background-color: #6b7280;
+  color: var(--color-gray-300);
+}
+
+.parteObservacoes {
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-500);
+  font-style: italic;
+  margin-top: var(--spacing-1);
+  line-height: 1.4;
+}
+
+.dark .parteObservacoes {
+  color: var(--color-gray-400);
+}
+
+.parteDetails {
+  padding: var(--spacing-4);
+  background-color: rgba(249, 250, 251, 0.5);
+  border-top: 1px solid var(--color-gray-100);
+  animation: slideDown 0.3s ease-out;
+}
+
+.dark .parteDetails {
+  background-color: rgba(55, 65, 81, 0.3);
+  border-top-color: #4b5563;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.parteDetailItem {
+  margin-bottom: var(--spacing-3);
+  padding: var(--spacing-2);
+  border-radius: var(--border-radius);
+  background-color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(229, 231, 235, 0.8);
+}
+
+.parteDetailItem:last-child {
+  margin-bottom: 0;
+}
+
+.dark .parteDetailItem {
+  background-color: rgba(75, 85, 99, 0.4);
+  border-color: rgba(107, 114, 128, 0.6);
+}
+
+.parteDetailLabel {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-gray-700);
+  margin-bottom: var(--spacing-1);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dark .parteDetailLabel {
+  color: var(--color-gray-300);
+}
+
+.parteDetailValue {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-800);
+  line-height: 1.5;
+}
+
+.dark .parteDetailValue {
+  color: var(--color-gray-200);
+}
+
+.tagsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-1);
+}
+
+.tag {
+  display: inline-block;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--color-gray-700);
+  padding: calc(var(--spacing-1) + 1px) var(--spacing-2);
+  border-radius: calc(var(--border-radius-sm) + 2px);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  border: 1px solid rgba(229, 231, 235, 0.6);
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.tag:hover {
+  background-color: var(--color-white);
+  border-color: var(--color-gray-300);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.dark .tag {
+  background-color: rgba(75, 85, 99, 0.7);
+  color: var(--color-gray-200);
+  border-color: rgba(107, 114, 128, 0.5);
+}
+
+.dark .tag:hover {
+  background-color: #4b5563;
+  border-color: #6b7280;
+}
+
+/* Seção de Autores - como DetailRow */
+.autoresSection {
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.autoresRow {
+  padding: var(--spacing-4) var(--spacing-6);
+  display: flex;
+  flex-direction: column;
+}
+
+.autoresLabel {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-gray-500);
+  margin-bottom: var(--spacing-3);
+}
+
+.autoresContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.autorItem {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-4);
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.autorItem:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-color: var(--color-gray-300);
+  transform: translateY(-1px);
+}
+
+.dark .autorItem {
+  background-color: #374151;
+  border-color: #4b5563;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.dark .autorItem:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border-color: #6b7280;
+}
+
+.autorNome {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-2);
+  letter-spacing: 0.01em;
+}
+
+.dark .autorNome {
+  color: var(--color-white);
+}
+
+.autorAfiliacao {
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-600);
+  line-height: 1.5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-1);
+}
+
+.dark .autorAfiliacao {
+  color: var(--color-gray-300);
+}
+
+.afiliacaoSigla {
+  font-weight: 600;
+  color: #002856; 
+  background-color: rgba(235, 169, 0, 0.2);
+  padding: 1px var(--spacing-1);
+  border-radius: calc(var(--border-radius-sm) - 1px);
+  font-size: calc(var(--font-size-xs) - 1px);
+}
+
+.dark .afiliacaoSigla {
+  color: var(--color-purple-400);
+  background-color: rgba(196, 181, 253, 0.15);
+}
+
+/* Fallback para afiliação simples */
+.afiliacaoSimples {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-4);
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-800);
+  line-height: 1.5;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.afiliacaoSimples:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-color: var(--color-gray-300);
+}
+
+.dark .afiliacaoSimples {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: var(--color-gray-200);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.dark .afiliacaoSimples:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border-color: #6b7280;
+}
+
+/* ===============================================
+   RESPONSIVIDADE
+   =============================================== */
+
+@media (min-width: 768px) {
+  .detailRow,
+  .partesUsadasRow,
+  .autoresRow {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .detailLabel,
+  .partesUsadasLabel,
+  .autoresLabel {
+    width: 10rem;
+    flex-shrink: 0;
+    margin-bottom: 0;
+    padding-top: 2px; /* Alinhamento visual */
+  }
+
+  .detailValue,
+  .partesUsadasContent,
+  .autoresContent {
+    margin-left: var(--spacing-6);
+    flex: 1;
+  }
+
+  /* Grid para autores em telas maiores */
+  .autoresContent {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-3);
+    margin-left: var(--spacing-6);
+  }
+
+  /* Melhor alinhamento para partes usadas */
+  .partesUsadasContent {
+    max-width: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .detailsGrid {
+    grid-template-columns: 1.5fr 1.5fr;
+  }
+  
+  /* Grid mais largo para autores em telas grandes */
+  .autoresContent {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .plantImagePlaceholder {
+    height: 22rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .detailsGrid {
+    grid-template-columns: 1.6fr 1.4fr;
+  }
+
+  .plantImagePlaceholder {
+    height: 20rem;
+  }
+}
+
+/* Animações suaves e refinadas */
+.parteItem,
+.autorItem {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Transições refinadas para estados hover */
+.parteItem,
+.autorItem,
+.afiliacaoSimples {
+  position: relative;
+}
+
+.parteItem::before,
+.autorItem::before,
+.afiliacaoSimples::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.parteItem:hover::before,
+.autorItem:hover::before,
+.afiliacaoSimples:hover::before {
+  opacity: 1;
+}
+
+.dark .parteItem::before,
+.dark .autorItem::before,
+.dark .afiliacaoSimples::before {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+}
+
+/* ===============================================
+   REFERÊNCIAS SIMPLES - APENAS TEXTO + EMOJIS
+   =============================================== */
+
+/* Seção de Referências - igual às outras seções */
+.referenciasSection {
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.referenciasRow {
+  padding: var(--spacing-4) var(--spacing-6);
+  display: flex;
+  flex-direction: column;
+}
+
+.referenciasLabel {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-gray-500);
+  margin-bottom: var(--spacing-3);
+}
+
+.referenciasContent {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-900);
+  line-height: 1.6;
+}
+
+.dark .referenciasContent {
+  color: var(--color-gray-200);
+}
+
+/* Referência simples (fallback) */
+.referenciaSimples {
+  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.6;
+  color: var(--color-gray-800);
+}
+
+.dark .referenciaSimples {
+  color: var(--color-gray-200);
+}
+
+/* Lista simples de referências */
+.referenciasList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+/* Item de referência - só uma linha simples */
+.referenciaItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) 0;
+  border-bottom: 1px solid var(--color-gray-100);
+}
+
+.referenciaItem:last-child {
+  border-bottom: none;
+}
+
+.dark .referenciaItem {
+  border-bottom-color: #4b5563;
+}
+
+/* Ícone do tipo - pequeno e simples */
+.referenciaIcon {
+  font-size: var(--font-size-sm);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* Conteúdo da referência */
+.referenciaTexto {
+  flex: 1;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  color: var(--color-gray-800);
+}
+
+.dark .referenciaTexto {
+  color: var(--color-gray-200);
+}
+
+/* Ano pequeno no final */
+.referenciaAno {
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-500);
+  font-weight: 500;
+  margin-left: var(--spacing-2);
+  flex-shrink: 0;
+}
+
+.dark .referenciaAno {
+  color: var(--color-gray-400);
+}
+
+/* Link simples quando é URL */
+.referenciaLink {
+  color: #007acc;
+  text-decoration: underline;
+  text-decoration-color: rgba(0, 122, 204, 0.3);
+  transition: all 0.2s ease;
+}
+
+.referenciaLink:hover {
+  color: #0056b3;
+  text-decoration-color: rgba(0, 86, 179, 0.6);
+}
+
+.dark .referenciaLink {
+  color: #3b82f6;
+  text-decoration-color: rgba(59, 130, 246, 0.3);
+}
+
+.dark .referenciaLink:hover {
+  color: #2563eb;
+  text-decoration-color: rgba(37, 99, 235, 0.6);
+}
+
+/* Responsividade simples */
+@media (min-width: 768px) {
+  .referenciasRow {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .referenciasLabel {
+    width: 10rem;
+    flex-shrink: 0;
+    margin-bottom: 0;
+    padding-top: 2px;
+  }
+
+  .referenciasContent {
+    margin-left: var(--spacing-6);
+    flex: 1;
+  }
+}
+
+/* Adições ao plant-details.module.css existente */
+
+/* ===============================================
+   NOVOS ESTILOS PARA BOTÕES DE ARTIGO
+   =============================================== */
+
+.articleButton {
+  background: #eba900; 
+  color: #002856;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  box-shadow: 0 2px 4px rgba(147, 51, 234, 0.2);
+}
+
+.articleButton:hover {
+  background: #d49a00;  
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(147, 51, 234, 0.3);
+}
+
+.articleButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(147, 51, 234, 0.2);
+}
+
+.dark .articleButton {
+  background: linear-gradient(135deg, var(--color-purple-500), var(--color-purple-600));
+  box-shadow: 0 2px 4px rgba(196, 181, 253, 0.2);
+}
+
+.dark .articleButton:hover {
+  background: linear-gradient(135deg, var(--color-purple-600), var(--color-purple-700));
+  box-shadow: 0 4px 8px rgba(196, 181, 253, 0.3);
+}
+
+/* Card do artigo */
+.articleCard {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  animation: slideIn 0.3s ease-out;
+}
+
+.dark .articleCard {
+  background-color: #374151;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.articleHeader {
+  padding: var(--spacing-4) var(--spacing-6);
+  background: #002856;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.articleTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  color: var(--color-white);
+  margin: 0;
+}
+
+.backButton {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.backButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateX(-2px);
+}
+
+.articleBody {
+  padding: var(--spacing-6);
+  line-height: 1.7;
+  color: var(--color-gray-800);
+  font-family: Georgia, 'Times New Roman', serif;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.dark .articleBody {
+  color: var(--color-gray-200);
+}
+
+.articleBody h2 {
+  color: #002856;
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-4);
+  border-bottom: 2px solid rgba(0, 40, 86, 0.1);
+  padding-bottom: var(--spacing-2);
+}
+
+.dark .articleBody h2 {
+  color: var(--color-purple-400);
+  border-bottom-color: #4b5563;
+}
+
+.articleBody h3 {
+  color: var(--color-gray-900);
+  font-size: var(--font-size-lg);
+  margin-top: var(--spacing-6);
+  margin-bottom: var(--spacing-3);
+  font-weight: 600;
+}
+
+.dark .articleBody h3 {
+  color: var(--color-white);
+}
+
+.articleBody p {
+  margin-bottom: var(--spacing-4);
+  text-align: justify;
+}
+
+.articleBody strong {
+  color: #002856;
+  font-weight: 600;
+}
+
+.dark .articleBody strong {
+  color: var(--color-purple-400);
+}
+
+.articleBody em {
+  font-style: italic;
+  color: var(--color-gray-600);
+}
+
+.dark .articleBody em {
+  color: var(--color-gray-400);
+}
+
+/* ===============================================
+   MELHORIAS NA GALERIA INTEGRADA
+   =============================================== */
+
+.plantImageCard {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+}
+
+.plantImageCard:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.dark .plantImageCard {
+  background-color: #374151;
+}
+
+/* Integração da galeria sem padding extra */
+.plantGallery {
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.plantImageInfo {
+  padding: var(--spacing-4);
+  border-top: 1px solid var(--color-gray-100);
+  background: linear-gradient(135deg, rgba(249, 250, 251, 0.8), rgba(255, 255, 255, 0.9));
+  backdrop-filter: blur(10px);
+}
+
+.dark .plantImageInfo {
+  border-top-color: #4b5563;
+  background: linear-gradient(135deg, rgba(55, 65, 81, 0.8), rgba(75, 85, 99, 0.9));
+}
+
+.plantName {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-2);
+  line-height: 1.3;
+}
+
+.dark .plantName {
+  color: var(--color-white);
+}
+
+.plantFamily {
+  font-size: var(--font-size-sm);
+  color: var(--color-purple-600);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--spacing-2);
+}
+
+.dark .plantFamily {
+  color: var(--color-purple-400);
+}
+
+.plantScientific {
+  font-style: italic;
+  color: var(--color-gray-600);
+  font-size: var(--font-size-sm);
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.dark .plantScientific {
+  color: var(--color-gray-400);
+}
+
+/* ===============================================
+   RESPONSIVIDADE MELHORADA
+   =============================================== */
+
+@media (max-width: 768px) {
+  .articleHeader {
+    flex-direction: column;
+    gap: var(--spacing-3);
+    align-items: flex-start;
+  }
+  
+  .backButton {
+    align-self: flex-end;
+  }
+  
+  .articleBody {
+    padding: var(--spacing-4);
+    max-height: 60vh;
+  }
+  
+  .plantImageInfo {
+    padding: var(--spacing-3);
+  }
+  
+  .plantName {
+    font-size: var(--font-size-base);
+  }
+}
+
+@media (max-width: 480px) {
+  .articleButton {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-1) var(--spacing-2);
+  }
+  
+  .articleBody {
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-3);
+  }
+  
+  .articleBody h2 {
+    font-size: var(--font-size-lg);
+  }
+  
+  .articleBody h3 {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* ===============================================
+   ANIMAÇÕES E MICROINTERAÇÕES
+   =============================================== */
+
+.plantImageCard {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.infoCard {
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+/* Transições suaves para mudança entre info e artigo */
+.infoCard,
+.articleCard {
+  transition: all 0.3s ease;
+}
+
+/* Efeito hover nos botões com gradiente */
+.articleButton,
+.backButton {
+  position: relative;
+  overflow: hidden;
+}
+
+.articleButton::before,
+.backButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.articleButton:hover::before,
+.backButton:hover::before {
+  left: 100%;
+}
+
+/* Scroll suave no artigo */
+.articleBody {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-purple-300) var(--color-gray-100);
+}
+
+.articleBody::-webkit-scrollbar {
+  width: 6px;
+}
+
+.articleBody::-webkit-scrollbar-track {
+  background: var(--color-gray-100);
+  border-radius: 3px;
+}
+
+.articleBody::-webkit-scrollbar-thumb {
+  background: var(--color-purple-300);
+  border-radius: 3px;
+}
+
+.articleBody::-webkit-scrollbar-thumb:hover {
+  background: var(--color-purple-400);
+}
+
+.dark .articleBody::-webkit-scrollbar-track {
+  background: #4b5563;
+}
+
+.dark .articleBody::-webkit-scrollbar-thumb {
+  background: var(--color-purple-500);
+}
+
+.dark .articleBody::-webkit-scrollbar-thumb:hover {
+  background: var(--color-purple-400);
+}
+
+/* ===============================================
+   MELHORIAS DE ACESSIBILIDADE
+   =============================================== */
+
+.articleButton:focus,
+.backButton:focus {
+  outline: 2px solid var(--color-purple-400);
+  outline-offset: 2px;
+}
+
+/* Indicação visual para elementos interativos */
+.articleButton,
+.backButton {
+  touch-action: manipulation;
+}
+
+/* Texto mais legível no artigo */
+.articleBody {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===============================================
+   ESTADOS DE FOCO E ACTIVE MELHORADOS
+   =============================================== */
+
+.plantImageCard:focus-within {
+  outline: 2px solid var(--color-purple-400);
+  outline-offset: 2px;
+}
+
+/* Transições mais suaves para todos os elementos interativos */
+.plantImageCard,
+.articleButton,
+.backButton,
+.plantName,
+.plantFamily,
+.plantScientific {
+  transition: all 0.2s ease;
+}
+
+/* Efeitos de hover mais subtis */
+.plantImageInfo:hover .plantName {
+  color: var(--color-purple-700);
+}
+
+.dark .plantImageInfo:hover .plantName {
+  color: var(--color-purple-400);
+}
+
+/* ===============================================
+   INTEGRAÇÃO COM DARK MODE
+   =============================================== */
+
+.dark .articleBody {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+}
+
+.dark .plantImageInfo {
+  background: linear-gradient(135deg, rgba(31, 41, 55, 0.8), rgba(17, 24, 39, 0.9));
+}
+
+/* ===============================================
+   MELHORIAS PARA TELAS GRANDES
+   =============================================== */
+
+@media (min-width: 1024px) {
+  .detailsGrid {
+    grid-template-columns: 1fr 1.2fr;
+    gap: var(--spacing-10);
+  }
+  
+  .articleBody {
+    max-height: 75vh;
+    padding: var(--spacing-8);
+  }
+  
+  .plantImageCard {
+    position: sticky;
+    top: var(--spacing-6);
+  }
+}
+
+@media (min-width: 1280px) {
+  .detailsGrid {
+    grid-template-columns: 1fr 1.3fr;
+    gap: var(--spacing-12);
+  }
+  
+  .articleBody {
+    font-size: var(--font-size-base);
+    line-height: 1.8;
+  }
+}
+
+/* ===============================================
+   OPTIMIZAÇÕES DE PERFORMANCE
+   =============================================== */
+
+.plantImageCard,
+.infoCard,
+.articleCard {
+  will-change: transform, opacity;
+}
+
+/* Desabilitar animações em caso de preferência do usuário */
+@media (prefers-reduced-motion: reduce) {
+  .plantImageCard,
+  .infoCard,
+  .articleCard,
+  .articleButton,
+  .backButton {
+    animation: none;
+    transition: none;
+  }
+  
+  .articleButton::before,
+  .backButton::before {
+    display: none;
+  }
+}
+
+/* ===============================================
+   MELHORIAS PARA IMPRESSÃO
+   =============================================== */
+
+@media print {
+  .articleButton,
+  .backButton {
+    display: none;
+  }
+  
+  .articleBody {
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+  
+  .plantImageCard {
+    break-inside: avoid;
+  }
+  
+  .detailsGrid {
+    display: block;
+  }
+  
+  .plantImageSection {
+    margin-bottom: 2cm;
+  }
+}

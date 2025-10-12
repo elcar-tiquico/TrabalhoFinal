@@ -1,0 +1,512 @@
+/* ReferenceBibliographyManager.module.css - CORES ATUALIZADAS */
+
+.referenceManager {
+  width: 100%;
+}
+
+/* Referências Selecionadas */
+.selectedReferences {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+}
+
+.selectedReferences h4 {
+  margin: 0 0 12px 0;
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.selectedReference {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.selectedReference:hover {
+  border-color: #002856;
+  box-shadow: 0 4px 8px rgba(0, 40, 86, 0.1);
+}
+
+.referenceInfo {
+  flex: 1;
+  margin-right: 12px;
+}
+
+.referenceTitle {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.referenceLink {
+  margin-bottom: 4px;
+}
+
+.referenceLink a {
+  color: #002856;
+  text-decoration: none;
+  font-size: 0.875rem;
+  word-break: break-all;
+  transition: color 0.2s ease;
+}
+
+.referenceLink a:hover {
+  color: #001f45;
+  text-decoration: underline;
+}
+
+.referenceMeta {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+.referenceAuthors {
+  font-size: 0.875rem;
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.resultAuthors {
+  font-size: 0.875rem;
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.helpText {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.removeButton {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
+.removeButton:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* Seletor de Modo */
+.modeSelector {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.modeButton {
+  flex: 1;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  color: #64748b;
+  transition: all 0.2s ease;
+  border-right: 1px solid #e2e8f0;
+}
+
+.modeButton:last-child {
+  border-right: none;
+}
+
+.modeButton:hover {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+}
+
+.modeButton.active {
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  color: white;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Modo de Seleção */
+.selectMode {
+  width: 100%;
+}
+
+.searchContainer {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #002856;
+  box-shadow: 0 0 0 3px rgba(0, 40, 86, 0.1);
+}
+
+.loadingIndicator {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e2e8f0;
+  border-top: 2px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.searchResults {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.searchResult {
+  padding: 16px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.searchResult:hover {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-color: #002856;
+}
+
+.searchResult:last-child {
+  border-bottom: none;
+}
+
+.searchResult.alreadySelected {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  cursor: default;
+}
+
+.resultTitle {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.resultLink {
+  font-size: 0.875rem;
+  color: #002856;
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+
+.resultMeta {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+.selectedIndicator {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+}
+
+.noResults {
+  text-align: center;
+  padding: 24px;
+  color: #64748b;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.noResults p {
+  margin-bottom: 12px;
+}
+
+.createNewButton {
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+}
+
+.createNewButton:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* Modo de Criação */
+.createMode {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 20px;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+}
+
+.createMode h4 {
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 16px 0;
+  font-weight: 600;
+}
+
+.formGroup {
+  margin-bottom: 16px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.formGroup label.required::after {
+  content: " *";
+  color: #ef4444;
+}
+
+.input, .select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.input:focus, .select:focus {
+  outline: none;
+  border-color: #002856;
+  box-shadow: 0 0 0 3px rgba(0, 40, 86, 0.1);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 16px;
+}
+
+.createActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.createButton {
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  flex: 1;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+}
+
+.createButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.createButton:disabled {
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.cancelButton {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
+}
+
+.cancelButton:hover {
+  background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
+}
+
+/* Prévia da Referência */
+.referenceSummary {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.referenceSummary h5 {
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 12px 0;
+  font-weight: 600;
+}
+
+.summaryContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summaryContent div {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.summaryContent strong {
+  color: #374151;
+  font-weight: 600;
+}
+
+.summaryContent a {
+  color: #002856;
+  text-decoration: none;
+}
+
+.summaryContent a:hover {
+  color: #001f45;
+  text-decoration: underline;
+}
+
+/* Scroll customizado */
+.searchResults::-webkit-scrollbar {
+  width: 6px;
+}
+
+.searchResults::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.searchResults::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  border-radius: 3px;
+}
+
+.searchResults::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .modeSelector {
+    flex-direction: column;
+  }
+
+  .modeButton {
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .modeButton:last-child {
+    border-bottom: none;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .createActions {
+    flex-direction: column;
+  }
+
+  .selectedReference {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .removeButton {
+    align-self: flex-end;
+    margin-top: 8px;
+  }
+
+  .resultLink, .referenceLink a {
+    word-break: break-all;
+  }
+}

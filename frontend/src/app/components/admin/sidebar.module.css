@@ -1,0 +1,339 @@
+/* ===== SIDEBAR PROFISSIONAL COM CORES ISCTEM SUTIS ===== */
+
+.sidebar {
+  background-color: #ffffff; /* Essência branca mantida */
+  border-right: 1px solid rgba(0, 40, 86, 0.08); /* Borda azul muito sutil */
+  height: 100vh;
+  transition: width 0.3s ease;
+  width: 16rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 1px 0 3px rgba(0, 40, 86, 0.04); /* Sombra azul quase imperceptível */
+}
+
+.collapsed {
+  width: 5rem;
+}
+
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1rem 1rem 0.5rem;
+  border-bottom: 1px solid rgba(0, 40, 86, 0.06); /* Separador azul muito suave */
+  flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(235, 169, 0, 0.01) 0%, rgba(0, 40, 86, 0.01) 100%); /* Gradiente quase imperceptível */
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+}
+
+.logo img {
+  object-fit: contain;
+  max-width: 100%;
+  height: auto;
+}
+
+.logoText {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: #002856; /* Azul ISCTEM para o texto do logo */
+  white-space: nowrap;
+}
+
+.collapseButton {
+  padding: 0.25rem;
+  border-radius: 0.375rem;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.collapseButton:hover {
+  background-color: rgba(235, 169, 0, 0.08); /* Hover amarelo muito suave */
+  color: #002856; /* Ícone azul ISCTEM no hover */
+}
+
+/* ===== NAVEGAÇÃO PROFISSIONAL COM TOQUES ISCTEM ===== */
+.sidebarNav {
+  flex: 1;
+  margin-top: 1rem;
+  padding: 0 0.5rem;
+  overflow-y: auto;
+}
+
+.navList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.navItem {
+  width: 100%;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280; /* Cinza padrão para links */
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  position: relative;
+}
+
+.navLink:hover {
+  background-color: rgba(235, 169, 0, 0.06); /* Fundo amarelo muito suave */
+  color: #002856; /* Texto azul ISCTEM no hover */
+  border-color: rgba(235, 169, 0, 0.15); /* Borda amarela sutil */
+}
+
+.activeLink {
+  background-color: rgba(0, 40, 86, 0.06); /* Fundo azul muito suave para ativo */
+  color: #002856; /* Texto azul ISCTEM para ativo */
+  border-color: rgba(0, 40, 86, 0.15); /* Borda azul sutil */
+  font-weight: 600;
+}
+
+.activeLink::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background-color: #eba900; /* Indicador amarelo ISCTEM */
+  border-radius: 0 2px 2px 0;
+}
+
+.activeLink:hover {
+  background-color: rgba(235, 169, 0, 0.08); /* Hover do ativo com amarelo */
+  color: #002856;
+}
+
+.collapsedLink {
+  justify-content: center;
+  padding: 0.75rem 0.5rem;
+}
+
+.navIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.navLink:hover .navIcon {
+  transform: scale(1.05); /* Crescimento muito sutil */
+}
+
+.activeLink .navIcon {
+  color: #eba900; /* Ícone amarelo ISCTEM quando ativo */
+}
+
+.navText {
+  margin-left: 0.75rem;
+  white-space: nowrap;
+}
+
+.hidden {
+  display: none;
+}
+
+/* ===== FOOTER PROFISSIONAL ===== */
+.sidebarFooter {
+  border-top: 1px solid rgba(0, 40, 86, 0.06); /* Separador azul muito suave */
+  padding: 1rem 0.5rem;
+  flex-shrink: 0;
+  margin-top: auto;
+  background: linear-gradient(135deg, rgba(0, 40, 86, 0.01) 0%, rgba(235, 169, 0, 0.01) 100%);
+}
+
+.collapsedFooter {
+  padding: 1rem 0.25rem;
+}
+
+.logoutLink {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+}
+
+.logoutLink:hover {
+  background-color: rgba(239, 68, 68, 0.06); /* Hover vermelho muito suave */
+  color: #dc2626; /* Vermelho para logout */
+  border-color: rgba(239, 68, 68, 0.15);
+}
+
+.logoutLink.collapsedLink {
+  justify-content: center;
+  padding: 0.75rem 0.5rem;
+}
+
+/* ===== RESPONSIVIDADE PROFISSIONAL ===== */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease, width 0.3s ease;
+    width: 16rem;
+    box-shadow: 2px 0 8px rgba(0, 40, 86, 0.08); /* Sombra mais visível no mobile */
+  }
+  
+  .sidebar.mobileOpen {
+    transform: translateX(0);
+  }
+  
+  .sidebar.collapsed {
+    width: 16rem;
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.collapsed.mobileOpen {
+    transform: translateX(0);
+  }
+}
+
+@media (min-width: 769px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 40;
+  }
+}
+
+/* ===== ESTADOS DE FOCO PROFISSIONAIS ===== */
+.navLink:focus,
+.logoutLink:focus {
+  outline: 2px solid rgba(235, 169, 0, 0.4); /* Outline amarelo suave */
+  outline-offset: 2px;
+  background-color: rgba(235, 169, 0, 0.04);
+}
+
+.navLink:active,
+.logoutLink:active {
+  transform: scale(0.98); /* Pressão muito sutil */
+}
+
+/* ===== ANIMAÇÕES SUAVES ===== */
+.sidebar * {
+  transition: all 0.3s ease;
+}
+
+.logoContainer,
+.navText {
+  transition: opacity 0.3s ease;
+}
+
+/* ===== CORREÇÕES ESPECÍFICAS PARA LARGURA ===== */
+.sidebar.collapsed .sidebarFooter {
+  width: 5rem;
+}
+
+.sidebar.collapsed .logoutLink {
+  width: auto;
+  margin: 0 auto;
+}
+
+/* ===== SCROLLBAR PROFISSIONAL COM TOQUES ISCTEM ===== */
+.sidebarNav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebarNav::-webkit-scrollbar-track {
+  background: rgba(0, 40, 86, 0.02); /* Track azul quase imperceptível */
+}
+
+.sidebarNav::-webkit-scrollbar-thumb {
+  background: rgba(235, 169, 0, 0.25); /* Thumb amarelo suave */
+  border-radius: 2px;
+}
+
+.sidebarNav::-webkit-scrollbar-thumb:hover {
+  background: rgba(235, 169, 0, 0.4); /* Thumb amarelo um pouco mais forte no hover */
+}
+
+/* ===== MELHORIAS SUTIS DE USABILIDADE ===== */
+.navLink:hover::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  background-color: rgba(235, 169, 0, 0.6);
+  border-radius: 50%;
+  opacity: 0;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.activeLink:hover::after {
+  display: none; /* Não mostrar o ponto no item ativo */
+}
+
+/* ===== ACESSIBILIDADE MELHORADA ===== */
+.navLink[aria-current="page"] {
+  background-color: rgba(0, 40, 86, 0.06);
+  color: #002856;
+  border-color: rgba(0, 40, 86, 0.15);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .sidebar *,
+  .navLink,
+  .logoutLink {
+    transition: none;
+  }
+}

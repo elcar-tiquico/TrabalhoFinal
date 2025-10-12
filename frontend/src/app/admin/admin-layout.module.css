@@ -1,0 +1,68 @@
+/* ===== LAYOUT ADMIN COM COMPENSAÇÃO PARA SIDEBAR FIXA ===== */
+
+.adminLayout {
+  display: flex;
+  min-height: 100vh;
+  overflow-y: auto;
+  background-color: #f9fafb;
+  position: relative;
+}
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-left: 16rem; /* ✅ ADICIONADO: Compensar largura da sidebar expandida */
+  transition: margin-left 0.3s ease; /* ✅ ADICIONADO: Transição suave */
+}
+
+/* ✅ ADICIONADO: Estado quando sidebar está colapsada */
+.mainContent.sidebarCollapsed {
+  margin-left: 5rem; /* ✅ Compensar largura da sidebar colapsada */
+}
+
+.contentArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .contentArea {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .contentArea {
+    padding: 2rem;
+  }
+}
+
+/* ✅ ADICIONADO: Overlay para mobile */
+.mobileOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 45;
+  display: none;
+}
+
+/* ✅ ADICIONADO: Responsividade para mobile */
+@media (max-width: 768px) {
+  .mainContent {
+    margin-left: 0; /* ✅ Sem margem no mobile */
+  }
+  
+  .mainContent.sidebarCollapsed {
+    margin-left: 0; /* ✅ Sem margem no mobile mesmo colapsada */
+  }
+  
+  .mobileOverlay {
+    display: block;
+  }
+}

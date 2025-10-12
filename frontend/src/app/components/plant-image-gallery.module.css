@@ -1,0 +1,655 @@
+/* plant-image-gallery.module.css - Mobile First & Clean */
+
+/* ===========================
+   BASE - MOBILE FIRST
+   =========================== */
+
+.gallery {
+  width: 100%;
+  max-width: 100%;
+}
+
+.singleImageContainer {
+  width: 100%;
+}
+
+/* Card da imagem - LIMPO E SIMPLES */
+.imageCard {
+  background-color: var(--color-white);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  position: relative;
+}
+
+.imageCard:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.imageCard:active {
+  transform: translateY(0);
+  transition: transform 0.1s ease;
+}
+
+.dark .imageCard {
+  background-color: #374151;
+  border-color: #4b5563;
+}
+
+.dark .imageCard:hover {
+  border-color: #6b7280;
+}
+
+/* Container da imagem - MOBILE FIRST */
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 200px; /* Menor no mobile */
+  overflow: hidden;
+  background-color: #f8fafc;
+}
+
+/* Imagem thumbnail */
+.thumbnailImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.imageCard:hover .thumbnailImage {
+  transform: scale(1.02);
+}
+
+/* Overlay SIMPLIFICADO para mobile */
+.imageOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.imageCard:hover .imageOverlay {
+  opacity: 1;
+}
+
+/* Ícone expandir - MAIOR para mobile */
+.expandIcon {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  padding: 12px;
+  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+}
+
+.imageCard:hover .expandIcon {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+/* Indicador múltiplas imagens - SIMPLIFICADO */
+.multipleImagesIndicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Legenda - LIMPA */
+.thumbnailCaption {
+  padding: 12px 16px;
+  background-color: var(--color-white);
+  border-top: 1px solid #f1f5f9;
+}
+
+.dark .thumbnailCaption {
+  background-color: #374151;
+  border-top-color: #4b5563;
+}
+
+.captionText {
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dark .captionText {
+  color: #d1d5db;
+}
+
+/* ===========================
+   ESTADOS DE LOADING/ERROR - SIMPLIFICADOS
+   =========================== */
+
+.loadingState,
+.errorState,
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  height: 200px;
+  background-color: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.dark .loadingState,
+.dark .errorState,
+.dark .emptyState {
+  background-color: #374151;
+  border-color: #4b5563;
+}
+
+.loadingSpinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #8b5cf6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingText,
+.errorText,
+.emptyText {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.dark .loadingText,
+.dark .errorText,
+.dark .emptyText {
+  color: #9ca3af;
+}
+
+.errorIcon {
+  color: #ef4444;
+  margin-bottom: 12px;
+}
+
+.retryButton {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background-color: #8b5cf6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.retryButton:hover {
+  background-color: #7c3aed;
+}
+
+.placeholderImage {
+  width: 48px;
+  height: 48px;
+  background-color: #e5e7eb;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  color: #9ca3af;
+}
+
+.dark .placeholderImage {
+  background-color: #4b5563;
+  color: #6b7280;
+}
+
+/* ===========================
+   MODAL - MOBILE FRIENDLY
+   =========================== */
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.95);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalContent {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Botões do modal - MOBILE FIRST */
+.closeButton {
+  position: absolute;
+  top: -50px;
+  right: 0;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #000;
+  transition: all 0.2s ease;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.closeButton:hover {
+  transform: scale(1.1);
+}
+
+.navButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #000;
+  transition: all 0.2s ease;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.navButton:hover {
+  transform: translateY(-50%) scale(1.1);
+}
+
+.navPrev {
+  left: -60px;
+}
+
+.navNext {
+  right: -60px;
+}
+
+/* Container da imagem modal */
+.modalImageContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Imagem no modal */
+.modalImage {
+  max-width: 90vw;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  animation: imageZoomIn 0.3s ease;
+}
+
+@keyframes imageZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Legenda no modal */
+.modalCaption {
+  position: absolute;
+  bottom: -60px;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.modalCaption .captionText {
+  color: white;
+  font-size: 14px;
+  line-height: 1.4;
+  margin: 0;
+  text-align: center;
+}
+
+/* Indicadores do modal */
+.modalIndicators {
+  position: absolute;
+  bottom: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.imageCounter {
+  color: white;
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.dots {
+  display: flex;
+  gap: 8px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dot:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.activeDot {
+  background: white;
+  transform: scale(1.2);
+}
+
+/* ===========================
+   RESPONSIVIDADE - TABLET & DESKTOP
+   =========================== */
+
+@media (min-width: 768px) {
+  .imageContainer {
+    height: 280px;
+  }
+  
+  .closeButton {
+    width: 44px;
+    height: 44px;
+    top: -60px;
+  }
+  
+  .navButton {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .navPrev {
+    left: -70px;
+  }
+  
+  .navNext {
+    right: -70px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .imageContainer {
+    height: 320px;
+  }
+  
+  .navPrev {
+    left: -80px;
+  }
+  
+  .navNext {
+    right: -80px;
+  }
+}
+
+/* ===========================
+   MOBILE ESPECÍFICO - LAYOUT CORRIGIDO
+   =========================== */
+
+@media (max-width: 767px) {
+  .modal {
+    padding: 0;
+    flex-direction: column;
+  }
+  
+  .modalContent {
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 20px;
+  }
+  
+  .modalImage {
+    max-width: 100%;
+    max-height: 60vh;
+    margin-top: 60px; /* Espaço para os botões superiores */
+  }
+  
+  /* Barra superior com botões */
+  .closeButton {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    z-index: 11;
+  }
+  
+  .navPrev {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    transform: none;
+    width: 40px;
+    height: 40px;
+    z-index: 11;
+  }
+  
+  .navNext {
+    position: fixed;
+    top: 20px;
+    left: 70px; /* Ao lado do prev */
+    transform: none;
+    width: 40px;
+    height: 40px;
+    z-index: 11;
+  }
+  
+  /* Container da imagem centralizado */
+  .modalImageContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+  }
+  
+  /* Legenda e indicadores na parte inferior */
+  .modalCaption {
+    position: fixed;
+    bottom: 80px;
+    left: 20px;
+    right: 20px;
+    margin: 0;
+    border-radius: 8px;
+  }
+  
+  .modalIndicators {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+  }
+  
+  /* Esconder dots se muitas imagens no mobile */
+  .dots {
+    display: none;
+  }
+  
+  /* Apenas contador no mobile */
+  .imageCounter {
+    font-size: 16px;
+    padding: 8px 16px;
+  }
+  
+  /* Overlay sempre visível no mobile para facilitar toque */
+  .imageOverlay {
+    opacity: 0.6;
+  }
+  
+  .imageCard:active .imageOverlay {
+    opacity: 1;
+  }
+  
+  /* Touch targets maiores */
+  .expandIcon {
+    padding: 20px;
+  }
+  
+  .multipleImagesIndicator {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+}
+
+/* ===========================
+   ACESSIBILIDADE & PERFORMANCE
+   =========================== */
+
+.imageCard:focus {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+.navButton:focus,
+.closeButton:focus,
+.dot:focus {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+/* Touch friendly */
+.imageCard,
+.navButton,
+.closeButton,
+.dot {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Smooth scrolling disabled quando modal aberto */
+body.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+/* Reduzir motion se preferido */
+@media (prefers-reduced-motion: reduce) {
+  .imageCard,
+  .modalImage,
+  .modal {
+    animation: none;
+    transition: none;
+  }
+  
+  .imageCard:hover .thumbnailImage {
+    transform: none;
+  }
+}
+
+/* ===========================
+   MELHORIAS VISUAIS SUTIS
+   =========================== */
+
+.imageCard {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Estados hover mais sutis e naturais */
+.imageCard:hover {
+  border-color: #c4b5fd;
+}
+
+.dark .imageCard:hover {
+  border-color: #8b5cf6;
+}
+
+/* Garantir que o modal apareça sobre tudo */
+.modal {
+  backdrop-filter: blur(2px);
+}
+
+/* Melhor contraste no dark mode */
+.dark .modal {
+  background-color: rgba(0, 0, 0, 0.98);
+}

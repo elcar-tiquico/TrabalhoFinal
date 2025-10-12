@@ -1,0 +1,84 @@
+/* hero-section.module.css - Versão Refinada */
+
+.heroSection {
+  /* 60% - Fundo branco para um visual limpo e académico */
+  background-color: #ffffff; 
+  padding: var(--spacing-16) 0;
+  border-bottom: 1px solid #e2e8f0; /* Adiciona uma linha subtil para separar secções */
+}
+
+.heroContent {
+  max-width: 48rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.heroTitle {
+  font-size: var(--font-size-4xl);
+  font-weight: 700;
+  /* 30% - Título em azul-escuro para forte impacto e legibilidade */
+  color: #002856; 
+  margin-bottom: var(--spacing-6);
+}
+
+.heroSubtitle {
+  font-size: var(--font-size-xl);
+  /* Subtítulo num tom de azul ligeiramente mais suave ou com opacidade para hierarquia */
+  color: #002856;
+  opacity: 0.85;
+  margin-bottom: var(--spacing-8);
+}
+
+.heroButtons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-4);
+}
+
+/* 10% - Botão primário com a cor de destaque amarela */
+.primaryButton {
+  background-color: #eba900; 
+  /* Texto em azul para manter a consistência da paleta e garantir contraste */
+  color: #002856;
+  font-weight: 600; /* Aumenta o peso da fonte para mais destaque */
+  padding: var(--spacing-3) var(--spacing-6);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md); /* Sombra mais subtil */
+  border: none;
+  transition: all 0.2s ease-in-out;
+  transform: translateY(0);
+}
+
+.primaryButton:hover {
+  background-color: #d49a00; /* Amarelo um pouco mais escuro no hover */
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* Botão secundário com um estilo "outline" para ser menos dominante */
+.secondaryButton {
+  background-color: transparent;
+  /* Borda e texto na cor azul secundária */
+  color: #002856;
+  border: 2px solid #002856;
+  font-weight: 500;
+  padding: calc(var(--spacing-3) - 2px) calc(var(--spacing-6) - 2px); /* Ajuste de padding por causa da borda */
+  border-radius: var(--border-radius-lg);
+  transition: all 0.2s ease-in-out;
+}
+
+.secondaryButton:hover {
+  background-color: #002856;
+  color: #ffffff; /* Inverte as cores no hover para um feedback claro */
+}
+
+@media (max-width: 768px) {
+  .heroTitle {
+    font-size: var(--font-size-3xl);
+  }
+
+  .heroSubtitle {
+    font-size: var(--font-size-lg);
+  }
+}

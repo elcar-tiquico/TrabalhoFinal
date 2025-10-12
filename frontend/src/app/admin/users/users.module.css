@@ -1,0 +1,792 @@
+/* D:\Elcar\Projecto\frontend\src\app\admin\users\users.module.css */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+@media (min-width: 640px) {
+  .header {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #002856; /* Azul ISCTEM para títulos */
+}
+
+.logoutButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  margin-top: 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  background-color: #002856; /* Azul ISCTEM */
+  box-shadow: 0 1px 2px 0 rgba(0, 40, 86, 0.1);
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.logoutButton:hover {
+  background-color: #001f45; /* Azul ISCTEM mais escuro */
+}
+
+.logoutButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #f9fafb, 0 0 0 4px rgba(235, 169, 0, 0.4); /* Focus amarelo ISCTEM */
+}
+
+@media (min-width: 640px) {
+  .logoutButton {
+    margin-top: 0;
+  }
+}
+
+.errorAlert {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  color: #dc2626;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.closeAlert {
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filterCard {
+  background-color: white;
+  border: 1px solid rgba(0, 40, 86, 0.1); /* Borda azul ISCTEM sutil */
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 40, 86, 0.06); /* Sombra azul ISCTEM */
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .controls {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+}
+
+.searchSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.searchInputContainer {
+  position: relative;
+}
+
+.searchInput {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  padding-right: 2.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #002856; /* Azul ISCTEM no foco */
+  box-shadow: 0 0 0 1px rgba(0, 40, 86, 0.3);
+}
+
+.searchInput::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.searchIcon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(0, 40, 86, 0.5); /* Ícone azul ISCTEM suave */
+  pointer-events: none;
+}
+
+.createButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  background-color: #eba900; /* Amarelo ISCTEM para ações principais */
+  box-shadow: 0 1px 2px 0 rgba(235, 169, 0, 0.2);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  gap: 0.5rem;
+}
+
+.createButton:hover {
+  background-color: #d19700; /* Amarelo ISCTEM mais escuro */
+  transform: translateY(-1px);
+}
+
+.createButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #f9fafb, 0 0 0 4px rgba(235, 169, 0, 0.4);
+}
+
+.icon {
+  margin-right: 0.5rem;
+}
+
+.tableCard {
+  background-color: white;
+  border: 1px solid rgba(0, 40, 86, 0.08);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0, 40, 86, 0.06);
+}
+
+.tableContainer {
+  overflow-x: auto;
+}
+
+.usersTable {
+  min-width: 100%;
+  border-collapse: collapse;
+}
+
+.usersTable thead {
+  background: linear-gradient(135deg, rgba(0, 40, 86, 0.03) 0%, rgba(235, 169, 0, 0.02) 100%); /* Gradiente ISCTEM muito sutil */
+}
+
+.usersTable th {
+  padding: 0.75rem 1.5rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #002856; /* Cabeçalhos azul ISCTEM */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: relative;
+  transition: background-color 0.3s ease;
+}
+
+.usersTable tr {
+  border-top: 1px solid rgba(0, 40, 86, 0.06);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.usersTable tr:hover {
+  background-color: rgba(235, 169, 0, 0.04); /* Hover amarelo ISCTEM muito suave */
+}
+
+.usersTable td {
+  padding: 1rem 1.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.nameCell {
+  padding: 1rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #002856; /* Nome em azul ISCTEM */
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nameCell strong {
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.userAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #002856 0%, #eba900 100%); /* Gradiente ISCTEM */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+  border: 1px solid rgba(235, 169, 0, 0.2);
+}
+
+.roleBadge {
+  background-color: rgba(0, 40, 86, 0.08); /* Fundo azul ISCTEM suave */
+  color: #002856; /* Texto azul ISCTEM */
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid rgba(0, 40, 86, 0.15);
+}
+
+.adminBadge {
+  background-color: rgba(235, 169, 0, 0.1); /* Fundo amarelo ISCTEM suave */
+  color: #eba900; /* Texto amarelo ISCTEM */
+  font-weight: 600;
+  border-color: rgba(235, 169, 0, 0.3);
+}
+
+.statusBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.statusActive {
+  background-color: #d1fae5;
+  color: #059669;
+}
+
+.statusInactive {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.tableCellActions {
+  padding: 1rem 1.5rem;
+  font-size: 0.875rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.editButton {
+  color: #002856; /* Azul ISCTEM para editar */
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  transition: all 0.3s ease;
+}
+
+.editButton:hover {
+  color: #001f45;
+  background-color: rgba(0, 40, 86, 0.08);
+}
+
+.deleteButton {
+  color: #dc2626;
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  transition: all 0.3s ease;
+}
+
+.deleteButton:hover {
+  color: #b91c1c;
+  background-color: #fef2f2;
+}
+
+.loadingState {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #eba900; /* Spinner amarelo ISCTEM */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+.pagination {
+  background-color: white;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(0, 40, 86, 0.08);
+  border-radius: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .pagination {
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+.paginationButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(0, 40, 86, 0.2);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #002856; /* Texto azul ISCTEM */
+  background-color: white;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.paginationButton:hover {
+  background-color: rgba(235, 169, 0, 0.06); /* Hover amarelo ISCTEM suave */
+  border-color: rgba(235, 169, 0, 0.3);
+}
+
+.paginationButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.paginationButton:disabled:hover {
+  background-color: white;
+}
+
+.paginationInfo {
+  font-size: 0.875rem;
+  color: #002856; /* Azul ISCTEM */
+  font-weight: 500;
+}
+
+/* ===== MODAL STYLES COM CORES ISCTEM ===== */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 40, 86, 0.4); /* Overlay azul ISCTEM */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  overflow-y: auto;
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modalContent {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 40, 86, 0.15), 0 10px 10px -5px rgba(0, 40, 86, 0.08);
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.3s ease-out;
+  border: 1px solid rgba(0, 40, 86, 0.1);
+}
+
+@media (min-width: 640px) {
+  .modalContent {
+    max-width: 42rem;
+  }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(0, 40, 86, 0.1);
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%); /* Header azul ISCTEM */
+  color: white;
+  border-radius: 12px 12px 0 0;
+}
+
+.modalTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+  color: white;
+}
+
+.modalCloseButton {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+}
+
+.modalCloseButton:hover {
+  background: rgba(235, 169, 0, 0.2); /* Hover amarelo ISCTEM */
+  transform: scale(1.05);
+}
+
+.modalCloseButton:focus {
+  outline: 2px solid rgba(235, 169, 0, 0.4);
+  outline-offset: 2px;
+}
+
+.modalBody {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.modalFooter {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 1.5rem;
+  border-top: 1px solid rgba(0, 40, 86, 0.08);
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 0 0 12px 12px;
+}
+
+@media (max-width: 640px) {
+  .modalFooter {
+    flex-direction: column-reverse;
+  }
+}
+
+.formGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.formLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #002856; /* Labels azul ISCTEM */
+  margin-bottom: 0.5rem;
+}
+
+.formInput {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  background-color: #ffffff;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: #002856; /* Foco azul ISCTEM */
+  box-shadow: 0 0 0 1px rgba(0, 40, 86, 0.3);
+}
+
+.formInput:disabled {
+  background-color: #f9fafb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.formInput::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.formHint {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 1rem;
+  height: 1rem;
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, #eba900 0%, #d19700 100%); /* Amarelo ISCTEM */
+  color: #002856; /* Texto azul ISCTEM para contraste */
+  border: 1px solid transparent;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5rem;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d19700 0%, #b8820a 100%);
+  transform: translateY(-1px);
+}
+
+.btnPrimary:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #f9fafb, 0 0 0 4px rgba(235, 169, 0, 0.4);
+}
+
+.btnPrimary:disabled {
+  background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
+  color: #6b7280;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btnSecondary {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  color: #002856; /* Texto azul ISCTEM */
+  border: 1px solid rgba(0, 40, 86, 0.2);
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5rem;
+}
+
+.btnSecondary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border-color: rgba(235, 169, 0, 0.3); /* Borda amarela no hover */
+  transform: translateY(-1px);
+}
+
+.btnSecondary:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #f9fafb, 0 0 0 4px rgba(0, 40, 86, 0.3);
+}
+
+/* ===== ANIMAÇÕES ===== */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .header {
+    gap: 0.75rem;
+  }
+
+  .createButton {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+  }
+
+  .usersTable {
+    font-size: 0.75rem;
+  }
+
+  .usersTable th,
+  .usersTable td,
+  .nameCell,
+  .tableCellActions {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .usersTable th {
+    font-size: 0.625rem;
+  }
+
+  .nameCell {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+  }
+
+  .modalOverlay {
+    padding: 0.5rem;
+  }
+
+  .modalContent {
+    max-height: 95vh;
+  }
+
+  .modalHeader,
+  .modalBody,
+  .modalFooter {
+    padding: 1rem;
+  }
+
+  .modalTitle {
+    font-size: 1rem;
+  }
+
+  .modalFooter {
+    flex-direction: column-reverse;
+  }
+
+  .modalFooter button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .controls {
+    gap: 0.75rem;
+  }
+
+  .container {
+    gap: 1rem;
+  }
+
+  .header {
+    gap: 0.75rem;
+  }
+
+  .createButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ===== SCROLL CUSTOMIZADO COM CORES ISCTEM ===== */
+.modalBody::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modalBody::-webkit-scrollbar-track {
+  background: rgba(0, 40, 86, 0.05);
+  border-radius: 10px;
+}
+
+.modalBody::-webkit-scrollbar-thumb {
+  background-color: rgba(235, 169, 0, 0.4);
+  border-radius: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.modalBody::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(235, 169, 0, 0.6);
+}
+
+/* ===== TRANSIÇÕES SUAVES ===== */
+.usersTable tr,
+.paginationButton,
+.createButton,
+.logoutButton,
+.formInput,
+.editButton,
+.deleteButton {
+  transition: all 0.3s ease-in-out;
+}
+
+/* ===== FOCUS STATES ===== */
+.usersTable th:focus {
+  outline: 2px solid rgba(235, 169, 0, 0.4);
+  outline-offset: -2px;
+}
+
+.createButton:focus,
+.logoutButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #f9fafb, 0 0 0 4px rgba(235, 169, 0, 0.4);
+}

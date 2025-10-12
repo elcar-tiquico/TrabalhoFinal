@@ -1,0 +1,310 @@
+/* D:\Elcar\Projecto\frontend\src\app\admin\login\login.module.css */
+.loginContainer {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #f9f5ff, #f0fdf4);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+}
+
+.loginBox {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 28rem;
+}
+
+.logoContainer {
+  display: flex;
+  justify-content: center;
+}
+
+.logo {
+  background: linear-gradient(to right, #9333ea, #22c55e);
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.logoIcon {
+  color: white;
+}
+
+.title {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.subtitle {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.formContainer {
+  margin-top: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 28rem;
+}
+
+.formBox {
+  background-color: white;
+  padding: 2rem 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border-radius: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .formBox {
+    padding: 2rem 2.5rem;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.errorMessage {
+  background-color: #fef2f2;
+  border-left: 4px solid #ef4444;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+}
+
+.errorIcon {
+  flex-shrink: 0;
+}
+
+.errorSvg {
+  height: 1.25rem;
+  width: 1.25rem;
+  color: #ef4444;
+}
+
+.errorText {
+  margin-left: 0.75rem;
+}
+
+.errorText p {
+  font-size: 0.875rem;
+  color: #b91c1c;
+}
+
+.formGroup {
+  margin-bottom: 1rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+
+.inputWrapper {
+  margin-top: 0.25rem;
+}
+
+.input {
+  appearance: none;
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  font-size: 0.875rem;
+  color: #111827;
+}
+
+.input::placeholder {
+  color: #9ca3af;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #002856;
+  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+}
+
+.formOptions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rememberMe {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox {
+  height: 1rem;
+  width: 1rem;
+  color: #002856;
+  border-color: #d1d5db;
+  border-radius: 0.25rem;
+}
+
+.checkboxLabel {
+  margin-left: 0.5rem;
+  display: block;
+  font-size: 0.875rem;
+  color: #111827;
+}
+
+.forgotPassword {
+  font-size: 0.875rem;
+}
+
+.forgotPasswordLink {
+  font-weight: 500;
+  color: #002856;
+  text-decoration: none;
+}
+
+.forgotPasswordLink:hover {
+  color: #002856;
+}
+
+.loginButton {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  background: #eba900;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.loginButton:hover:not(:disabled) {
+  background: #fdce57;
+}
+
+.loginButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.5);
+}
+
+.loginButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loadingSpinner {
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+  height: 1rem;
+  width: 1rem;
+}
+
+.spinnerBg {
+  opacity: 0.25;
+}
+
+.spinnerPath {
+  opacity: 0.75;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loginHelp {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #f8fafc;
+  border-radius: 0.375rem;
+  border: 1px solid #e2e8f0;
+}
+
+.helpText {
+  text-align: center;
+}
+
+.helpText h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.helpText p {
+  margin: 0.25rem 0;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.helpText strong {
+  color: #374151;
+}
+
+.divider {
+  margin-top: 1.5rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.dividerLine {
+  flex-grow: 1;
+  border-top: 1px solid #e5e7eb;
+}
+
+.dividerText {
+  padding: 0 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  background-color: white;
+}
+
+.homeLink {
+  margin-top: 1.5rem;
+}
+
+.homeLinkButton {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  background-color: white;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.homeLinkButton:hover {
+  background-color: #f9fafb;
+  transform: translateY(-1px);
+}
+
+.homeLinkButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.5);
+}

@@ -1,0 +1,24 @@
+/* serch-section.module.css */
+.searchSection {
+  padding: var(--spacing-12) 0;
+}
+
+.searchGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-8);
+}
+
+@media (min-width: 1024px) {
+  .searchGrid {
+    grid-template-columns: 1fr 2fr;
+  }
+}
+
+.searchFormContainer {
+  width: 100%;
+}
+
+.resultsContainer {
+  width: 100%;
+}

@@ -1,0 +1,803 @@
+/* results-table.module.css */
+.resultsCard {
+  background-color: #ffffff;
+  border-radius: var(--border-radius-2xl);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  border: 1px solid rgba(0, 40, 86, 0.1);
+  height: 100%;
+}
+
+.resultsHeader {
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%); /* ✅ MUDANÇA: Gradiente azul ISCTEM */
+  padding: var(--spacing-5) var(--spacing-6);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.resultsTitle {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: #ffffff; /* ✅ MUDANÇA: Texto branco no header azul */
+}
+
+.resultsActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+  .resultsCount {
+    background-color: #ffffff;
+    color: #002856; 
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--border-radius-full);
+  }
+
+.resultsList {
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.resultItem {
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.resultItemHeader {
+  padding: var(--spacing-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.resultItemHeader:hover {
+  background-color: rgba(235, 169, 0, 0.05);
+}
+
+.resultItemInfo {
+  flex: 1;
+}
+
+.resultItemTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  color: var(--color-gray-900);
+  transition: color 0.2s ease;
+}
+
+.resultItemHeader:hover .resultItemTitle {
+  color: #002856;
+}
+
+.resultItemFamily {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #002856; /* ✅ MUDANÇA: Azul ISCTEM */
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.resultItemScientific {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-700);
+  margin-top: var(--spacing-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.resultItemActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-2);
+}
+
+.toggleButton {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-1) var(--spacing-1);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid var(--color-gray-300);
+  color: var(--color-gray-700);
+  background-color: var(--color-white);
+}
+
+.toggleButton:hover {
+  background-color: var(--color-gray-50);
+}
+
+.actionIcon {
+  margin-right: var(--spacing-1);
+}
+
+/* Estados vazios e de carregamento */
+.loadingState,
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-8);
+  height: 24rem;
+  
+}
+
+.loadingIcon,
+.emptyIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 9999px;
+  background-color: rgba(0, 40, 86, 0.1); 
+  color: #002856; 
+  margin-bottom: var(--spacing-4);
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  height: 2rem;
+  width: 2rem;
+}
+
+.spinnerCircle {
+  opacity: 0.25;
+}
+
+.spinnerPath {
+  opacity: 0.75;
+}
+
+.loadingTitle,
+.emptyTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  color: #002856; 
+  margin-bottom: var(--spacing-2);
+}
+
+.loadingText,
+.emptyText {
+  color: #4a5568;
+  max-width: 24rem;
+}
+
+@media (min-width: 768px) {
+  .resultItemHeader {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .resultItemActions {
+    margin-top: 0;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.resultItemScientific {
+  font-style: italic;
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.dark .resultItemScientific {
+  color: #9ca3af;
+}
+
+/* Família em maiúsculas */
+.resultItemFamily {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #002856;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.dark .resultItemFamily {
+  color: #002856;
+}
+
+/* Seção de autores */
+.authorSection {
+  margin-top: 0.5rem;
+}
+
+.authorInfo {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.dark .authorInfo {
+  color: #9ca3af;
+}
+
+/* Container do tooltip de autores */
+.authorTooltipContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.authorButton {
+  font-size: 0.75rem;
+  color: #002856;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.authorButton:hover {
+  background-color: #eff6ff;
+  text-decoration: underline;
+}
+
+.dark .authorButton {
+  color: #60a5fa;
+}
+
+.dark .authorButton:hover {
+  background-color: #1e3a8a;
+}
+
+/* Tooltip dos autores */
+.authorTooltip {
+  z-index: 1000;
+  width: min(18rem, calc(100vw - 2rem));
+  max-width: 18rem;
+  padding: 0.75rem;
+  background: white;
+  border: 1px solid rgba(0, 40, 86, 0.15); /* ✅ MUDANÇA: Borda azul ISCTEM */
+  border-radius: 0.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 40, 86, 0.1), 0 10px 10px -5px rgba(0, 40, 86, 0.04); /* ✅ MUDANÇA: Sombra azul ISCTEM */
+  animation: fadeIn 0.2s ease-in-out;
+  max-height: 20rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(235, 169, 0, 0.4) #f1f5f9; /* ✅ MUDANÇA: Scrollbar amarelo ISCTEM */
+}
+
+.dark .authorTooltip {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tooltipTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.dark .tooltipTitle {
+  color: #9ca3af;
+}
+
+.authorItem {
+  margin-bottom: 0.5rem;
+}
+
+.authorName {
+  font-weight: 500;
+  color: #111827;
+  font-size: 0.875rem;
+}
+
+.dark .authorName {
+  color: #f9fafb;
+}
+
+.authorAffiliation {
+  color: #6b7280;
+  font-size: 0.75rem;
+  margin-top: 0.125rem;
+}
+
+.dark .authorAffiliation {
+  color: #9ca3af;
+}
+
+.authorSigla {
+  color: #002856;
+  margin-left: 0.25rem;
+}
+
+.dark .authorSigla {
+  color: #60a5fa;
+}
+
+.authorDivider {
+  border-bottom: 1px solid #e5e7eb;
+  margin-top: 0.5rem;
+}
+
+.dark .authorDivider {
+  border-bottom-color: #374151;
+}
+
+/* ... CSS existente permanece igual até a seção dos autores ... */
+
+.resultsCard {
+  background-color: #ffffff;
+  border-radius: var(--border-radius-2xl);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  border: 1px solid rgba(0, 40, 86, 0.1); 
+  height: 100%;
+}
+
+.resultsHeader {
+  background: linear-gradient(135deg, #002856 0%, #001f45 100%);
+  padding: var(--spacing-5) var(--spacing-6);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.resultsTitle {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-white);
+}
+
+.resultsActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+  .resultsCount {
+    background-color: #ffffff;
+    color: #002856; 
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--border-radius-full);
+  }
+
+.resultsList {
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.resultItem {
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.resultItemHeader {
+  padding: var(--spacing-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.resultItemHeader:hover {
+  background-color: rgba(235, 169, 0, 0.05); 
+
+}
+
+.resultItemInfo {
+  flex: 1;
+}
+
+.resultItemTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  color: var(--color-gray-900);
+  transition: color 0.2s ease;
+}
+
+.resultItemHeader:hover .resultItemTitle {
+  color: #002856; 
+}
+
+.resultItemFamily {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-500);
+  margin-top: var(--spacing-1);
+}
+
+.resultItemScientific {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-700);
+  margin-top: var(--spacing-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.resultItemActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-2);
+}
+
+.toggleButton {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-1) var(--spacing-1);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid var(--color-gray-300);
+  color: var(--color-gray-700);
+  background-color: var(--color-white);
+}
+
+.toggleButton:hover {
+  background-color: var(--color-gray-50);
+}
+
+.actionIcon {
+  margin-right: var(--spacing-1);
+}
+
+/* Estados vazios e de carregamento */
+.loadingState,
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-8);
+  height: 24rem;
+}
+
+.loadingIcon,
+.emptyIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 9999px;
+   background-color: rgba(0, 40, 86, 0.1);
+  color: #002856; 
+  margin-bottom: var(--spacing-4);
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  height: 2rem;
+  width: 2rem;
+}
+
+.spinnerCircle {
+  opacity: 0.25;
+}
+
+.spinnerPath {
+  opacity: 0.75;
+}
+
+.loadingTitle,
+.emptyTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  color: #002856; /* ✅ MUDANÇA: Azul ISCTEM */
+  margin-bottom: var(--spacing-2);
+}
+
+.loadingText,
+.emptyText {
+  color: var(--color-gray-500);
+  max-width: 24rem;
+}
+
+@media (min-width: 768px) {
+  .resultItemHeader {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .resultItemActions {
+    margin-top: 0;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.resultItemScientific {
+  font-style: italic;
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.dark .resultItemScientific {
+  color: #9ca3af;
+}
+
+/* Família em maiúsculas */
+.resultItemFamily {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #002856;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.dark .resultItemFamily {
+  color: #60a5fa;
+}
+
+/* Seção de autores */
+.authorSection {
+  margin-top: 0.5rem;
+}
+
+.authorInfo {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.dark .authorInfo {
+  color: #9ca3af;
+}
+
+/* Container do tooltip de autores - ATUALIZADO */
+.authorTooltipContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.authorButton {
+  font-size: 0.75rem;
+  color: #002856; /* ✅ MUDANÇA: Azul ISCTEM */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  transition: all 0.3s ease;
+}
+
+.authorButton:hover {
+  background-color: rgba(0, 40, 86, 0.06); /* ✅ MUDANÇA: Hover azul ISCTEM suave */
+  text-decoration: underline;
+}
+
+.authorButton:focus {
+  outline: 2px solid rgba(235, 169, 0, 0.4); /* ✅ MUDANÇA: Focus amarelo ISCTEM */
+  outline-offset: 2px;
+  background-color: rgba(0, 40, 86, 0.06);
+}
+
+.dark .authorButton {
+  color: #002856;
+}
+
+.dark .authorButton:hover,
+.dark .authorButton:focus {
+  background-color: rgba(0, 40, 86, 0.15);
+}
+
+/* Tooltip dos autores - MELHORADO */
+.authorTooltip {
+  /* Removemos position: absolute pois agora usamos position: fixed via JavaScript */
+  z-index: 1000;
+  width: min(18rem, calc(100vw - 2rem));
+  max-width: 18rem;
+  padding: 0.75rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: fadeIn 0.2s ease-in-out;
+  max-height: 20rem;
+  overflow-y: auto;
+  /* Scroll personalizado para o tooltip */
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.authorTooltip::-webkit-scrollbar {
+  width: 6px;
+}
+
+.authorTooltip::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.authorTooltip::-webkit-scrollbar-thumb {
+  background: rgba(235, 169, 0, 0.4);
+  border-radius: 3px;
+}
+
+.authorTooltip::-webkit-scrollbar-thumb:hover {
+  background: rgba(235, 169, 0, 0.6);
+}
+
+.dark .authorTooltip {
+  background: #1f2937;
+  border-color: #374151;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.dark .authorTooltip::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+.dark .authorTooltip::-webkit-scrollbar-thumb {
+  background: rgba(235, 169, 0, 0.5);
+}
+
+.dark .authorTooltip::-webkit-scrollbar-thumb:hover {
+  background: rgba(235, 169, 0, 0.7);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.tooltipTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #002856; /* ✅ MUDANÇA: Azul ISCTEM */
+  margin-bottom: 0.5rem;
+}
+
+.dark .tooltipTitle {
+  color: #002856;
+}
+
+/* .authorsList { */
+  /* Container para a lista de autores */
+/* } */
+
+.authorItem {
+  margin-bottom: 0.5rem;
+}
+
+.authorItem:last-child {
+  margin-bottom: 0;
+}
+
+.authorName {
+  font-weight: 500;
+  color: #111827;
+  font-size: 0.875rem;
+  line-height: 1.25;
+}
+
+.dark .authorName {
+  color: #f9fafb;
+}
+
+.authorAffiliation {
+  color: #6b7280;
+  font-size: 0.75rem;
+  margin-top: 0.125rem;
+  line-height: 1.25;
+}
+
+.dark .authorAffiliation {
+  color: #9ca3af;
+}
+
+.authorSigla {
+  color: #eba900;
+  margin-left: 0.25rem;
+  font-weight: 500;
+}
+
+.dark .authorSigla {
+  color: #eba900;
+}
+
+.authorDivider {
+  border-bottom: 1px solid rgba(0, 40, 86, 0.1);
+  margin: 0.5rem 0;
+}
+
+.dark .authorDivider {
+  border-bottom-color: rgba(0, 40, 86, 0.2);
+}
+
+/* Melhorias de responsividade para o tooltip */
+@media (max-width: 640px) {
+  .authorTooltip {
+    width: calc(100vw - 1rem);
+    max-width: calc(100vw - 1rem);
+    left: 0.5rem !important;
+    right: 0.5rem !important;
+  }
+}
+
+/* Melhoria de acessibilidade */
+.authorButton[aria-expanded="true"] {
+  background-color: rgba(0, 40, 86, 0.06);
+}
+
+.dark .authorButton[aria-expanded="true"] {
+  background-color: rgba(0, 40, 86, 0.15);
+}
+
+/* Estados de foco melhorados */
+.authorTooltip:focus-within {
+  outline: none;
+}
+
+/* Animação melhorada para entrada e saída */
+.authorTooltip.entering {
+  animation: tooltipEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.authorTooltip.exiting {
+  animation: tooltipExit 0.15s cubic-bezier(0.4, 0, 1, 1);
+}
+
+@keyframes tooltipEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes tooltipExit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+}
