@@ -307,3 +307,5 @@ def delete_planta(planta_id):
     except Exception as e:
         db.session.rollback()
         return handle_error(e, "Erro ao excluir planta")
+    
+    

@@ -25,8 +25,8 @@ interface Indicacao {
 }
 
 interface Familia {
-  id_familia: number;
-  nome_familia: string;
+  nome_familia: string;  // Remove id_familia
+  total_plantas?: number; // Opcional: quantas plantas tem
 }
 
 // URL base da API
@@ -444,13 +444,10 @@ export function SearchForm() {
       }
     }
     
-    // NOVO: Filtro por família (ID)
-    if (filters.familia && filters.familia !== "") {
-      const familiaId = parseInt(filters.familia)
-      if (!isNaN(familiaId)) {
-        searchFilters.familia_id = familiaId
-        console.log('Adicionado filtro familia_id:', searchFilters.familia_id)
-      }
+    // NOVO: Filtro por família (NOME)
+    if (filters.familia && filters.familia.trim()) {
+      searchFilters.familia = filters.familia.trim()  // ✅ Envia nome direto
+      console.log('Adicionado filtro familia:', searchFilters.familia)
     }
     
     // CORRIGIDO: Filtro por autor (ID)
@@ -539,8 +536,8 @@ export function SearchForm() {
 
   const familiaOptions = useMemo(() => {
     return familias.map(familia => ({
-      value: familia.id_familia.toString(),
-      label: familia.nome_familia || `Família ${familia.id_familia}`
+      value: familia.nome_familia,  // ✅ Agora usa NOME
+      label: familia.nome_familia
     }))
   }, [familias])
 
