@@ -334,6 +334,79 @@
   margin-top: var(--spacing-1);
 }
 
+/* =====================================================
+   ESTILOS PARA VALIDAÇÃO
+   ADICIONE ESTAS LINHAS NO FINAL DO ARQUIVO search-form.module.css
+   ===================================================== */
+
+/* Input com erro */
+.inputError {
+  border-color: #dc2626 !important;
+  background-color: #fef2f2 !important;
+}
+
+.inputError:focus {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+}
+
+/* Texto de erro */
+.errorText {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  animation: slideDown 0.2s ease-out;
+}
+
+.errorText::before {
+  content: "⚠";
+  font-size: 1rem;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estado de gravação (voz) */
+.recordingText {
+  color: #059669;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.recordingDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #dc2626;
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
 /* Animations */
 @keyframes spin {
   from {
@@ -375,4 +448,49 @@
   .searchButton {
     width: 100%;
   }
+}
+
+/* =====================================================
+   MENSAGEM DE ERRO GERAL DO FORMULÁRIO
+   ===================================================== */
+
+.errorMessage {
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.errorMessage p {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.retryButton {
+  align-self: flex-start;
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.retryButton:hover {
+  background-color: #b91c1c;
+}
+
+.retryButton:active {
+  background-color: #991b1b;
 }

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 API Principal - Sistema de Plantas Medicinais
-REFATORADO: Estrutura modular com nova BD
 """
 import os
 from flask import Flask
@@ -19,23 +18,38 @@ CORS(app, origins=Config.CORS_ORIGINS)
 # Criar pasta de uploads
 os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
 
-# ===== IMPORTANTE: Inicializar DB ANTES de importar models =====
+# ===== INICIALIZAR DB ANTES de importar models =====
 from models.planta import db
 db.init_app(app)
 
 # ===== Importar models (APÓS inicializar db) =====
 from models import *
 
-# ===== Importar e registrar Blueprints =====
+# ===== Importar Blueprints EXISTENTES =====
 from routes.plantas import plantas_bp
 from routes.busca import busca_bp
 from routes.auxiliares import auxiliares_bp
 from routes.imagens import imagens_bp
 
+# ===== Importar Blueprints NOVOS (Dashboard) =====
+from routes.dashboard_stats import dashboard_stats_bp
+from routes.dashboard_crud import dashboard_crud_bp
+from routes.dashboard_busca import dashboard_busca_bp
+from routes.dashboard_imagens import dashboard_imagens_bp
+from routes.dashboard_auxiliares import dashboard_auxiliares_bp
+
+# ===== Registrar Blueprints EXISTENTES =====
 app.register_blueprint(plantas_bp, url_prefix='/api')
 app.register_blueprint(busca_bp, url_prefix='/api')
 app.register_blueprint(auxiliares_bp, url_prefix='/api')
 app.register_blueprint(imagens_bp, url_prefix='/api')
+
+# ===== Registrar Blueprints NOVOS (Dashboard) =====
+app.register_blueprint(dashboard_stats_bp, url_prefix='/api/admin/dashboard')
+app.register_blueprint(dashboard_crud_bp, url_prefix='/api/admin')
+app.register_blueprint(dashboard_busca_bp, url_prefix='/api/admin/dashboard')
+app.register_blueprint(dashboard_imagens_bp, url_prefix='/api/admin')
+app.register_blueprint(dashboard_auxiliares_bp, url_prefix='/api/admin')
 
 # ===== Rota de health check =====
 @app.route('/health')
@@ -51,6 +65,7 @@ def index():
         'endpoints': {
             'plantas': '/api/plantas',
             'busca': '/api/busca',
+            'dashboard': '/api/admin/dashboard/stats',
             'provincias': '/api/provincias',
             'partes_usadas': '/api/partes-usadas',
             'indicacoes': '/api/indicacoes',
@@ -77,6 +92,7 @@ if __name__ == '__main__':
     print("🌿 API PLANTAS MEDICINAIS - NOVA ESTRUTURA")
     print("=" * 60)
     print(f"🚀 Servidor: http://localhost:5000")
+    print(f"📊 Dashboard: http://localhost:5000/api/admin/dashboard/stats")
     print(f"📁 Estrutura: Modular (arquivos separados)")
     print(f"🗄️  Database: {Config.SQLALCHEMY_DATABASE_URI}")
     print("=" * 60)

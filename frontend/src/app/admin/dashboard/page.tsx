@@ -140,6 +140,12 @@ interface SearchDetailed {
   }>;
 }
 
+// Helper para toUpperCase seguro
+const safeUpper = (value: any): string => {
+  if (!value) return 'Não informado';
+  return String(value).toUpperCase();
+};
+
 // Componente principal
 const AdminDashboardComponent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("overview");
@@ -179,7 +185,7 @@ const AdminDashboardComponent: React.FC = () => {
     return !nonManageableNames.includes(normalizedName)
   }
 
-  const API_BASE_URL = process.env.REACT_APP_ADMIN_API_URL || 'http://localhost:5001/api/admin/dashboard';
+  const API_BASE_URL = process.env.REACT_APP_ADMIN_API_URL || 'http://localhost:5000/api/admin/dashboard';
   const MAIN_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
   // ADICIONAR estes novos estados após os existentes:
@@ -188,8 +194,8 @@ const AdminDashboardComponent: React.FC = () => {
   const [selectedViewItem, setSelectedViewItem] = useState<any>(null);
 
   // ===== FUNÇÃO PARA FORMATAR NOMES DE FAMÍLIAS =====
-  const formatarNomeFamilia = (nomeFamilia: string): string => {
-    return nomeFamilia.toUpperCase();
+  const formatarNomeFamilia = (nomeFamilia: any): string => {
+    return safeUpper(nomeFamilia);
   };
 
   // ===== NOVA FUNÇÃO PARA BUSCAR DADOS DE PESQUISA =====
@@ -1597,15 +1603,7 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                     </div>
                     <div className={styles.infoItem}>
                       <label>Família Botânica</label>
-                      <span>{selectedViewItem?.familia?.nome_familia.toUpperCase() || 'Não informado'}</span>
-                    </div>
-                    <div className={styles.infoItem}>
-                      <label>Número de Exsicata</label>
-                      <span>{selectedViewItem?.numero_exsicata || 'Não informado'}</span>
-                    </div>
-                    <div className={styles.infoItem}>
-                      <label>Data de Adição</label>
-                      <span>{selectedViewItem?.data_adicao || selectedViewItem?.added_at || 'Não informado'}</span>
+                      <span>{safeUpper(selectedViewItem?.familia?.nome_familia) || 'Não informado'}</span>
                     </div>
                   </div>
                 </div>

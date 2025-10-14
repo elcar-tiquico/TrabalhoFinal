@@ -25,8 +25,8 @@ interface Indicacao {
 }
 
 interface Familia {
-  nome_familia: string;  // Remove id_familia
-  total_plantas?: number; // Opcional: quantas plantas tem
+  nome_familia: string;
+  total_plantas?: number;
 }
 
 interface ParteUsada {
@@ -39,7 +39,7 @@ interface ParteUsada {
 // URL base da API
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
 
-// Componente de ComboBox com busca CORRIGIDO
+// Componente de ComboBox com busca
 interface ComboBoxProps {
   id: string
   label: string
@@ -65,7 +65,6 @@ function SearchableComboBox({
   const [isOpen, setIsOpen] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
 
-  // Filtrar opções baseado no termo de busca
   const filteredOptions = useMemo(() => {
     if (!searchTerm.trim()) return options
     return options.filter(option =>
@@ -73,27 +72,18 @@ function SearchableComboBox({
     )
   }, [options, searchTerm])
 
-  // Encontrar o label da opção selecionada
   const selectedLabel = useMemo(() => {
     if (!value) return ''
     const selectedOption = options.find(opt => opt.value === value)
     return selectedOption ? selectedOption.label : ''
   }, [value, options])
 
-  // Resetar busca quando fechar
   useEffect(() => {
     if (!isOpen) {
       setSearchTerm('')
       setHighlightedIndex(-1)
     }
   }, [isOpen])
-
-  // CORRIGIDO: Sincronizar searchTerm quando o valor externo muda
-  useEffect(() => {
-    if (!isOpen && value && selectedLabel) {
-      setSearchTerm('')
-    }
-  }, [value, selectedLabel, isOpen])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSearchTerm = e.target.value
@@ -103,7 +93,6 @@ function SearchableComboBox({
   }
 
   const handleOptionClick = (optionValue: string) => {
-    console.log(`Selecionando opção: ${optionValue}`) // Debug
     onChange(optionValue)
     setIsOpen(false)
     setSearchTerm('')
@@ -148,7 +137,6 @@ function SearchableComboBox({
     setIsOpen(true)
   }
 
-  // CORRIGIDO: Delay maior para permitir cliques
   const handleInputBlur = () => {
     setTimeout(() => setIsOpen(false), 300)
   }
@@ -216,7 +204,7 @@ function SearchableComboBox({
                     type="button"
                     className={styles.comboBoxOption}
                     onClick={() => handleOptionClick('')}
-                    onMouseDown={(e) => e.preventDefault()} // Evitar blur
+                    onMouseDown={(e) => e.preventDefault()}
                   >
                     <span className={styles.clearOptionText}>Limpar seleção</span>
                   </button>
@@ -229,7 +217,7 @@ function SearchableComboBox({
                       index === highlightedIndex ? styles.highlighted : ''
                     } ${option.value === value ? styles.selected : ''}`}
                     onClick={() => handleOptionClick(option.value)}
-                    onMouseDown={(e) => e.preventDefault()} // Evitar blur
+                    onMouseDown={(e) => e.preventDefault()}
                     onMouseEnter={() => setHighlightedIndex(index)}
                   >
                     {option.label}
@@ -250,12 +238,19 @@ export function SearchForm() {
   const [isRecordingPopular, setIsRecordingPopular] = useState(false)
   const [isRecordingScientific, setIsRecordingScientific] = useState(false)
   
+  // ✅ Estados para validação
+  const [validationErrors, setValidationErrors] = useState({
+    popularName: '',
+    scientificName: ''
+  })
+  
   // Estados para armazenar dados das comboboxes
   const [provincias, setProvincias] = useState<Provincia[]>([])
   const [autores, setAutores] = useState<Autor[]>([])
   const [indicacoes, setIndicacoes] = useState<Indicacao[]>([])
   const [familias, setFamilias] = useState<Familia[]>([])
   const [partesUsadas, setPartesUsadas] = useState<ParteUsada[]>([])
+  
   // Estados de loading
   const [loadingProvincias, setLoadingProvincias] = useState(true)
   const [loadingAutores, setLoadingAutores] = useState(true)
@@ -265,7 +260,66 @@ export function SearchForm() {
   
   const [error, setError] = useState<string | null>(null)
 
-  // Função genérica para fazer requisições COM MELHOR TRATAMENTO DE ERRO
+  // ✅ FUNÇÕES DE VALIDAÇÃO
+  const validatePopularName = (value: string): boolean => {
+    if (!value.trim()) {
+      setValidationErrors(prev => ({ ...prev, popularName: '' }))
+      return true
+    }
+    
+    // Permitir: letras (incluindo acentuadas), espaços, hífens, apóstrofos
+    const regex = /^[a-zA-ZÀ-ÿ\s\-']+$/
+    
+    if (!regex.test(value)) {
+      setValidationErrors(prev => ({ 
+        ...prev, 
+        popularName: 'Nome popular deve conter apenas letras, espaços e hífens' 
+      }))
+      return false
+    }
+    
+    if (value.length > 100) {
+      setValidationErrors(prev => ({ 
+        ...prev, 
+        popularName: 'Nome popular deve ter no máximo 100 caracteres' 
+      }))
+      return false
+    }
+    
+    setValidationErrors(prev => ({ ...prev, popularName: '' }))
+    return true
+  }
+  
+  const validateScientificName = (value: string): boolean => {
+    if (!value.trim()) {
+      setValidationErrors(prev => ({ ...prev, scientificName: '' }))
+      return true
+    }
+    
+    // Permitir: letras, espaços, pontos, hífens, × (para híbridos)
+    const regex = /^[a-zA-Z\s.\-×]+$/
+    
+    if (!regex.test(value)) {
+      setValidationErrors(prev => ({ 
+        ...prev, 
+        scientificName: 'Nome científico deve conter apenas letras, espaços, pontos e hífens' 
+      }))
+      return false
+    }
+    
+    if (value.length > 150) {
+      setValidationErrors(prev => ({ 
+        ...prev, 
+        scientificName: 'Nome científico deve ter no máximo 150 caracteres' 
+      }))
+      return false
+    }
+    
+    setValidationErrors(prev => ({ ...prev, scientificName: '' }))
+    return true
+  }
+
+  // Função genérica para fazer requisições
   const fetchData = async <T,>(
     endpoint: string,
     setter: React.Dispatch<React.SetStateAction<T[]>>,
@@ -284,13 +338,10 @@ export function SearchForm() {
         },
       })
       
-      console.log(`Response status ${entityName}:`, response.status)
-      
       if (response.ok) {
         const data = await response.json()
         console.log(`${entityName} recebidos:`, data)
         
-        // CORRIGIDO: Validar se é array antes de setar
         if (Array.isArray(data)) {
           setter(data)
         } else {
@@ -299,23 +350,19 @@ export function SearchForm() {
         }
       } else {
         const errorText = await response.text()
-        console.error(`Erro ao buscar ${entityName}:`, response.status, errorText)
+        console.error(`Erro ao buscar ${entityName}:`, errorText)
         throw new Error(`Erro ${response.status}: ${errorText}`)
       }
     } catch (error) {
       console.error(`Erro na requisição de ${entityName}:`, error)
-      // CORRIGIDO: Não sobrescrever erro se já existir
-      if (!error) {
-        setError(`Erro ao carregar ${entityName}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
-      }
-      setter([]) // Setar array vazio em caso de erro
+      setError(`Erro ao carregar ${entityName}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
+      setter([])
     } finally {
       loadingSetter(false)
     }
   }
 
-  // CORRIGIDO: Função para buscar partes usadas com melhor tratamento
-  // Função para buscar partes usadas - SIMPLIFICADA
+  // Função para buscar partes usadas
   const fetchPartesUsadas = async () => {
     try {
       setLoadingPartesUsadas(true)
@@ -358,7 +405,6 @@ export function SearchForm() {
     const loadAllData = async () => {
       setError(null)
       
-      // CORRIGIDO: Carregar dados em paralelo mas tratar erros individualmente
       const promises = [
         fetchData('/provincias', setProvincias, setLoadingProvincias, 'províncias'),
         fetchData('/autores', setAutores, setLoadingAutores, 'autores'),
@@ -367,93 +413,59 @@ export function SearchForm() {
         fetchPartesUsadas()
       ]
       
-      // Aguardar todas as promises, mesmo se algumas falharem
       await Promise.allSettled(promises)
     }
     
     loadAllData()
   }, [])
 
-  // CORRIGIDO: Melhor tratamento do submit
+  // ✅ HANDLE SUBMIT COM VALIDAÇÃO
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
-    console.log('Submit com filtros atuais:', filters) // Debug
+    // Validar antes de submeter
+    const isPopularValid = validatePopularName(filters.popularName || '')
+    const isScientificValid = validateScientificName(filters.scientificName || '')
     
-    // Construir filtros baseados na API
-    const searchFilters: Record<string, any> = {}
-    
-    // Filtros de texto para nomes
-    if (filters.popularName && filters.popularName.trim()) {
-      searchFilters.search_popular = filters.popularName.trim()
-      console.log('Adicionado filtro search_popular:', searchFilters.search_popular)
+    if (!isPopularValid || !isScientificValid) {
+      console.log('❌ Validação falhou, não enviando formulário')
+      return
     }
     
-    if (filters.scientificName && filters.scientificName.trim()) {
-      searchFilters.search_cientifico = filters.scientificName.trim()
-      console.log('Adicionado filtro search_cientifico:', searchFilters.search_cientifico)
+    // ✅ VERIFICAR SE PELO MENOS UM CAMPO ESTÁ PREENCHIDO
+    const hasPopularName = filters.popularName && filters.popularName.trim()
+    const hasScientificName = filters.scientificName && filters.scientificName.trim()
+    const hasFamilia = filters.familia && filters.familia.trim()
+    const hasParteUsada = filters.parteUsada && filters.parteUsada.trim()
+    const hasUsoTradicional = filters.usoTradicional && filters.usoTradicional.trim()
+    const hasProvincia = filters.provincia && filters.provincia.trim()
+    const hasAuthor = filters.author && filters.author.trim()
+    
+    if (!hasPopularName && !hasScientificName && !hasFamilia && !hasParteUsada && 
+        !hasUsoTradicional && !hasProvincia && !hasAuthor) {
+      setError('Por favor, preencha pelo menos um campo de pesquisa')
+      console.log('❌ Nenhum campo preenchido')
+      return
     }
     
-    // CORRIGIDO: Filtro por parte usada (string)
-    if (filters.parteUsada && filters.parteUsada.trim()) {
-      searchFilters.parte_usada = filters.parteUsada.trim()
-      console.log('Adicionado filtro parte_usada:', searchFilters.parte_usada)
-    }
-    
-    // CORRIGIDO: Filtro por uso tradicional (ID da indicação)
-    if (filters.usoTradicional && filters.usoTradicional !== "") {
-      const indicacaoId = parseInt(filters.usoTradicional)
-      if (!isNaN(indicacaoId)) {
-        searchFilters.indicacao_id = indicacaoId
-        console.log('Adicionado filtro indicacao_id:', searchFilters.indicacao_id)
-      }
-    }
-    
-    // CORRIGIDO: Filtro por província (ID)
-    if (filters.provincia && filters.provincia !== "") {
-      const provinciaId = parseInt(filters.provincia)
-      if (!isNaN(provinciaId)) {
-        searchFilters.provincia_id = provinciaId
-        console.log('Adicionado filtro provincia_id:', searchFilters.provincia_id)
-      }
-    }
-    
-    // NOVO: Filtro por família (NOME)
-    if (filters.familia && filters.familia.trim()) {
-      searchFilters.familia = filters.familia.trim()  // ✅ Envia nome direto
-      console.log('Adicionado filtro familia:', searchFilters.familia)
-    }
-    
-    // CORRIGIDO: Filtro por autor (ID)
-    if (filters.author && filters.author !== "") {
-      const autorId = parseInt(filters.author)
-      if (!isNaN(autorId)) {
-        searchFilters.autor_id = autorId
-        console.log('Adicionado filtro autor_id:', searchFilters.autor_id)
-      }
-    }
-    
-    // Paginação
-    searchFilters.page = 1
-    searchFilters.per_page = 50
-    
-    console.log('Filtros finais para busca:', searchFilters)
-    performSearch(searchFilters)
+    setError(null)
+    console.log('✅ Validação passou, enviando formulário:', filters)
+    performSearch()
   }
 
   const handleClear = () => {
-    console.log('Limpando formulário') // Debug
     clearSearch()
-    setError(null)
+    setValidationErrors({ popularName: '', scientificName: '' })
   }
 
   const toggleRecordingPopular = () => {
     setIsRecordingPopular(!isRecordingPopular)
     if (!isRecordingPopular) {
       setTimeout(() => {
-        const exemploNomes = ["Mpalhacufa", "Moringa", "Mulungu", "Nhamacua", "Xicarangoma"]
-        const nomeAleatorio = exemploNomes[Math.floor(Math.random() * exemploNomes.length)]
+        const exemplos = ["Moringa", "Acácia", "Neem", "Baobá"]
+        const nomeAleatorio = exemplos[Math.floor(Math.random() * exemplos.length)]
         setFilters((prev) => ({ ...prev, popularName: nomeAleatorio }))
+        validatePopularName(nomeAleatorio)
         setIsRecordingPopular(false)
       }, 2000)
     }
@@ -463,30 +475,27 @@ export function SearchForm() {
     setIsRecordingScientific(!isRecordingScientific)
     if (!isRecordingScientific) {
       setTimeout(() => {
-        const exemplosCientificos = ["Baccharis", "Moringa oleifera", "Strychnos", "Phyllanthus", "Combretum"]
+        const exemplosCientificos = ["Moringa oleifera", "Strychnos spinosa", "Azadirachta indica"]
         const nomeAleatorio = exemplosCientificos[Math.floor(Math.random() * exemplosCientificos.length)]
         setFilters((prev) => ({ ...prev, scientificName: nomeAleatorio }))
+        validateScientificName(nomeAleatorio)
         setIsRecordingScientific(false)
       }, 2000)
     }
   }
 
-  // CORRIGIDO: Função para formatar o texto de exibição do autor
   const formatAutorDisplay = (autor: Autor) => {
     let display = autor.nome_autor || `Autor ${autor.id_autor}`
-    
     if (autor.afiliacao && autor.afiliacao.trim()) {
       display += ` (${autor.afiliacao.trim()})`
     }
-    
     if (autor.sigla_afiliacao && autor.sigla_afiliacao.trim()) {
       display += ` [${autor.sigla_afiliacao.trim()}]`
     }
-    
     return display
   }
 
-  // CORRIGIDO: Preparar opções com validação
+  // Preparar opções
   const provinciaOptions = useMemo(() => {
     return provincias.map(provincia => ({
       value: provincia.id_provincia.toString(),
@@ -510,43 +519,23 @@ export function SearchForm() {
 
   const familiaOptions = useMemo(() => {
     return familias.map(familia => ({
-      value: familia.nome_familia,  // ✅ Agora usa NOME
+      value: familia.nome_familia,
       label: familia.nome_familia
     }))
   }, [familias])
 
-    useEffect(() => {
-    const loadPartesUsadas = async () => {
-      try {
-        setLoadingPartesUsadas(true)
-        const data = await fetchData<any>(
-          '/partes-usadas',
-          setPartesUsadas,
-          setLoadingPartesUsadas,
-          'partes usadas'
-        )
-        
-        console.log('✅ Partes usadas carregadas:', data)
-      } catch (error) {
-        console.error('❌ Erro ao carregar partes usadas:', error)
-      } finally {
-        setLoadingPartesUsadas(false)
-      }
+  const parteUsadaOptions = useMemo(() => {
+    if (!Array.isArray(partesUsadas)) {
+      console.warn('⚠️ partesUsadas não é array:', partesUsadas)
+      return []
     }
     
-    loadPartesUsadas()
-  }, [])
-
-  const parteUsadaOptions = useMemo(() => {
-    if (!Array.isArray(partesUsadas)) return []
-    
     return partesUsadas.map(parte => ({
-      value: String(parte.id_parte),  // Enviar ID como string
-      label: parte.nome_parte || parte.label || 'Sem nome'
+      value: String(parte.id_parte),
+      label: parte.nome_parte || parte.label || `Parte ${parte.id_parte}`
     }))
   }, [partesUsadas])
 
-  // Função para retentar carregamento
   const retryLoad = () => {
     setError(null)
     fetchData('/provincias', setProvincias, setLoadingProvincias, 'províncias')
@@ -565,17 +554,14 @@ export function SearchForm() {
         {error && (
           <div className={styles.errorMessage}>
             <p>⚠️ {error}</p>
-            <button 
-              onClick={retryLoad}
-              className={styles.retryButton}
-            >
+            <button onClick={retryLoad} className={styles.retryButton}>
               Tentar Novamente
             </button>
           </div>
         )}
         
         <form onSubmit={handleSubmit} className={styles.form}>
-          {/* Nome Popular */}
+          {/* Nome Popular COM VALIDAÇÃO */}
           <div className={styles.formGroup}>
             <label htmlFor="nomePopular" className={styles.formLabel}>
               {translate("search.popularName")}
@@ -584,16 +570,16 @@ export function SearchForm() {
               <input
                 type="text"
                 id="nomePopular"
-                className={styles.formInput}
+                className={`${styles.formInput} ${validationErrors.popularName ? styles.inputError : ''}`}
                 placeholder={translate("search.placeholder.popular")}
                 value={filters.popularName || ''}
                 onChange={(e) => {
-                  console.log('Mudança no nome popular:', e.target.value) // Debug
-                  setFilters((prev) => ({ 
-                    ...prev, 
-                    popularName: e.target.value
-                  }))
+                  const value = e.target.value
+                  validatePopularName(value)
+                  setFilters((prev) => ({ ...prev, popularName: value }))
                 }}
+                aria-invalid={!!validationErrors.popularName}
+                aria-describedby={validationErrors.popularName ? "popularName-error" : undefined}
               />
               <button
                 type="button"
@@ -618,6 +604,11 @@ export function SearchForm() {
                 </svg>
               </button>
             </div>
+            {validationErrors.popularName && (
+              <p id="popularName-error" className={styles.errorText}>
+                {validationErrors.popularName}
+              </p>
+            )}
             {isRecordingPopular && (
               <p className={styles.recordingText}>
                 <span className={styles.recordingDot}></span>
@@ -626,7 +617,7 @@ export function SearchForm() {
             )}
           </div>
 
-          {/* Nome Científico */}
+          {/* Nome Científico COM VALIDAÇÃO */}
           <div className={styles.formGroup}>
             <label htmlFor="nomeCientifico" className={styles.formLabel}>
               {translate("search.scientificName")}
@@ -635,40 +626,23 @@ export function SearchForm() {
               <input
                 type="text"
                 id="nomeCientifico"
-                className={styles.formInput}
+                className={`${styles.formInput} ${validationErrors.scientificName ? styles.inputError : ''}`}
                 placeholder={translate("search.placeholder.scientific")}
                 value={filters.scientificName || ''}
                 onChange={(e) => {
-                  console.log('Mudança no nome científico:', e.target.value) // Debug
-                  setFilters((prev) => ({ 
-                    ...prev, 
-                    scientificName: e.target.value
-                  }))
+                  const value = e.target.value
+                  validateScientificName(value)
+                  setFilters((prev) => ({ ...prev, scientificName: value }))
                 }}
+                aria-invalid={!!validationErrors.scientificName}
+                aria-describedby={validationErrors.scientificName ? "scientificName-error" : undefined}
               />
-              <button
-                type="button"
-                onClick={toggleRecordingScientific}
-                className={`${styles.iconButton} ${isRecordingScientific ? styles.recording : ""}`}
-                title="Busca por voz"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                  <line x1="12" x2="12" y1="19" y2="22"></line>
-                </svg>
-              </button>
             </div>
+            {validationErrors.scientificName && (
+              <p id="scientificName-error" className={styles.errorText}>
+                {validationErrors.scientificName}
+              </p>
+            )}
             {isRecordingScientific && (
               <p className={styles.recordingText}>
                 <span className={styles.recordingDot}></span>
@@ -677,16 +651,13 @@ export function SearchForm() {
             )}
           </div>
 
-          {/* Família - NOVO FILTRO */}
+          {/* Família Botânica */}
           <SearchableComboBox
             id="familia"
             label="Família Botânica"
             placeholder="Escolha uma família..."
             value={filters.familia || ''}
-            onChange={(value) => {
-              console.log('Mudança na família:', value) // Debug
-              setFilters((prev) => ({ ...prev, familia: value }))
-            }}
+            onChange={(value) => setFilters((prev) => ({ ...prev, familia: value }))}
             options={familiaOptions}
             loading={loadingFamilias}
           />
@@ -697,24 +668,18 @@ export function SearchForm() {
             label="Parte da Planta Usada"
             placeholder="Escolha uma parte usada..."
             value={filters.parteUsada || ''}
-            onChange={(value) => {
-              console.log('Mudança na parte usada:', value) // Debug
-              setFilters((prev) => ({ ...prev, parteUsada: value }))
-            }}
+            onChange={(value) => setFilters((prev) => ({ ...prev, parteUsada: value }))}
             options={parteUsadaOptions}
             loading={loadingPartesUsadas}
           />
 
-          {/* Uso Tradicional (Indicações) */}
+          {/* Uso Tradicional */}
           <SearchableComboBox
             id="usoTradicional"
             label="Uso Tradicional"
             placeholder="Escolha um uso tradicional..."
             value={filters.usoTradicional || ''}
-            onChange={(value) => {
-              console.log('Mudança no uso tradicional:', value) // Debug
-              setFilters((prev) => ({ ...prev, usoTradicional: value }))
-            }}
+            onChange={(value) => setFilters((prev) => ({ ...prev, usoTradicional: value }))}
             options={indicacaoOptions}
             loading={loadingIndicacoes}
           />
@@ -725,10 +690,7 @@ export function SearchForm() {
             label="Província"
             placeholder="Escolha uma província..."
             value={filters.provincia || ''}
-            onChange={(value) => {
-              console.log('Mudança na província:', value) // Debug
-              setFilters((prev) => ({ ...prev, provincia: value }))
-            }}
+            onChange={(value) => setFilters((prev) => ({ ...prev, provincia: value }))}
             options={provinciaOptions}
             loading={loadingProvincias}
           />
@@ -739,17 +701,14 @@ export function SearchForm() {
             label={translate("search.author")}
             placeholder="Escolha um autor..."
             value={filters.author || ''}
-            onChange={(value) => {
-              console.log('Mudança no autor:', value) // Debug
-              setFilters((prev) => ({ ...prev, author: value }))
-            }}
+            onChange={(value) => setFilters((prev) => ({ ...prev, author: value }))}
             options={autorOptions}
             loading={loadingAutores}
           />
 
-          <p className={styles.helpText}>
+          {/* <p className={styles.helpText}>
             {translate("search.empty")}
-          </p>
+          </p> */}
 
           <div className={styles.formActions}>
             <button type="button" onClick={handleClear} className={styles.clearButton}>
@@ -773,27 +732,11 @@ export function SearchForm() {
             <button type="submit" disabled={isLoading} className={styles.searchButton}>
               {isLoading ? (
                 <>
-                  <svg
-                    className={styles.spinnerIcon}
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className={styles.spinnerCircle}
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className={styles.spinnerPath}
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
+                  <svg className={styles.spinner} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className={styles.spinnerCircle} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className={styles.spinnerPath} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Consultando...
+                  {translate("search.searching")}
                 </>
               ) : (
                 <>
