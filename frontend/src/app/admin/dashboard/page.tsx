@@ -326,7 +326,7 @@ const AdminDashboardComponent: React.FC = () => {
 
       console.log('🔄 Carregando dados REAIS da API:', API_BASE_URL);
 
-      // Fazer todas as chamadas da API REAL em paralelo (mantido igual)
+      // Fazer todas as chamadas da API REAL em paralelo
       const [
         statsResponse,
         familiasResponse,
@@ -362,7 +362,7 @@ const AdminDashboardComponent: React.FC = () => {
         }
       }
 
-      // Parse das respostas JSON (mantido igual)
+      // Parse das respostas JSON
       const [
         statsData,
         familiasData,
@@ -385,54 +385,125 @@ const AdminDashboardComponent: React.FC = () => {
         autoresRecentesResponse.json()
       ]);
 
-      // Atualizar todos os estados com dados REAIS (mantido igual)
+      // Atualizar todos os estados com dados REAIS
       setStats(statsData);
       
       // Aplicar formatação de maiúsculas nas famílias
       if (familiasData.familias) {
-        const familiasFormatadas = familiasData.familias.map((familia: { name: string; }) => ({
+        console.log('🔍 Dados de famílias recebidos da API:', familiasData.familias);
+        
+        // Calcular total de plantas
+        const totalPlantas = familiasData.familias.reduce((sum: number, f: any) => sum + f.count, 0);
+        
+        const familiasFormatadas = familiasData.familias.map((familia: any) => ({
           ...familia,
-          name: formatarNomeFamilia(familia.name)
+          name: formatarNomeFamilia(familia.name),
+          percentage: totalPlantas > 0 ? Math.round((familia.count / totalPlantas) * 100 * 10) / 10 : 0  // ✅ CALCULAR PERCENTUAL
         }));
+        
+        console.log('✅ Famílias formatadas:', familiasFormatadas);
         setPlantasPorFamilia(familiasFormatadas);
       } else {
         setPlantasPorFamilia([]);
       }
       
-      // Recalcular percentual baseado em plantas únicas (mantido igual)
-      if (provinciasData.provincias && statsData.total_plantas) {
-        const totalPlantasNoSistema = statsData.total_plantas.value;
-        
-        const provinciasCorrigidas = provinciasData.provincias.map((provincia: { total_plantas_unicas: any; count: any; name: any; }) => {
-          const plantasUnicas = provincia.total_plantas_unicas || provincia.count;
-          const percentualCorreto = totalPlantasNoSistema > 0 
-            ? (plantasUnicas / totalPlantasNoSistema * 100) 
-            : 0;
-          
-          return {
-            name: provincia.name,
-            count: plantasUnicas,
-            percentage: Math.round(percentualCorreto * 10) / 10
-          };
-        });
-        
-        // Ordenar por número de plantas (decrescente)
-        provinciasCorrigidas.sort((a: { count: number; }, b: { count: number; }) => b.count - a.count);
-        setPlantasPorProvincia(provinciasCorrigidas);
-      } else {
-        setPlantasPorProvincia([]);
-      }
+      // Recalcular percentual baseado em plantas únicas
+// Recalcular percentual baseado em plantas únicas
+if (provinciasData.provincias) {
+  console.log('📍 Dados de províncias recebidos:', provinciasData.provincias);
+  
+  // ✅ CORREÇÃO: Usar statsData PARSEADO (não o estado stats)
+  const totalPlantasNoSistema = statsData?.total_plantas?.value || 
+                                 statsData?.total_plantas || 
+                                 3;  // fallback seguro
+  
+  console.log('🌍 Total de plantas no sistema:', totalPlantasNoSistema);
+  console.log('📊 statsData completo:', statsData);
+  
+  const provinciasCorrigidas = provinciasData.provincias.map((provincia: any) => {
+    const plantasUnicas = provincia.total_plantas_unicas || provincia.count;
+    const percentualCorreto = totalPlantasNoSistema > 0 
+      ? (plantasUnicas / totalPlantasNoSistema * 100) 
+      : 0;
+    
+    console.log(`📊 Província ${provincia.name}: ${plantasUnicas} plantas = ${percentualCorreto.toFixed(1)}%`);
+    
+    return {
+      name: provincia.name,
+      count: plantasUnicas,
+      percentage: Math.round(percentualCorreto * 10) / 10
+    };
+  });
+  
+  console.log('✅ Províncias formatadas:', provinciasCorrigidas);
+  
+  provinciasCorrigidas.sort((a: { count: number; }, b: { count: number; }) => b.count - a.count);
+  setPlantasPorProvincia(provinciasCorrigidas);
+} else {
+  setPlantasPorProvincia([]);
+}
       
-      // Aplicar formatação de maiúsculas nas plantas recentes
+      // ✅ BUSCAR NOMES COMPLETOS PARA PLANTAS RECENTES
+        // ✅ BUSCAR NOMES COMPLETOS PARA PLANTAS RECENTES
       if (recentesData.plantas_recentes) {
-        const plantasRecentesFormatadas = recentesData.plantas_recentes.map((planta: { family: string; }) => ({
-          ...planta,
-          family: formatarNomeFamilia(planta.family)
-        }));
-        setPlantasRecentes(plantasRecentesFormatadas);
+        console.log('🔄 Buscando nomes completos para plantas recentes...');
+        console.log('📦 Dados recebidos:', recentesData.plantas_recentes);
+        
+        // Construir URL correta para a API de plantas
+        const plantasApiUrl = API_BASE_URL.includes('/dashboard') 
+          ? API_BASE_URL.replace('/api/admin/dashboard', '/api/admin/plantas')
+          : `${API_BASE_URL.split('/api')[0]}/api/admin/plantas`;
+        
+        console.log('🔗 URL da API de plantas:', plantasApiUrl);
+        
+        const plantasComNomes = await Promise.all(
+          recentesData.plantas_recentes.map(async (planta: any) => {
+            console.log(`🔍 Buscando planta ID ${planta.id}...`);
+            try {
+              const response = await fetch(`${plantasApiUrl}/${planta.id}`);
+              console.log(`📡 Response status para planta ${planta.id}:`, response.status);
+              
+              if (response.ok) {
+                const plantaCompleta = await response.json();
+                console.log(`✅ Planta ${planta.id} completa:`, plantaCompleta);
+                
+                console.log('🧪 Estrutura de nomes_comuns:', plantaCompleta.nomes_comuns);
+                const todosNomes = plantaCompleta.nomes_comuns?.map((n: any) => {
+                  console.log('🔍 Nome individual:', n);
+                  return n.nome_comum || n.nome || n;
+                }) || [planta.name];
+                console.log(`📝 Nomes encontrados para planta ${planta.id}:`, todosNomes);
+                
+                
+                return {
+                  ...planta,
+                  family: formatarNomeFamilia(planta.family),
+                  all_names: todosNomes,
+                  names_count: todosNomes.length
+                };
+              }
+            } catch (error) {
+              console.error(`❌ Erro ao buscar nomes da planta ${planta.id}:`, error);
+            }
+            
+            // Fallback: se falhar, retorna com dados básicos
+            console.log(`⚠️ Usando fallback para planta ${planta.id}`);
+            return {
+              ...planta,
+              family: formatarNomeFamilia(planta.family),
+              all_names: [planta.name],
+              names_count: 1
+            };
+          })
+        );
+        
+        console.log('✅ Nomes completos carregados:', plantasComNomes);
+        setPlantasRecentes(plantasComNomes);
       } else {
+        console.log('❌ Nenhuma planta recente encontrada');
         setPlantasRecentes([]);
       }
+      
       setPlantasPorIdioma(idiomasData.idiomas || []);
 
       // Garantir que os dados de referências e autores nunca sejam null/undefined
@@ -467,7 +538,7 @@ const AdminDashboardComponent: React.FC = () => {
         autores: autorStatsData.total_autores || 0
       });
 
-      // ===== CARREGAR DADOS DE PESQUISA APÓS DADOS PRINCIPAIS =====
+      // Carregar dados de pesquisa após dados principais
       await fetchSearchData();
 
     } catch (error) {
@@ -557,23 +628,33 @@ const AdminDashboardComponent: React.FC = () => {
   );
 
   const PlantNameDisplay: React.FC<{ planta: PlantaRecente }> = ({ planta }) => {
-    const hasMultipleNames = planta.all_names && planta.all_names.length > 1;
-    
-    if (!hasMultipleNames) {
+    // Se não tem all_names ou tem apenas 1 nome, mostra só o nome principal
+    if (!planta.all_names || planta.all_names.length <= 1) {
       return <span className={styles.primaryName}>{planta.name}</span>;
     }
 
+    // Se tem múltiplos nomes, mostra os primeiros 2 + contador
+    const displayNames = planta.all_names.slice(0, 2);
+    const remainingCount = planta.all_names.length - 2;
+
     return (
       <div className={styles.plantNameContainer}>
-        <span className={styles.primaryName}>{planta.name}</span>
+        <span className={styles.primaryName}>
+          {displayNames.join(', ')}
+          {remainingCount > 0 && (
+            <span style={{ color: '#6b7280', fontWeight: 'normal' }}>
+              {' '}+{remainingCount} {remainingCount === 1 ? 'nome' : 'nomes'}
+            </span>
+          )}
+        </span>
         <div className={styles.quickTooltip}>
           <span className={styles.infoIcon}>ℹ️</span>
           <div className={styles.quickTooltipContent}>
             <div className={styles.tooltipTitle}>
-              Todos os nomes ({planta.all_names?.length}):
+              Todos os nomes ({planta.all_names.length}):
             </div>
             <div className={styles.namesList}>
-              {planta.all_names?.map((nome, index) => (
+              {planta.all_names.map((nome, index) => (
                 <div key={index} className={styles.nameItem}>{nome}</div>
               ))}
             </div>
@@ -661,14 +742,14 @@ const AdminDashboardComponent: React.FC = () => {
     );
   };
 // ADICIONAR APENAS ESTAS:
-  const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', item: any) => {
+const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', item: any) => {
     console.log('👁️ Visualizando:', tipo, item);
     setViewModalType(tipo);
+    setLoadingModal(true);
     
     if (tipo === 'planta') {
-      // ✅ CORREÇÃO: Buscar dados completos da planta com URL correta
       try {
-        // Construir URL correta para a API principal (não a de dashboard)
+        // Construir URL correta para a API principal
         const plantasApiUrl = API_BASE_URL.includes('/dashboard') 
           ? API_BASE_URL.replace('/api/admin/dashboard', '/api/admin/plantas')
           : `${API_BASE_URL.split('/api')[0]}/api/admin/plantas`;
@@ -680,45 +761,92 @@ const AdminDashboardComponent: React.FC = () => {
         if (response.ok) {
           const plantaCompleta = await response.json();
           console.log('✅ Dados completos da planta carregados:', plantaCompleta);
+          console.log('🔍 Verificando campos específicos:', {
+            comp_quimica: plantaCompleta.comp_quimica,
+            prop_farmacologica: plantaCompleta.prop_farmacologica,
+            infos_adicionais: plantaCompleta.infos_adicionais,
+            numero_exsicata: plantaCompleta.numero_exsicata
+          });
           
-          // ✅ MESCLAR dados básicos com dados completos
-          // Preservar all_names da lista se disponível
-          const dadosFinais = {
-            ...plantaCompleta,
-            // Garantir que temos all_names disponível
-            all_names: item.all_names || plantaCompleta.nomes_comuns?.map((n: any) => n.nome_comum) || [],
-            names_count: item.names_count || plantaCompleta.nomes_comuns?.length || 0,
-            // Nome para exibição
-            name: item.name || plantaCompleta.nome_cientifico
+          // 🔧 NORMALIZAR estrutura de dados
+          const dadosNormalizados: PlantaDetalhadaDashboard = {
+            // IDs e nomes básicos
+            id_planta: plantaCompleta.id_planta || item.id,
+            nome_cientifico: plantaCompleta.nome_cientifico || item.scientific_name || item.nome_cientifico,
+            
+            // Família (normalizar estrutura)
+            familia: typeof plantaCompleta.familia === 'string' 
+              ? { nome_familia: plantaCompleta.familia }
+              : plantaCompleta.familia || { nome_familia: item.family || 'Não informado' },
+            
+            // Dados adicionais - GARANTIR QUE SEJAM PRESERVADOS
+            numero_exsicata: plantaCompleta.numero_exsicata || item.exsicata || item.numero_exsicata,
+            infos_adicionais: plantaCompleta.infos_adicionais || plantaCompleta.informacoes_adicionais,
+            comp_quimica: plantaCompleta.comp_quimica || plantaCompleta.composicao_quimica,
+            prop_farmacologica: plantaCompleta.prop_farmacologica || plantaCompleta.propriedades_farmacologicas,
+            data_adicao: plantaCompleta.data_adicao || item.added_at,
+            
+            // Arrays garantidos (nunca undefined)
+            nomes_comuns: plantaCompleta.nomes_comuns || [],
+            provincias: plantaCompleta.provincias || [],
+            usos_especificos: plantaCompleta.usos_especificos || plantaCompleta.partes_usadas || [],
+            partes_usadas: plantaCompleta.partes_usadas || plantaCompleta.usos_especificos || [],
+            autores: plantaCompleta.autores || [],
+            referencias_especificas: plantaCompleta.referencias_especificas || plantaCompleta.referencias || [],
+            referencias: plantaCompleta.referencias || plantaCompleta.referencias_especificas || [],
+            imagens: plantaCompleta.imagens || [],
+            
+            // Metadados
+            metadata: plantaCompleta.metadata
           };
           
-          setSelectedViewItem(dadosFinais);
-        } else {
-          console.warn('⚠️ Falha ao buscar dados completos, usando dados básicos');
-          // Fallback: usar dados básicos com all_names
-          setSelectedViewItem({
-            ...item,
-            nomes_comuns: item.all_names?.map((nome: string, idx: number) => ({
-              id_nome: idx,
-              nome_comum: nome
-            })) || []
+          console.log('🔧 Dados normalizados:', dadosNormalizados);
+          console.log('📊 Arrays verificados:', {
+            nomes_comuns: dadosNormalizados.nomes_comuns.length,
+            provincias: dadosNormalizados.provincias.length,
+            usos_especificos: dadosNormalizados.usos_especificos.length,
+            autores: dadosNormalizados.autores.length,
+            referencias: dadosNormalizados.referencias.length,
+            imagens: dadosNormalizados.imagens.length
           });
+          console.log('📝 Campos de texto:', {
+            comp_quimica: dadosNormalizados.comp_quimica ? '✅ Preenchido' : '❌ Vazio',
+            prop_farmacologica: dadosNormalizados.prop_farmacologica ? '✅ Preenchido' : '❌ Vazio',
+            infos_adicionais: dadosNormalizados.infos_adicionais ? '✅ Preenchido' : '❌ Vazio',
+            numero_exsicata: dadosNormalizados.numero_exsicata ? '✅ Preenchido' : '❌ Vazio'
+          });
+          setSelectedViewItem(dadosNormalizados);
+        } else {
+          console.error('❌ Erro HTTP:', response.status, response.statusText);
+          throw new Error(`Erro ao buscar dados: ${response.status}`);
         }
       } catch (error) {
         console.error('❌ Erro ao buscar detalhes da planta:', error);
-        // Fallback: usar dados básicos com all_names convertidos
+        // Fallback com dados básicos
         setSelectedViewItem({
-          ...item,
+          id_planta: item.id,
+          nome_cientifico: item.scientific_name || item.nome_cientifico,
+          familia: { nome_familia: item.family || 'Não informado' },
+          numero_exsicata: item.exsicata,
+          data_adicao: item.added_at,
           nomes_comuns: item.all_names?.map((nome: string, idx: number) => ({
             id_nome: idx,
             nome_comum: nome
-          })) || []
+          })) || [],
+          provincias: [],
+          usos_especificos: [],
+          partes_usadas: [],
+          autores: [],
+          referencias_especificas: [],
+          referencias: [],
+          imagens: []
         });
       }
     } else {
       setSelectedViewItem(item);
     }
     
+    setLoadingModal(false);
     setShowViewModal(true);
   };
 
@@ -894,7 +1022,6 @@ const AdminDashboardComponent: React.FC = () => {
                             <th className={styles.tableHeader}>Nome</th>
                             <th className={styles.tableHeader}>Nome Científico</th>
                             <th className={styles.tableHeader}>Família</th>
-                            <th className={styles.tableHeader}>Data de Adição</th>
                             <th className={styles.tableHeader}>
                               <span className={styles.srOnly}>Ver</span>
                             </th>
@@ -910,19 +1037,18 @@ const AdminDashboardComponent: React.FC = () => {
                                 <em>{planta.scientific_name}</em>
                               </td>
                               <td className={styles.tableCell}>{planta.family}</td>
-                              <td className={styles.tableCell}>{planta.added_at}</td>
                               <td className={styles.tableCellAction}>
                                 <button 
                                   onClick={() => abrirModalVisualizacao('planta', {
                                     id: planta.id,
                                     name: planta.name,
-                                    all_names: planta.all_names || [],  // ✅ Lista completa de nomes
-                                    names_count: planta.names_count || 0,  // ✅ Contagem de nomes
+                                    all_names: planta.all_names || [],
+                                    names_count: planta.names_count || 0,
                                     scientific_name: planta.scientific_name,
-                                    nome_cientifico: planta.scientific_name,  // ✅ Alias para compatibilidade
+                                    nome_cientifico: planta.scientific_name,
                                     family: planta.family,
                                     exsicata: planta.exsicata,
-                                    numero_exsicata: planta.exsicata,  // ✅ Alias para compatibilidade
+                                    numero_exsicata: planta.exsicata,
                                     added_at: planta.added_at
                                   })}
                                   className={styles.viewButton}
@@ -1272,170 +1398,177 @@ const AdminDashboardComponent: React.FC = () => {
               </div>
             )}
 
-            {/* Referências */}
-            {activeTab === 'references' && (
-              <div>
-                <h3 className={styles.tabTitle}>Gestão de Referências</h3>
-                <p className={styles.tabDescription}>
-                  Visualize e faça a gestão das referências bibliográficas do sistema.
-                </p>
+{/* Referências */}
+{activeTab === 'references' && (
+  <div>
+    <h3 className={styles.tabTitle}>Gestão de Referências</h3>
+    <p className={styles.tabDescription}>
+      Visualize e faça a gestão das referências bibliográficas do sistema.
+    </p>
 
-                {loading ? (
-                  <LoadingSpinner />
-                ) : referenciaStats ? (
-                  <>
-                    <div className={styles.chartsGrid}>
-                      <div className={styles.chartCard}>
-                        <h4 className={styles.chartTitle}>Distribuição por Tipo</h4>
-                        <div className={styles.progressList}>
-                          {referenciaStats.tipos && referenciaStats.tipos.map((tipo, index) => (
-                            <div key={index} className={styles.progressItem}>
-                              <div className={styles.progressInfo}>
-                                <span className={styles.progressLabel}>{tipo.tipo}</span>
-                                <span className={styles.progressValue}>{tipo.count} referências</span>
-                              </div>
-                              <div className={styles.progressBar}>
-                                <div 
-                                  className={styles.progressFillPurple} 
-                                  style={{ width: `${(tipo.count / referenciaStats.total_referencias) * 100}%` }}
-                                ></div>
-                              </div>
-                              <span className={styles.progressPercentage}>
-                                {((tipo.count / referenciaStats.total_referencias) * 100).toFixed(1)}%
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className={styles.chartCard}>
-                        <h4 className={styles.chartTitle}>Estatísticas Gerais</h4>
-                        <div className={styles.progressList}>
-                          <div className={styles.progressItem}>
-                            <div className={styles.progressInfo}>
-                              <span className={styles.progressLabel}>Total de Referências</span>
-                              <span className={styles.progressValue}>{referenciaStats.total_referencias}</span>
-                            </div>
-                          </div>
-                          <div className={styles.progressItem}>
-                            <div className={styles.progressInfo}>
-                              <span className={styles.progressLabel}>Com Plantas Associadas</span>
-                              <span className={styles.progressValue}>{referenciaStats.referencias_com_plantas}</span>
-                            </div>
-                          </div>
-                          <div className={styles.progressItem}>
-                            <div className={styles.progressInfo}>
-                              <span className={styles.progressLabel}>Sem Ano Definido</span>
-                              <span className={styles.progressValue}>{referenciaStats.referencias_sem_ano}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+    {loading ? (
+      <LoadingSpinner />
+    ) : referenciaStats ? (
+      <>
+        <div className={styles.chartsGrid}>
+          <div className={styles.chartCard}>
+            <h4 className={styles.chartTitle}>Distribuição por Tipo</h4>
+            <div className={styles.progressList}>
+              {referenciaStats.tipos && Array.isArray(referenciaStats.tipos) && referenciaStats.tipos.length > 0 ? (
+                referenciaStats.tipos.map((tipo, index) => (
+                  <div key={index} className={styles.progressItem}>
+                    <div className={styles.progressInfo}>
+                      <span className={styles.progressLabel}>{tipo.tipo}</span>
+                      <span className={styles.progressValue}>{tipo.count} referências</span>
                     </div>
-
-                    {/* Referências Recentes */}
-                    {referenciasRecentes && referenciasRecentes.length > 0 && (
-                      <div className={styles.section}>
-                        <h4 className={styles.sectionTitle}>Referências Recentemente Adicionadas</h4>
-                        <div className={styles.tableContainer}>
-                          <table className={styles.table}>
-                            <thead className={styles.tableHead}>
-                              <tr>
-                                <th className={styles.tableHeader}>Título</th>
-                                <th className={styles.tableHeader}>Tipo</th>
-                                <th className={styles.tableHeader}>Ano</th>
-                                <th className={styles.tableHeader}>Plantas</th>
-                                <th className={styles.tableHeader}>Autores</th>
-                                <th className={styles.tableHeader}>
-                                  <span className={styles.srOnly}>Ver</span>
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className={styles.tableBody}>
-                              {referenciasRecentes.map((ref) => (
-                                <tr key={ref.id} className={styles.tableRow}>
-                                  <td className={styles.tableCell}>
-                                    <div className={styles.tableCellTitle}>
-                                      {ref.titulo.length > 50 ? `${ref.titulo.substring(0, 50)}...` : ref.titulo}
-                                    </div>
-                                  </td>
-                                  <td className={styles.tableCell}>
-                                    <span className={styles.badge}>{ref.tipo}</span>
-                                  </td>
-                                  <td className={styles.tableCell}>{ref.ano || 'N/A'}</td>
-                                  <td className={styles.tableCell}>{ref.total_plantas}</td>
-                                  <td className={styles.tableCell}>
-                                    <div className={styles.authorList}>
-                                      {ref.autores && ref.autores.length > 0 ? ref.autores.slice(0, 2).join(', ') : 'Sem autores'}
-                                      {ref.autores.length > 2 && ` +${ref.autores.length - 2}`}
-                                    </div>
-                                  </td>
-                                  <td className={styles.tableCellAction}>
-                                    <button 
-                                      onClick={() => abrirModalVisualizacao('referencia', {
-                                        id_referencia: ref.id,
-                                        titulo_referencia: ref.titulo,
-                                        tipo_referencia: ref.tipo,
-                                        ano: ref.ano,
-                                        link_referencia: ref.link,
-                                        total_plantas: ref.total_plantas,
-                                        autores: ref.autores
-                                      })}
-                                      className={styles.viewButton}
-                                    >
-                                      Ver
-                                    </button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Referências Mais Utilizadas */}
-                    {referenciaStats.mais_utilizadas.length > 0 && (
-                      <div className={styles.section}>
-                        <h4 className={styles.sectionTitle}>Referências Mais Utilizadas</h4>
-                        <div className={styles.progressList}>
-                          {referenciaStats.mais_utilizadas && referenciaStats.mais_utilizadas.slice(0, 5).map((ref, index) => (
-                            <div key={index} className={styles.progressItem}>
-                              <div className={styles.progressInfo}>
-                                <span className={styles.progressLabel}>
-                                  {ref.titulo.length > 40 ? `${ref.titulo.substring(0, 40)}...` : ref.titulo}
-                                  {ref.ano && ` (${ref.ano})`}
-                                </span>
-                                <span className={styles.progressValue}>{ref.total_plantas} plantas</span>
-                              </div>
-                              <div className={styles.progressBar}>
-                                <div 
-                                  className={styles.progressFillPurple} 
-                                  style={{ 
-                                    width: `${(ref.total_plantas / Math.max(...referenciaStats.mais_utilizadas.map(r => r.total_plantas))) * 100}%` 
-                                  }}
-                                ></div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className={styles.loadingContainer}>
-                    <span className={styles.loadingText}>Nenhum dado de referência disponível</span>
+                    <div className={styles.progressBar}>
+                      <div 
+                        className={styles.progressFillPurple} 
+                        style={{ width: `${(tipo.count / referenciaStats.total_referencias) * 100}%` }}
+                      ></div>
+                    </div>
+                    <span className={styles.progressPercentage}>
+                      {((tipo.count / referenciaStats.total_referencias) * 100).toFixed(1)}%
+                    </span>
                   </div>
-                )}
+                ))
+              ) : (
+                <div className={styles.noData}>Nenhum tipo de referência disponível</div>
+              )}
+            </div>
+          </div>
 
-                <div className={styles.viewAllContainer}>
-                  <Link href="/admin/references?tab=referencias" className={styles.buttonPurple}>
-                    Gerir referências
-                  </Link>
+          <div className={styles.chartCard}>
+            <h4 className={styles.chartTitle}>Estatísticas Gerais</h4>
+            <div className={styles.progressList}>
+              <div className={styles.progressItem}>
+                <div className={styles.progressInfo}>
+                  <span className={styles.progressLabel}>Total de Referências</span>
+                  <span className={styles.progressValue}>{referenciaStats.total_referencias}</span>
                 </div>
               </div>
-            )}
+              <div className={styles.progressItem}>
+                <div className={styles.progressInfo}>
+                  <span className={styles.progressLabel}>Com Plantas Associadas</span>
+                  <span className={styles.progressValue}>{referenciaStats.referencias_com_plantas}</span>
+                </div>
+              </div>
+              <div className={styles.progressItem}>
+                <div className={styles.progressInfo}>
+                  <span className={styles.progressLabel}>Sem Ano Definido</span>
+                  <span className={styles.progressValue}>{referenciaStats.referencias_sem_ano}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
+        {/* Referências Recentes */}
+        {referenciasRecentes && Array.isArray(referenciasRecentes) && referenciasRecentes.length > 0 && (
+          <div className={styles.section}>
+            <h4 className={styles.sectionTitle}>Referências Recentemente Adicionadas</h4>
+            <div className={styles.tableContainer}>
+              <table className={styles.table}>
+                <thead className={styles.tableHead}>
+                  <tr>
+                    <th className={styles.tableHeader}>Título</th>
+                    <th className={styles.tableHeader}>Tipo</th>
+                    <th className={styles.tableHeader}>Ano</th>
+                    <th className={styles.tableHeader}>Plantas</th>
+                    <th className={styles.tableHeader}>Autores</th>
+                    <th className={styles.tableHeader}>
+                      <span className={styles.srOnly}>Ver</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className={styles.tableBody}>
+                  {referenciasRecentes.map((ref) => (
+                    <tr key={ref.id} className={styles.tableRow}>
+                      <td className={styles.tableCell}>
+                        <div className={styles.tableCellTitle}>
+                            {ref.titulo && ref.titulo.length > 50 
+                              ? `${ref.titulo.substring(0, 50)}...` 
+                              : (ref.titulo || 'Sem título')}
+                        </div>
+                      </td>
+                      <td className={styles.tableCell}>
+                        <span className={styles.badge}>{ref.tipo}</span>
+                      </td>
+                      <td className={styles.tableCell}>{ref.ano || 'N/A'}</td>
+                      <td className={styles.tableCell}>{ref.total_plantas}</td>
+                      <td className={styles.tableCell}>
+                        <div className={styles.authorList}>
+                          {ref.autores && ref.autores.length > 0 ? ref.autores.slice(0, 2).join(', ') : 'Sem autores'}
+                          {ref.autores && ref.autores.length > 2 && ` +${ref.autores.length - 2}`}
+                        </div>
+                      </td>
+                      <td className={styles.tableCellAction}>
+                        <button 
+                          onClick={() => abrirModalVisualizacao('referencia', {
+                            id_referencia: ref.id,
+                            titulo_referencia: ref.titulo,
+                            tipo_referencia: ref.tipo,
+                            ano: ref.ano,
+                            link_referencia: ref.link,
+                            total_plantas: ref.total_plantas,
+                            autores: ref.autores
+                          })}
+                          className={styles.viewButton}
+                        >
+                          Ver
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Referências Mais Utilizadas */}
+        {referenciaStats.mais_utilizadas && Array.isArray(referenciaStats.mais_utilizadas) && referenciaStats.mais_utilizadas.length > 0 && (
+          <div className={styles.section}>
+            <h4 className={styles.sectionTitle}>Referências Mais Utilizadas</h4>
+            <div className={styles.progressList}>
+              {referenciaStats.mais_utilizadas.slice(0, 5).map((ref, index) => (
+                <div key={index} className={styles.progressItem}>
+                  <div className={styles.progressInfo}>
+                    <span className={styles.progressLabel}>
+                      {ref.titulo.length > 40 ? `${ref.titulo.substring(0, 40)}...` : ref.titulo}
+                      {ref.ano && ` (${ref.ano})`}
+                    </span>
+                    <span className={styles.progressValue}>{ref.total_plantas} plantas</span>
+                  </div>
+                  <div className={styles.progressBar}>
+                    <div 
+                      className={styles.progressFillPurple} 
+                      style={{ 
+                        width: `${(ref.total_plantas / Math.max(...referenciaStats.mais_utilizadas.map(r => r.total_plantas))) * 100}%` 
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </>
+    ) : (
+      <div className={styles.loadingContainer}>
+        <span className={styles.loadingText}>Nenhum dado de referência disponível</span>
+      </div>
+    )}
+
+    <div className={styles.viewAllContainer}>
+      <Link href="/admin/references?tab=referencias" className={styles.buttonPurple}>
+        Gerir referências
+      </Link>
+    </div>
+  </div>
+)}
+
+            {/* Autores */}
             {/* Autores */}
             {activeTab === 'authors' && (
               <div>
@@ -1452,25 +1585,29 @@ const AdminDashboardComponent: React.FC = () => {
                       <div className={styles.chartCard}>
                         <h4 className={styles.chartTitle}>Autores Mais Produtivos</h4>
                         <div className={styles.progressList}>
-                          {autorStats.mais_produtivos && autorStats.mais_produtivos.slice(0, 5).map((autor, index) => (
-                            <div key={index} className={styles.progressItem}>
-                              <div className={styles.progressInfo}>
-                                <span className={styles.progressLabel}>
-                                  {autor.nome}
-                                  {autor.sigla && ` (${autor.sigla})`}
-                                </span>
-                                <span className={styles.progressValue}>{autor.total_plantas} plantas</span>
+                          {autorStats.mais_produtivos && Array.isArray(autorStats.mais_produtivos) && autorStats.mais_produtivos.length > 0 ? (
+                            autorStats.mais_produtivos.slice(0, 5).map((autor, index) => (
+                              <div key={index} className={styles.progressItem}>
+                                <div className={styles.progressInfo}>
+                                  <span className={styles.progressLabel}>
+                                    {autor.nome}
+                                    {autor.sigla && ` (${autor.sigla})`}
+                                  </span>
+                                  <span className={styles.progressValue}>{autor.total_plantas} plantas</span>
+                                </div>
+                                <div className={styles.progressBar}>
+                                  <div 
+                                    className={styles.progressFillGreen} 
+                                    style={{ 
+                                      width: `${(autor.total_plantas / Math.max(...autorStats.mais_produtivos.map(a => a.total_plantas))) * 100}%` 
+                                    }}
+                                  ></div>
+                                </div>
                               </div>
-                              <div className={styles.progressBar}>
-                                <div 
-                                  className={styles.progressFillGreen} 
-                                  style={{ 
-                                    width: `${(autor.total_plantas / Math.max(...autorStats.mais_produtivos.map(a => a.total_plantas))) * 100}%` 
-                                  }}
-                                ></div>
-                              </div>
-                            </div>
-                          ))}
+                            ))
+                          ) : (
+                            <div className={styles.noData}>Nenhum autor produtivo disponível</div>
+                          )}
                         </div>
                       </div>
 
@@ -1506,7 +1643,7 @@ const AdminDashboardComponent: React.FC = () => {
                     </div>
 
                     {/* Autores Recentes */}
-                    {autoresRecentes && autoresRecentes.length > 0 && (
+                    {autoresRecentes && Array.isArray(autoresRecentes) && autoresRecentes.length > 0 && (
                       <div className={styles.section}>
                         <h4 className={styles.sectionTitle}>Autores Recentemente Adicionados</h4>
                         <div className={styles.tableContainer}>
@@ -1531,8 +1668,9 @@ const AdminDashboardComponent: React.FC = () => {
                                   </td>
                                   <td className={styles.tableCell}>
                                     <div className={styles.affiliationText}>
-                                      {autor.afiliacao.length > 30 ? `${autor.afiliacao.substring(0, 30)}...` : autor.afiliacao}
-                                    </div>
+                                      {autor.afiliacao && autor.afiliacao.length > 30 
+                                        ? `${autor.afiliacao.substring(0, 30)}...` 
+                                        : (autor.afiliacao || 'Sem afiliação')}                                    </div>
                                   </td>
                                   <td className={styles.tableCell}>
                                     {autor.sigla && <span className={styles.badge}>{autor.sigla}</span>}
@@ -1563,11 +1701,11 @@ const AdminDashboardComponent: React.FC = () => {
                     )}
 
                     {/* Distribuição por Afiliação */}
-                    {autorStats.por_afiliacao.length > 0 && (
+                    {autorStats.por_afiliacao && Array.isArray(autorStats.por_afiliacao) && autorStats.por_afiliacao.length > 0 && (
                       <div className={styles.section}>
                         <h4 className={styles.sectionTitle}>Distribuição por Afiliação</h4>
                         <div className={styles.progressListScroll}>
-                          {autorStats.por_afiliacao && autorStats.por_afiliacao.slice(0, 8).map((afiliacao, index) => (
+                          {autorStats.por_afiliacao.slice(0, 8).map((afiliacao, index) => (
                             <div key={index} className={styles.progressItem}>
                               <div className={styles.progressInfo}>
                                 <span className={styles.progressLabel}>
@@ -1865,33 +2003,56 @@ const AdminDashboardComponent: React.FC = () => {
                   </div>
                 )}
 
-                {/* Compostos Químicos - CORRIGIDO */}
-                {selectedViewItem?.compostos && Array.isArray(selectedViewItem.compostos) && selectedViewItem.compostos.length > 0 ? (
+{/* Informações Adicionais */}
+                {selectedViewItem?.infos_adicionais ? (
                   <div className={styles.modalSection}>
-                    <h3 className={styles.sectionTitle}>Compostos Químicos ({selectedViewItem.compostos.length})</h3>
+                    <h3 className={styles.sectionTitle}>Informações Adicionais</h3>
+                    <div className={styles.infoItem}>
+                      <p style={{ 
+                        padding: '1rem', 
+                        backgroundColor: '#f9fafb', 
+                        borderLeft: '4px solid #3b82f6',
+                        borderRadius: '4px',
+                        lineHeight: '1.6',
+                        color: '#374151'
+                      }}>
+                        {selectedViewItem.infos_adicionais}
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Composição Química - SEPARADO POR VÍRGULAS/PONTO-E-VÍRGULA */}
+                {selectedViewItem?.comp_quimica ? (
+                  <div className={styles.modalSection}>
+                    <h3 className={styles.sectionTitle}>
+                      Composição Química ({selectedViewItem.comp_quimica.split(/[,;]/).filter((item: string) => item.trim()).length})
+                    </h3>
                     <div className={styles.badgesContainer}>
-                      {selectedViewItem.compostos.map((composto: any, index: number) => (
+                      {selectedViewItem.comp_quimica.split(/[,;]/).filter((item: string) => item.trim()).map((composto: string, index: number) => (
                         <span key={index} className={styles.badgeSimple} style={{ borderColor: '#8b5cf6', color: '#8b5cf6' }}>
-                          {composto?.nome_composto || 'Sem nome'}
+                          {composto.trim()}
                         </span>
                       ))}
                     </div>
                   </div>
                 ) : (
                   <div className={styles.modalSection}>
-                    <h3 className={styles.sectionTitle}>Compostos Químicos</h3>
-                    <div className={styles.noData}>Nenhum composto químico registado</div>
+                    <h3 className={styles.sectionTitle}>Composição Química</h3>
+                    <div className={styles.noData}>Composição química não informada</div>
                   </div>
                 )}
 
-                {/* Propriedades Farmacológicas - CORRIGIDO */}
-                {selectedViewItem?.propriedades && Array.isArray(selectedViewItem.propriedades) && selectedViewItem.propriedades.length > 0 ? (
+                {/* Propriedades Farmacológicas - SEPARADO POR VÍRGULAS/PONTO-E-VÍRGULA */}
+                {selectedViewItem?.prop_farmacologica ? (
                   <div className={styles.modalSection}>
-                    <h3 className={styles.sectionTitle}>Propriedades Farmacológicas ({selectedViewItem.propriedades.length})</h3>
+                    <h3 className={styles.sectionTitle}>
+                      Propriedades Farmacológicas ({selectedViewItem.prop_farmacologica.split(/[,;]/).filter((item: string) => item.trim()).length})
+                    </h3>
                     <div className={styles.badgesContainer}>
-                      {selectedViewItem.propriedades.map((prop: any, index: number) => (
+                      {selectedViewItem.prop_farmacologica.split(/[,;]/).filter((item: string) => item.trim()).map((prop: string, index: number) => (
                         <span key={index} className={styles.badgeSimple} style={{ borderColor: '#059669', color: '#059669' }}>
-                          {prop?.descricao || 'Sem descrição'}
+                          {prop.trim()}
                         </span>
                       ))}
                     </div>
@@ -1899,7 +2060,7 @@ const AdminDashboardComponent: React.FC = () => {
                 ) : (
                   <div className={styles.modalSection}>
                     <h3 className={styles.sectionTitle}>Propriedades Farmacológicas</h3>
-                    <div className={styles.noData}>Nenhuma propriedade farmacológica registada</div>
+                    <div className={styles.noData}>Propriedades farmacológicas não informadas</div>
                   </div>
                 )}
 

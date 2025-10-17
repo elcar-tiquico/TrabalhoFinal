@@ -243,9 +243,16 @@ export default function Referencias() {
   }
 
   // Calcular estatísticas
-  const totalReferencias = plantasComReferencias.reduce((total, planta) => 
-    total + planta.referencias.length, 0
-  )
+  // Calcular estatísticas - contar referências únicas por id_referencia
+  const totalReferencias = (() => {
+    const referenciasUnicas = new Set<number>()
+    plantasComReferencias.forEach(planta => {
+      planta.referencias.forEach(ref => {
+        referenciasUnicas.add(ref.id_referencia)
+      })
+    })
+    return referenciasUnicas.size
+  })()
 
   // Calcular paginação
   const totalPages = Math.ceil(filteredPlantas.length / itemsPerPage)
