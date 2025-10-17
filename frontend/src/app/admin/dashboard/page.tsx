@@ -4,6 +4,84 @@ import styles from './dashboard.module.css';
 import Link from 'next/link';
 
 // Interfaces TypeScript (mantidas iguais)
+interface NomeComumDetalhado {
+  id_nome: number;
+  nome_comum: string;
+  nome?: string;
+}
+
+interface ProvinciaDetalhada {
+  id_provincia: number;
+  nome_provincia: string;
+  local?: string;
+}
+
+interface UsoEspecifico {
+  id_parte: number;
+  nome_parte: string;
+  indicacoes: Array<{
+    id_indicacao: number;
+    descricao: string;
+  }>;
+}
+
+interface AutorDetalhado {
+  id_autor: number;
+  nome_autor: string;
+  afiliacao?: string;
+}
+
+interface ReferenciaDetalhada {
+  id_referencia: number;
+  titulo?: string;
+  link?: string;
+  ano?: string | number;
+  autores: Array<{
+    id_autor: number;
+    nome_autor: string;
+  }>;
+}
+
+interface ImagemPlanta {
+  id_imagem: number;
+  nome_arquivo: string;
+  url: string;
+  legenda?: string;
+}
+
+interface PlantaDetalhadaDashboard {
+  id_planta: number;
+  nome_cientifico: string;
+  familia: {
+    nome_familia: string;
+  };
+  numero_exsicata?: string;
+  infos_adicionais?: string;
+  comp_quimica?: string;
+  prop_farmacologica?: string;
+  data_adicao?: string;
+  
+  nomes_comuns: NomeComumDetalhado[];
+  provincias: ProvinciaDetalhada[];
+  usos_especificos: UsoEspecifico[];
+  partes_usadas: UsoEspecifico[];  // Alias
+  autores: AutorDetalhado[];
+  referencias_especificas: ReferenciaDetalhada[];
+  referencias: ReferenciaDetalhada[];  // Alias
+  imagens: ImagemPlanta[];
+  
+  metadata?: {
+    total_nomes_comuns: number;
+    total_provincias: number;
+    total_usos: number;
+    total_autores: number;
+    total_referencias: number;
+    total_imagens: number;
+    tem_comp_quimica: boolean;
+    tem_prop_farmacologica: boolean;
+  };
+}
+
 interface StatItem {
   value: number;
   change: string;
@@ -168,6 +246,10 @@ const AdminDashboardComponent: React.FC = () => {
   const [searchDetailed, setSearchDetailed] = useState<SearchDetailed | null>(null);
   const [searchLoading, setSearchLoading] = useState<boolean>(false);
 
+  const [selectedPlanta, setSelectedPlanta] = useState<PlantaDetalhadaDashboard | null>(null);
+  const [showViewModal, setShowViewModal] = useState<boolean>(false);
+  const [loadingModal, setLoadingModal] = useState<boolean>(false);
+
   const isManageableFamily = (familyName: string): boolean => {
     const normalizedName = familyName.toLowerCase().trim()
     const nonManageableNames = [
@@ -189,7 +271,7 @@ const AdminDashboardComponent: React.FC = () => {
   const MAIN_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
   // ADICIONAR estes novos estados após os existentes:
-  const [showViewModal, setShowViewModal] = useState<boolean>(false);
+  //const [showViewModal, setShowViewModal] = useState<boolean>(false);
   const [viewModalType, setViewModalType] = useState<'autor' | 'referencia' | 'planta' | null>(null);
   const [selectedViewItem, setSelectedViewItem] = useState<any>(null);
 
@@ -352,10 +434,28 @@ const AdminDashboardComponent: React.FC = () => {
         setPlantasRecentes([]);
       }
       setPlantasPorIdioma(idiomasData.idiomas || []);
-      setReferenciaStats(referenciaStatsData);
-      setAutorStats(autorStatsData);
-      setReferenciasRecentes(referenciasRecentesData.referencias_recentes || []);
-      setAutoresRecentes(autoresRecentesData.autores_recentes || []);
+
+      // Garantir que os dados de referências e autores nunca sejam null/undefined
+      setReferenciaStats(referenciaStatsData || {
+        total_referencias: 0,
+        referencias_com_plantas: 0,
+        referencias_sem_ano: 0,
+        tipos: [],
+        por_ano: [],
+        mais_utilizadas: []
+      });
+
+      setAutorStats(autorStatsData || {
+        total_autores: 0,
+        autores_com_plantas: 0,
+        autores_sem_afiliacao: 0,
+        total_afiliacoes: 0,
+        mais_produtivos: [],
+        por_afiliacao: []
+      });
+
+      setReferenciasRecentes(referenciasRecentesData?.referencias_recentes || []);
+      setAutoresRecentes(autoresRecentesData?.autores_recentes || []);
 
       console.log('✅ Dados REAIS carregados com sucesso:', {
         stats: statsData,
@@ -561,31 +661,66 @@ const AdminDashboardComponent: React.FC = () => {
     );
   };
 // ADICIONAR APENAS ESTAS:
-const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', item: any) => {
-  console.log('👁️ Visualizando:', tipo, item);
-  setViewModalType(tipo);
-  
-  if (tipo === 'planta') {
-    // Para plantas, buscar dados completos da API
-    try {
-      const response = await fetch(`${API_BASE_URL.replace('/dashboard', '')}/plantas/${item.id}`);
-      if (response.ok) {
-        const plantaCompleta = await response.json();
-        setSelectedViewItem(plantaCompleta);
-      } else {
-        // Fallback para dados básicos se API falhar
-        setSelectedViewItem(item);
+  const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', item: any) => {
+    console.log('👁️ Visualizando:', tipo, item);
+    setViewModalType(tipo);
+    
+    if (tipo === 'planta') {
+      // ✅ CORREÇÃO: Buscar dados completos da planta com URL correta
+      try {
+        // Construir URL correta para a API principal (não a de dashboard)
+        const plantasApiUrl = API_BASE_URL.includes('/dashboard') 
+          ? API_BASE_URL.replace('/api/admin/dashboard', '/api/admin/plantas')
+          : `${API_BASE_URL.split('/api')[0]}/api/admin/plantas`;
+        
+        console.log(`🔄 Buscando detalhes completos da planta ${item.id} em: ${plantasApiUrl}/${item.id}`);
+        
+        const response = await fetch(`${plantasApiUrl}/${item.id}`);
+        
+        if (response.ok) {
+          const plantaCompleta = await response.json();
+          console.log('✅ Dados completos da planta carregados:', plantaCompleta);
+          
+          // ✅ MESCLAR dados básicos com dados completos
+          // Preservar all_names da lista se disponível
+          const dadosFinais = {
+            ...plantaCompleta,
+            // Garantir que temos all_names disponível
+            all_names: item.all_names || plantaCompleta.nomes_comuns?.map((n: any) => n.nome_comum) || [],
+            names_count: item.names_count || plantaCompleta.nomes_comuns?.length || 0,
+            // Nome para exibição
+            name: item.name || plantaCompleta.nome_cientifico
+          };
+          
+          setSelectedViewItem(dadosFinais);
+        } else {
+          console.warn('⚠️ Falha ao buscar dados completos, usando dados básicos');
+          // Fallback: usar dados básicos com all_names
+          setSelectedViewItem({
+            ...item,
+            nomes_comuns: item.all_names?.map((nome: string, idx: number) => ({
+              id_nome: idx,
+              nome_comum: nome
+            })) || []
+          });
+        }
+      } catch (error) {
+        console.error('❌ Erro ao buscar detalhes da planta:', error);
+        // Fallback: usar dados básicos com all_names convertidos
+        setSelectedViewItem({
+          ...item,
+          nomes_comuns: item.all_names?.map((nome: string, idx: number) => ({
+            id_nome: idx,
+            nome_comum: nome
+          })) || []
+        });
       }
-    } catch (error) {
-      console.error('Erro ao buscar detalhes da planta:', error);
+    } else {
       setSelectedViewItem(item);
     }
-  } else {
-    setSelectedViewItem(item);
-  }
-  
-  setShowViewModal(true);
-};
+    
+    setShowViewModal(true);
+  };
 
   const fecharModalVisualizacao = () => {
     setShowViewModal(false);
@@ -781,10 +916,13 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                                   onClick={() => abrirModalVisualizacao('planta', {
                                     id: planta.id,
                                     name: planta.name,
-                                    all_names: planta.all_names,
+                                    all_names: planta.all_names || [],  // ✅ Lista completa de nomes
+                                    names_count: planta.names_count || 0,  // ✅ Contagem de nomes
                                     scientific_name: planta.scientific_name,
+                                    nome_cientifico: planta.scientific_name,  // ✅ Alias para compatibilidade
                                     family: planta.family,
                                     exsicata: planta.exsicata,
+                                    numero_exsicata: planta.exsicata,  // ✅ Alias para compatibilidade
                                     added_at: planta.added_at
                                   })}
                                   className={styles.viewButton}
@@ -1150,7 +1288,7 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                       <div className={styles.chartCard}>
                         <h4 className={styles.chartTitle}>Distribuição por Tipo</h4>
                         <div className={styles.progressList}>
-                          {referenciaStats.tipos.map((tipo, index) => (
+                          {referenciaStats.tipos && referenciaStats.tipos.map((tipo, index) => (
                             <div key={index} className={styles.progressItem}>
                               <div className={styles.progressInfo}>
                                 <span className={styles.progressLabel}>{tipo.tipo}</span>
@@ -1196,7 +1334,7 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                     </div>
 
                     {/* Referências Recentes */}
-                    {referenciasRecentes.length > 0 && (
+                    {referenciasRecentes && referenciasRecentes.length > 0 && (
                       <div className={styles.section}>
                         <h4 className={styles.sectionTitle}>Referências Recentemente Adicionadas</h4>
                         <div className={styles.tableContainer}>
@@ -1228,7 +1366,7 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                                   <td className={styles.tableCell}>{ref.total_plantas}</td>
                                   <td className={styles.tableCell}>
                                     <div className={styles.authorList}>
-                                      {ref.autores.length > 0 ? ref.autores.slice(0, 2).join(', ') : 'Sem autores'}
+                                      {ref.autores && ref.autores.length > 0 ? ref.autores.slice(0, 2).join(', ') : 'Sem autores'}
                                       {ref.autores.length > 2 && ` +${ref.autores.length - 2}`}
                                     </div>
                                   </td>
@@ -1261,7 +1399,7 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                       <div className={styles.section}>
                         <h4 className={styles.sectionTitle}>Referências Mais Utilizadas</h4>
                         <div className={styles.progressList}>
-                          {referenciaStats.mais_utilizadas.slice(0, 5).map((ref, index) => (
+                          {referenciaStats.mais_utilizadas && referenciaStats.mais_utilizadas.slice(0, 5).map((ref, index) => (
                             <div key={index} className={styles.progressItem}>
                               <div className={styles.progressInfo}>
                                 <span className={styles.progressLabel}>
@@ -1314,7 +1452,7 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                       <div className={styles.chartCard}>
                         <h4 className={styles.chartTitle}>Autores Mais Produtivos</h4>
                         <div className={styles.progressList}>
-                          {autorStats.mais_produtivos.slice(0, 5).map((autor, index) => (
+                          {autorStats.mais_produtivos && autorStats.mais_produtivos.slice(0, 5).map((autor, index) => (
                             <div key={index} className={styles.progressItem}>
                               <div className={styles.progressInfo}>
                                 <span className={styles.progressLabel}>
@@ -1368,7 +1506,7 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                     </div>
 
                     {/* Autores Recentes */}
-                    {autoresRecentes.length > 0 && (
+                    {autoresRecentes && autoresRecentes.length > 0 && (
                       <div className={styles.section}>
                         <h4 className={styles.sectionTitle}>Autores Recentemente Adicionados</h4>
                         <div className={styles.tableContainer}>
@@ -1429,7 +1567,7 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                       <div className={styles.section}>
                         <h4 className={styles.sectionTitle}>Distribuição por Afiliação</h4>
                         <div className={styles.progressListScroll}>
-                          {autorStats.por_afiliacao.slice(0, 8).map((afiliacao, index) => (
+                          {autorStats.por_afiliacao && autorStats.por_afiliacao.slice(0, 8).map((afiliacao, index) => (
                             <div key={index} className={styles.progressItem}>
                               <div className={styles.progressInfo}>
                                 <span className={styles.progressLabel}>
@@ -1568,7 +1706,7 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                     </span>
                   </div>
                 </div>
-                {selectedViewItem?.autores && selectedViewItem.autores.length > 0 && (
+                {selectedViewItem?.autores && Array.isArray(selectedViewItem.autores) && selectedViewItem.autores.length > 0 && (
                   <div className={styles.viewDetailItem} style={{ gridColumn: '1 / -1' }}>
                     <div className={styles.viewDetailLabel}>Autores</div>
                     <div className={styles.viewDetailValue}>
@@ -1608,14 +1746,29 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                   </div>
                 </div>
 
-                {/* Nomes Comuns */}
-                {selectedViewItem?.nomes_comuns && selectedViewItem.nomes_comuns.length > 0 ? (
+                {/* Nomes Comuns - CORRIGIDO */}
+                {selectedViewItem?.nomes_comuns && Array.isArray(selectedViewItem.nomes_comuns) && selectedViewItem.nomes_comuns.length > 0 ? (
                   <div className={styles.modalSection}>
-                    <h3 className={styles.sectionTitle}>Nomes Comuns ({selectedViewItem.nomes_comuns.length})</h3>
+                    <h3 className={styles.sectionTitle}>
+                      Nomes Comuns ({selectedViewItem.nomes_comuns.length})
+                    </h3>
                     <div className={styles.badgesContainer}>
                       {selectedViewItem.nomes_comuns.map((nome: any, index: number) => (
+                        <span key={nome?.id_nome || index} className={styles.badgeSimple}>
+                          {nome?.nome_comum || nome || 'Sem nome'}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : selectedViewItem?.all_names && Array.isArray(selectedViewItem.all_names) && selectedViewItem.all_names.length > 0 ? (
+                  <div className={styles.modalSection}>
+                    <h3 className={styles.sectionTitle}>
+                      Nomes Comuns ({selectedViewItem.all_names.length})
+                    </h3>
+                    <div className={styles.badgesContainer}>
+                      {selectedViewItem.all_names.map((nome: string, index: number) => (
                         <span key={index} className={styles.badgeSimple}>
-                          {nome.nome_comum}
+                          {nome}
                         </span>
                       ))}
                     </div>
@@ -1627,14 +1780,14 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                   </div>
                 )}
 
-                {/* Províncias */}
-                {selectedViewItem?.provincias && selectedViewItem.provincias.length > 0 ? (
+                {/* Províncias - CORRIGIDO */}
+                {selectedViewItem?.provincias && Array.isArray(selectedViewItem.provincias) && selectedViewItem.provincias.length > 0 ? (
                   <div className={styles.modalSection}>
                     <h3 className={styles.sectionTitle}>Províncias de Ocorrência ({selectedViewItem.provincias.length})</h3>
                     <div className={styles.badgesContainer}>
                       {selectedViewItem.provincias.map((provincia: any, index: number) => (
                         <span key={index} className={styles.badgeSimple}>
-                          {provincia.nome_provincia}
+                          {provincia?.nome_provincia || 'Sem nome'}
                         </span>
                       ))}
                     </div>
@@ -1646,56 +1799,56 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                   </div>
                 )}
 
-                {/* Usos Medicinais */}
-                {selectedViewItem?.usos_especificos && selectedViewItem.usos_especificos.length > 0 ? (
+                {/* Usos Medicinais - CORRIGIDO */}
+                {selectedViewItem?.usos_especificos && Array.isArray(selectedViewItem.usos_especificos) && selectedViewItem.usos_especificos.length > 0 ? (
                   <div className={styles.modalSection}>
                     <h3 className={styles.sectionTitle}>Usos Medicinais ({selectedViewItem.usos_especificos.length})</h3>
                     <div className={styles.usosEspecificosList}>
                       {selectedViewItem.usos_especificos.map((uso: any, index: number) => (
                         <div key={index} className={styles.usoEspecificoCard}>
                           <div className={styles.parteUsadaHeader}>
-                            🌿 Parte usada: {uso.parte_usada}
+                            🌿 Parte usada: {uso?.parte_usada || 'Não especificada'}
                           </div>
                           
-                          {uso.observacoes && (
+                          {uso?.observacoes && (
                             <div className={styles.observacoes}>
                               "{uso.observacoes}"
                             </div>
                           )}
 
-                          {uso.indicacoes && uso.indicacoes.length > 0 && (
+                          {uso?.indicacoes && Array.isArray(uso.indicacoes) && uso.indicacoes.length > 0 && (
                             <div className={styles.usoDetailSection}>
                               <div className={styles.usoDetailTitle}>Indicações:</div>
                               <div className={styles.badgesContainer}>
                                 {uso.indicacoes.map((ind: any, i: number) => (
                                   <span key={i} className={styles.badgeSimple} style={{ borderColor: '#3b82f6', color: '#3b82f6' }}>
-                                    {ind.descricao}
+                                    {ind?.descricao || 'Sem descrição'}
                                   </span>
                                 ))}
                               </div>
                             </div>
                           )}
 
-                          {uso.metodos_preparacao && uso.metodos_preparacao.length > 0 && (
+                          {uso?.metodos_preparacao && Array.isArray(uso.metodos_preparacao) && uso.metodos_preparacao.length > 0 && (
                             <div className={styles.usoDetailSection}>
                               <div className={styles.usoDetailTitle}>Métodos de Preparação:</div>
                               <div className={styles.badgesContainer}>
                                 {uso.metodos_preparacao.map((met: any, i: number) => (
                                   <span key={i} className={styles.badgeSimple} style={{ borderColor: '#10b981', color: '#10b981' }}>
-                                    {met.descricao}
+                                    {met?.descricao || 'Sem descrição'}
                                   </span>
                                 ))}
                               </div>
                             </div>
                           )}
 
-                          {uso.metodos_extracao && uso.metodos_extracao.length > 0 && (
+                          {uso?.metodos_extracao && Array.isArray(uso.metodos_extracao) && uso.metodos_extracao.length > 0 && (
                             <div className={styles.usoDetailSection}>
                               <div className={styles.usoDetailTitle}>Métodos de Extracção:</div>
                               <div className={styles.badgesContainer}>
                                 {uso.metodos_extracao.map((ext: any, i: number) => (
                                   <span key={i} className={styles.badgeSimple} style={{ borderColor: '#f59e0b', color: '#f59e0b' }}>
-                                    {ext.descricao}
+                                    {ext?.descricao || 'Sem descrição'}
                                   </span>
                                 ))}
                               </div>
@@ -1712,14 +1865,14 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                   </div>
                 )}
 
-                {/* Compostos Químicos */}
-                {selectedViewItem?.compostos && selectedViewItem.compostos.length > 0 ? (
+                {/* Compostos Químicos - CORRIGIDO */}
+                {selectedViewItem?.compostos && Array.isArray(selectedViewItem.compostos) && selectedViewItem.compostos.length > 0 ? (
                   <div className={styles.modalSection}>
                     <h3 className={styles.sectionTitle}>Compostos Químicos ({selectedViewItem.compostos.length})</h3>
                     <div className={styles.badgesContainer}>
                       {selectedViewItem.compostos.map((composto: any, index: number) => (
                         <span key={index} className={styles.badgeSimple} style={{ borderColor: '#8b5cf6', color: '#8b5cf6' }}>
-                          {composto.nome_composto}
+                          {composto?.nome_composto || 'Sem nome'}
                         </span>
                       ))}
                     </div>
@@ -1731,14 +1884,14 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                   </div>
                 )}
 
-                {/* Propriedades Farmacológicas */}
-                {selectedViewItem?.propriedades && selectedViewItem.propriedades.length > 0 ? (
+                {/* Propriedades Farmacológicas - CORRIGIDO */}
+                {selectedViewItem?.propriedades && Array.isArray(selectedViewItem.propriedades) && selectedViewItem.propriedades.length > 0 ? (
                   <div className={styles.modalSection}>
                     <h3 className={styles.sectionTitle}>Propriedades Farmacológicas ({selectedViewItem.propriedades.length})</h3>
                     <div className={styles.badgesContainer}>
                       {selectedViewItem.propriedades.map((prop: any, index: number) => (
                         <span key={index} className={styles.badgeSimple} style={{ borderColor: '#059669', color: '#059669' }}>
-                          {prop.descricao}
+                          {prop?.descricao || 'Sem descrição'}
                         </span>
                       ))}
                     </div>
@@ -1750,15 +1903,15 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                   </div>
                 )}
 
-                {/* Autores */}
-                {selectedViewItem?.autores && selectedViewItem.autores.length > 0 ? (
+                {/* Autores - CORRIGIDO */}
+                {selectedViewItem?.autores && Array.isArray(selectedViewItem.autores) && selectedViewItem.autores.length > 0 ? (
                   <div className={styles.modalSection}>
                     <h3 className={styles.sectionTitle}>Autores ({selectedViewItem.autores.length})</h3>
                     <div className={styles.badgesContainer}>
                       {selectedViewItem.autores.map((autor: any, index: number) => (
                         <span key={index} className={styles.badgeSimple}>
-                          {autor.nome_autor}
-                          {autor.sigla_afiliacao && ` (${autor.sigla_afiliacao})`}
+                          {autor?.nome_autor || 'Sem nome'}
+                          {autor?.sigla_afiliacao && ` (${autor.sigla_afiliacao})`}
                         </span>
                       ))}
                     </div>
@@ -1770,18 +1923,18 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                   </div>
                 )}
 
-                {/* Referências */}
-                {selectedViewItem?.referencias_especificas && selectedViewItem.referencias_especificas.length > 0 ? (
+                {/* Referências - CORRIGIDO */}
+                {selectedViewItem?.referencias_especificas && Array.isArray(selectedViewItem.referencias_especificas) && selectedViewItem.referencias_especificas.length > 0 ? (
                   <div className={styles.modalSection}>
                     <h3 className={styles.sectionTitle}>Referências ({selectedViewItem.referencias_especificas.length})</h3>
                     <div className={styles.referenciasEspecificasList}>
                       {selectedViewItem.referencias_especificas.map((ref: any, index: number) => (
                         <div key={index} className={styles.referenciaEspecificaCard}>
                           <div className={styles.referenciaHeader}>
-                            <div className={styles.refTitulo}>{ref.titulo}</div>
+                            <div className={styles.refTitulo}>{ref?.titulo || 'Sem título'}</div>
                             <div className={styles.refDetails}>
-                              {ref.tipo} • {ref.ano || 'Sem ano'}
-                              {ref.link && (
+                              {ref?.tipo || 'Sem tipo'} • {ref?.ano || 'Sem ano'}
+                              {ref?.link && (
                                 <span className={styles.refLink}>
                                   <a href={ref.link} target="_blank" rel="noopener noreferrer">
                                     🔗 Abrir Link
@@ -1790,14 +1943,14 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                               )}
                             </div>
                           </div>
-                          {ref.autores_especificos && ref.autores_especificos.length > 0 && (
+                          {ref?.autores_especificos && Array.isArray(ref.autores_especificos) && ref.autores_especificos.length > 0 && (
                             <div>
                               <div className={styles.usoDetailTitle}>Autores da Referência:</div>
                               <div className={styles.badgesContainer}>
                                 {ref.autores_especificos.map((autor: any, i: number) => (
                                   <span key={i} className={styles.badgeSimple} style={{ fontSize: '0.75rem' }}>
-                                    {autor.nome_autor}
-                                    {autor.ordem_autor && ` (${autor.ordem_autor}º)`}
+                                    {autor?.nome_autor || 'Sem nome'}
+                                    {autor?.ordem_autor && ` (${autor.ordem_autor}º)`}
                                   </span>
                                 ))}
                               </div>

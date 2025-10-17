@@ -11,22 +11,22 @@ export const useAuthGuard = () => {
   const router = useRouter()
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const result = await authAPI.verifyAuth()
-        if (result.valid) {
-          setIsAuthenticated(true)
-        } else {
-          router.push("/admin/login")
-        }
-      } catch (error) {
-        router.push("/admin/login")
-      } finally {
-        setIsLoading(false)
-      }
-    }
+    // const checkAuth = async () => {
+    //   try {
+    //     const result = await authAPI.verifyAuth()
+    //     if (result.valid) {
+    //       setIsAuthenticated(true)
+    //     } else {
+    //       router.push("/admin/login")
+    //     }
+    //   } catch (error) {
+    //     router.push("/admin/login")
+    //   } finally {
+    //     setIsLoading(false)
+    //   }
+    // }
 
-    checkAuth()
+    // checkAuth()
   }, [router])
 
   return { isAuthenticated, isLoading }

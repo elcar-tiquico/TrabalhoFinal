@@ -6,7 +6,7 @@ import ReferenceBibliographyManager from './ReferenceBibliographyManager';
 import PlantImageUploader from './PlantImageUploader';
 
 // Configuração da API do Wizard
-const WIZARD_API_URL = 'http://localhost:5002/api/wizard';
+const WIZARD_API_URL = 'http://localhost:5000/api/wizard';
 
 // Interfaces TypeScript
 interface SelectOption {

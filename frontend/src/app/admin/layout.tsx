@@ -21,10 +21,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
     
     // Verificar se o usuário está autenticado
-    const token = localStorage.getItem("adminToken")
-    if (!token) {
-      router.push("/admin/login")
-    }
+    // const token = localStorage.getItem("adminToken")
+    // if (!token) {
+    //   router.push("/admin/login")
+    // }
   }, [pathname, router])
 
   // Fechar menu mobile quando mudar de rota

@@ -362,7 +362,11 @@ export function ResultsTable() {
                 </h3>
                 
                 {/* Família (MAIÚSCULAS) */}
-                <p className={styles.resultItemFamily}>{plant.familia?.toUpperCase()}</p>
+                <p className={styles.resultItemFamily}>
+                  {typeof plant.familia === 'string' 
+                    ? plant.familia.toUpperCase() 
+                    : plant.familia?.nome_familia?.toUpperCase() || 'FAMÍLIA NÃO ESPECIFICADA'}
+                </p>
                 
                 {/* Nome científico (itálico) */}
                 <p className={styles.resultItemScientific}>

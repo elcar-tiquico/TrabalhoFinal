@@ -38,6 +38,9 @@ from routes.dashboard_busca import dashboard_busca_bp
 from routes.dashboard_imagens import dashboard_imagens_bp
 from routes.dashboard_auxiliares import dashboard_auxiliares_bp
 
+# ===== Importar Blueprint WIZARD (✅ NOVO) =====
+from routes.wizard import wizard_bp
+
 # ===== Registrar Blueprints EXISTENTES =====
 app.register_blueprint(plantas_bp, url_prefix='/api')
 app.register_blueprint(busca_bp, url_prefix='/api')
@@ -50,6 +53,9 @@ app.register_blueprint(dashboard_crud_bp, url_prefix='/api/admin')
 app.register_blueprint(dashboard_busca_bp, url_prefix='/api/admin/dashboard')
 app.register_blueprint(dashboard_imagens_bp, url_prefix='/api/admin')
 app.register_blueprint(dashboard_auxiliares_bp, url_prefix='/api/admin')
+
+# ===== Registrar Blueprint WIZARD (✅ NOVO) =====
+app.register_blueprint(wizard_bp, url_prefix='/api/wizard')
 
 # ===== Rota de health check =====
 @app.route('/health')
@@ -66,6 +72,7 @@ def index():
             'plantas': '/api/plantas',
             'busca': '/api/busca',
             'dashboard': '/api/admin/dashboard/stats',
+            'wizard': '/api/wizard/*',  # ✅ NOVO
             'provincias': '/api/provincias',
             'partes_usadas': '/api/partes-usadas',
             'indicacoes': '/api/indicacoes',
@@ -93,6 +100,7 @@ if __name__ == '__main__':
     print("=" * 60)
     print(f"🚀 Servidor: http://localhost:5000")
     print(f"📊 Dashboard: http://localhost:5000/api/admin/dashboard/stats")
+    print(f"✨ Wizard: http://localhost:5000/api/wizard/health")  # ✅ NOVO
     print(f"📁 Estrutura: Modular (arquivos separados)")
     print(f"🗄️  Database: {Config.SQLALCHEMY_DATABASE_URI}")
     print("=" * 60)
