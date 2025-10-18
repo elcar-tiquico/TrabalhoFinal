@@ -217,14 +217,24 @@ function AutoresDetalhados({ plant }: { plant: Plant }) {
             <div key={autor.id_autor || index} className={styles.autorItem}>
               <div className={styles.autorNome}>{autor.nome_autor}</div>
               
-              {autor.afiliacao && (
+              {/* Mostrar TODAS as afiliações */}
+              {autor.afiliacoes && autor.afiliacoes.length > 0 ? (
+                autor.afiliacoes.map((aff, affIndex) => (
+                  <div key={affIndex} className={styles.autorAfiliacao}>
+                    {aff.nome_afiliacao}
+                    {aff.sigla_afiliacao && (
+                      <span className={styles.afiliacaoSigla}> ({aff.sigla_afiliacao})</span>
+                    )}
+                  </div>
+                ))
+              ) : autor.afiliacao ? (
                 <div className={styles.autorAfiliacao}>
                   {autor.afiliacao}
                   {autor.sigla_afiliacao && (
                     <span className={styles.afiliacaoSigla}> ({autor.sigla_afiliacao})</span>
                   )}
                 </div>
-              )}
+              ) : null}
             </div>
           ))}
         </dd>

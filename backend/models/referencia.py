@@ -19,7 +19,7 @@ class Autor(db.Model):
     afiliacoes = db.relationship('Autor_afiliacao', backref='autor', lazy=True)
     referencias = db.relationship('Referencia_autor', backref='autor', lazy=True)
     
-    def to_dict(self, include_stats=False):
+    def to_dict(self, include_stats=False, include_afiliacoes=True):
         data = {
             'id_autor': self.id_autor,
             'nome_autor': self.nome_autor,
@@ -27,20 +27,30 @@ class Autor(db.Model):
             'value': self.id_autor
         }
         
-        if include_stats:
-            # Contar publicações
-            data['total_referencias'] = len(self.referencias)
-            
-            # Buscar afiliações
+        # ✅ SEMPRE incluir afiliações (não só quando include_stats=True)
+        if include_afiliacoes:
             afiliacoes_list = []
             for aa in self.afiliacoes:
                 if aa.afiliacao:
                     afiliacoes_list.append({
                         'id_afiliacao': aa.afiliacao.id_afiliacao,
-                        'nome': aa.afiliacao.nome_afiliacao,
-                        'sigla': aa.afiliacao.sigla_afiliacao
+                        'nome_afiliacao': aa.afiliacao.nome_afiliacao,
+                        'sigla_afiliacao': aa.afiliacao.sigla_afiliacao
                     })
             data['afiliacoes'] = afiliacoes_list
+            
+            # ✅ ADICIONAR: campos compatíveis com frontend antigo
+            # (para não quebrar código que espera afiliacao/sigla_afiliacao direto no autor)
+            if len(afiliacoes_list) > 0:
+                data['afiliacao'] = afiliacoes_list[0]['nome_afiliacao']
+                data['sigla_afiliacao'] = afiliacoes_list[0]['sigla_afiliacao']
+            else:
+                data['afiliacao'] = None
+                data['sigla_afiliacao'] = None
+        
+        if include_stats:
+            # Contar publicações
+            data['total_referencias'] = len(self.referencias)
         
         return data
 
@@ -117,10 +127,31 @@ class Referencia(db.Model):
             autores_list = []
             for ra in self.autores_relacao:
                 if ra.autor:
-                    autores_list.append({
+                    autor_dict = {
                         'id_autor': ra.autor.id_autor,
-                        'nome': ra.autor.nome_autor
-                    })
+                        'nome_autor': ra.autor.nome_autor,
+                        'afiliacoes': []
+                    }
+                    
+                    # ✅ Incluir TODAS as afiliações do autor
+                    for aa in ra.autor.afiliacoes:
+                        if aa.afiliacao:
+                            autor_dict['afiliacoes'].append({
+                                'id_afiliacao': aa.afiliacao.id_afiliacao,
+                                'nome_afiliacao': aa.afiliacao.nome_afiliacao,
+                                'sigla_afiliacao': aa.afiliacao.sigla_afiliacao
+                            })
+                    
+                    # ✅ Manter compatibilidade: primeira afiliação nos campos antigos
+                    if len(autor_dict['afiliacoes']) > 0:
+                        autor_dict['afiliacao'] = autor_dict['afiliacoes'][0]['nome_afiliacao']
+                        autor_dict['sigla_afiliacao'] = autor_dict['afiliacoes'][0]['sigla_afiliacao']
+                    else:
+                        autor_dict['afiliacao'] = None
+                        autor_dict['sigla_afiliacao'] = None
+                    
+                    autores_list.append(autor_dict)
+            
             data['autores'] = autores_list
         
         return data

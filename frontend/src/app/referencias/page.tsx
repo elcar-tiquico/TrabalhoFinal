@@ -172,8 +172,7 @@ export default function Referencias() {
         id_planta: planta.id_planta,
         nome_cientifico: planta.nome_cientifico,
         numero_exsicata: planta.numero_exsicata,
-        familia: planta.familia || 'Família não especificada',
-        nomes_comuns: planta.nomes_comuns || [],
+        familia: (planta.familia || 'Família não especificada').toUpperCase(),        nomes_comuns: planta.nomes_comuns || [],
         referencias: planta.referencias || [],
         autores: planta.autores || []
       }))
@@ -217,7 +216,7 @@ export default function Referencias() {
                 id_planta: plantaDetalhada.id_planta,
                 nome_cientifico: plantaDetalhada.nome_cientifico,
                 numero_exsicata: plantaDetalhada.numero_exsicata,
-                familia: plantaDetalhada.familia || 'Família não especificada',
+                familia: (plantaDetalhada.familia || 'Família não especificada').toUpperCase(),
                 nomes_comuns: plantaDetalhada.nomes_comuns || [],
                 referencias: plantaDetalhada.referencias || [],
                 autores: plantaDetalhada.autores || []

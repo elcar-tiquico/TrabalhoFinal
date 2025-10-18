@@ -41,6 +41,13 @@ from routes.dashboard_auxiliares import dashboard_auxiliares_bp
 # ===== Importar Blueprint WIZARD (✅ NOVO) =====
 from routes.wizard import wizard_bp
 
+# === Familias ===
+from routes.familias import admin_familias_bp
+
+# ===== Autores e Refs ======
+# Depois dos outros imports de routes
+from routes.admin_autores_referencias import admin_autores_refs_bp
+
 # ===== Registrar Blueprints EXISTENTES =====
 app.register_blueprint(plantas_bp, url_prefix='/api')
 app.register_blueprint(busca_bp, url_prefix='/api')
@@ -56,6 +63,12 @@ app.register_blueprint(dashboard_auxiliares_bp, url_prefix='/api/admin')
 
 # ===== Registrar Blueprint WIZARD (✅ NOVO) =====
 app.register_blueprint(wizard_bp, url_prefix='/api/wizard')
+
+# === Blueprint familias ===
+app.register_blueprint(admin_familias_bp, url_prefix='/api/admin')
+
+#==== Bluefprint Autores e Referências =====
+app.register_blueprint(admin_autores_refs_bp)
 
 # ===== Rota de health check =====
 @app.route('/health')

@@ -332,6 +332,316 @@ def serve_image(planta_id, filename):
     except:
         return jsonify({'error': 'Imagem não encontrada'}), 404
 
+
+# ==================== DASHBOARD - ESTATÍSTICAS DE REFERÊNCIAS ====================
+@admin_dashboard_bp.route('/dashboard/referencias-stats', methods=['GET'])
+def get_referencias_stats():
+    """Estatísticas de referências para o dashboard"""
+    try:
+        # Contagens gerais
+        total_referencias = Referencia.query.count()
+        
+        # Referências com plantas associadas
+        referencias_com_plantas = db.session.query(
+            func.count(func.distinct(Referencia.id_referencia))
+        ).join(Planta_referencia).scalar() or 0
+        
+        # Referências sem ano
+        referencias_sem_ano = Referencia.query.filter(
+            Referencia.ano_publicacao.is_(None)
+        ).count()
+        
+        # Distribuição por tipo (baseado no link)
+        todas_refs = Referencia.query.all()
+        tipos_dict = {}
+        
+        for ref in todas_refs:
+            if ref.link_referencia:
+                if 'doi.org' in ref.link_referencia.lower():
+                    tipo = 'Artigo'
+                elif 'http://' in ref.link_referencia or 'https://' in ref.link_referencia:
+                    tipo = 'URL'
+                else:
+                    tipo = 'Outro'
+            else:
+                tipo = 'Outro'
+            
+            tipos_dict[tipo] = tipos_dict.get(tipo, 0) + 1
+        
+        tipos_resultado = [{'tipo': k, 'count': v} for k, v in tipos_dict.items()]
+        
+        # Distribuição por ano
+        stats_por_ano = db.session.query(
+            Referencia.ano_publicacao.label('ano'),
+            func.count(Referencia.id_referencia).label('count')
+        ).filter(
+            Referencia.ano_publicacao.isnot(None)
+        ).group_by(
+            Referencia.ano_publicacao
+        ).order_by(
+            Referencia.ano_publicacao.desc()
+        ).limit(10).all()
+        
+        # Referências mais utilizadas
+        refs_mais_utilizadas = db.session.query(
+            Referencia.id_referencia,
+            Referencia.titulo_referencia,
+            Referencia.link_referencia,
+            Referencia.ano_publicacao,
+            func.count(Planta_referencia.id_planta).label('total_plantas')
+        ).join(Planta_referencia).group_by(
+            Referencia.id_referencia,
+            Referencia.titulo_referencia,
+            Referencia.link_referencia,
+            Referencia.ano_publicacao
+        ).order_by(
+            desc(func.count(Planta_referencia.id_planta))
+        ).limit(10).all()
+        
+        mais_utilizadas = []
+        for ref in refs_mais_utilizadas:
+            if ref.link_referencia and 'doi.org' in ref.link_referencia.lower():
+                tipo = 'Artigo'
+            elif ref.link_referencia and ('http://' in ref.link_referencia or 'https://' in ref.link_referencia):
+                tipo = 'URL'
+            else:
+                tipo = 'Outro'
+            
+            mais_utilizadas.append({
+                'id': ref.id_referencia,
+                'titulo': ref.titulo_referencia or 'Sem título',
+                'tipo': tipo,
+                'ano': str(ref.ano_publicacao) if ref.ano_publicacao else None,
+                'total_plantas': ref.total_plantas
+            })
+        
+        return jsonify({
+            'total_referencias': total_referencias,
+            'referencias_com_plantas': referencias_com_plantas,
+            'referencias_sem_ano': referencias_sem_ano,
+            'tipos': tipos_resultado,
+            'por_ano': [
+                {
+                    'ano': str(stat.ano) if stat.ano else 'Sem ano',
+                    'count': stat.count
+                } for stat in stats_por_ano
+            ],
+            'mais_utilizadas': mais_utilizadas
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ==================== DASHBOARD - ESTATÍSTICAS DE AUTORES ====================
+@admin_dashboard_bp.route('/dashboard/autores-stats', methods=['GET'])
+def get_autores_stats():
+    """Estatísticas de autores para o dashboard"""
+    try:
+        # Contagens gerais
+        total_autores = Autor.query.count()
+        
+        # Autores com plantas (via referências)
+        autores_com_plantas = db.session.query(
+            func.count(func.distinct(Autor.id_autor))
+        ).join(Referencia_autor).join(Referencia).join(Planta_referencia).scalar() or 0
+        
+        # Autores sem afiliação
+        autores_sem_afiliacao = db.session.query(
+            func.count(func.distinct(Autor.id_autor))
+        ).outerjoin(Autor.afiliacoes_relacao).filter(
+            Autor.afiliacoes_relacao == None
+        ).scalar() or 0
+        
+        # Total de afiliações
+        total_afiliacoes = Afiliacao.query.count()
+        
+        # Autores mais produtivos
+        autores_produtivos = db.session.query(
+            Autor.id_autor,
+            Autor.nome_autor,
+            func.group_concat(Afiliacao.nome_afiliacao.distinct()).label('afiliacao'),
+            func.group_concat(Afiliacao.sigla_afiliacao.distinct()).label('sigla'),
+            func.count(func.distinct(Planta_referencia.id_planta)).label('total_plantas')
+        ).join(
+            Referencia_autor, Autor.id_autor == Referencia_autor.id_autor
+        ).join(
+            Referencia, Referencia_autor.id_referencia == Referencia.id_referencia
+        ).join(
+            Planta_referencia, Referencia.id_referencia == Planta_referencia.id_referencia
+        ).outerjoin(
+            Autor.afiliacoes_relacao
+        ).outerjoin(
+            Afiliacao
+        ).group_by(
+            Autor.id_autor,
+            Autor.nome_autor
+        ).order_by(
+            desc(func.count(func.distinct(Planta_referencia.id_planta)))
+        ).limit(10).all()
+        
+        # Distribuição por afiliação
+        stats_por_afiliacao = db.session.query(
+            Afiliacao.nome_afiliacao.label('afiliacao'),
+            func.count(func.distinct(Autor.id_autor)).label('total_autores'),
+            func.count(func.distinct(Planta_referencia.id_planta)).label('total_plantas')
+        ).join(
+            Autor.afiliacoes_relacao
+        ).join(
+            Autor
+        ).outerjoin(
+            Referencia_autor, Autor.id_autor == Referencia_autor.id_autor
+        ).outerjoin(
+            Referencia, Referencia_autor.id_referencia == Referencia.id_referencia
+        ).outerjoin(
+            Planta_referencia, Referencia.id_referencia == Planta_referencia.id_referencia
+        ).filter(
+            Afiliacao.nome_afiliacao.isnot(None)
+        ).group_by(
+            Afiliacao.nome_afiliacao
+        ).order_by(
+            desc(func.count(func.distinct(Planta_referencia.id_planta)))
+        ).limit(10).all()
+        
+        return jsonify({
+            'total_autores': total_autores,
+            'autores_com_plantas': autores_com_plantas,
+            'autores_sem_afiliacao': autores_sem_afiliacao,
+            'total_afiliacoes': total_afiliacoes,
+            'mais_produtivos': [
+                {
+                    'id': autor.id_autor,
+                    'nome': autor.nome_autor,
+                    'afiliacao': autor.afiliacao.split(',')[0] if autor.afiliacao else 'Sem afiliação',
+                    'sigla': autor.sigla.split(',')[0] if autor.sigla else '',
+                    'total_plantas': autor.total_plantas
+                } for autor in autores_produtivos
+            ],
+            'por_afiliacao': [
+                {
+                    'afiliacao': stat.afiliacao,
+                    'total_autores': stat.total_autores,
+                    'total_plantas': stat.total_plantas or 0
+                } for stat in stats_por_afiliacao
+            ]
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ==================== DASHBOARD - REFERÊNCIAS RECENTES ====================
+@admin_dashboard_bp.route('/dashboard/referencias-recentes', methods=['GET'])
+def get_referencias_recentes():
+    """Referências recentes para o dashboard"""
+    try:
+        limit = request.args.get('limit', 5, type=int)
+        
+        referencias = db.session.query(
+            Referencia.id_referencia,
+            Referencia.titulo_referencia,
+            Referencia.link_referencia,
+            Referencia.ano_publicacao,
+            func.count(Planta_referencia.id_planta).label('total_plantas')
+        ).outerjoin(Planta_referencia).group_by(
+            Referencia.id_referencia,
+            Referencia.titulo_referencia,
+            Referencia.link_referencia,
+            Referencia.ano_publicacao
+        ).order_by(
+            desc(Referencia.id_referencia)
+        ).limit(limit).all()
+        
+        referencias_resultado = []
+        for ref in referencias:
+            # Buscar autores
+            autores = db.session.query(
+                Autor.nome_autor
+            ).join(
+                Referencia_autor, Autor.id_autor == Referencia_autor.id_autor
+            ).filter(
+                Referencia_autor.id_referencia == ref.id_referencia
+            ).all()
+            
+            lista_autores = [autor.nome_autor for autor in autores]
+            
+            # Determinar tipo
+            if ref.link_referencia and 'doi.org' in ref.link_referencia.lower():
+                tipo = 'Artigo'
+            elif ref.link_referencia and ('http://' in ref.link_referencia or 'https://' in ref.link_referencia):
+                tipo = 'URL'
+            else:
+                tipo = 'Outro'
+            
+            referencias_resultado.append({
+                'id': ref.id_referencia,
+                'titulo': ref.titulo_referencia or 'Sem título',
+                'tipo': tipo,
+                'ano': str(ref.ano_publicacao) if ref.ano_publicacao else None,
+                'link': ref.link_referencia,
+                'total_plantas': ref.total_plantas or 0,
+                'autores': lista_autores
+            })
+        
+        return jsonify({
+            'referencias_recentes': referencias_resultado,
+            'total': len(referencias_resultado)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ==================== DASHBOARD - AUTORES RECENTES ====================
+@admin_dashboard_bp.route('/dashboard/autores-recentes', methods=['GET'])
+def get_autores_recentes():
+    """Autores recentes para o dashboard"""
+    try:
+        limit = request.args.get('limit', 5, type=int)
+        
+        autores = db.session.query(
+            Autor.id_autor,
+            Autor.nome_autor,
+            func.group_concat(Afiliacao.nome_afiliacao.distinct()).label('afiliacao'),
+            func.group_concat(Afiliacao.sigla_afiliacao.distinct()).label('sigla'),
+            func.count(func.distinct(Planta_referencia.id_planta)).label('total_plantas'),
+            func.count(func.distinct(Referencia.id_referencia)).label('total_referencias')
+        ).outerjoin(
+            Autor.afiliacoes_relacao
+        ).outerjoin(
+            Afiliacao
+        ).outerjoin(
+            Referencia_autor, Autor.id_autor == Referencia_autor.id_autor
+        ).outerjoin(
+            Referencia, Referencia_autor.id_referencia == Referencia.id_referencia
+        ).outerjoin(
+            Planta_referencia, Referencia.id_referencia == Planta_referencia.id_referencia
+        ).group_by(
+            Autor.id_autor,
+            Autor.nome_autor
+        ).order_by(
+            desc(Autor.id_autor)
+        ).limit(limit).all()
+        
+        autores_resultado = []
+        for autor in autores:
+            autores_resultado.append({
+                'id': autor.id_autor,
+                'nome': autor.nome_autor or 'Nome não informado',
+                'afiliacao': autor.afiliacao.split(',')[0] if autor.afiliacao else 'Sem afiliação',
+                'sigla': autor.sigla.split(',')[0] if autor.sigla else '',
+                'total_plantas': autor.total_plantas or 0,
+                'total_referencias': autor.total_referencias or 0
+            })
+        
+        return jsonify({
+            'autores_recentes': autores_resultado,
+            'total': len(autores_resultado)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # ==================== HEALTH CHECK ====================
 @admin_dashboard_bp.route('/health', methods=['GET'])
 def health_check():

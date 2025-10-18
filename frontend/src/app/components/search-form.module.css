@@ -4,7 +4,7 @@
   background-color: #ffffff;
   border-radius: var(--border-radius-2xl);
   box-shadow: var(--shadow-xl);
-  overflow: hidden;
+  overflow: visible; /* ✅ MUDAR de hidden para visible */
   border: 1px solid rgba(0, 40, 86, 0.1); 
 }
 
@@ -22,6 +22,7 @@
 
 .searchBody {
   padding: var(--spacing-6);
+  overflow: visible; /* ✅ ADICIONAR */
 }
 
 .form {

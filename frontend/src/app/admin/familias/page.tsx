@@ -5,229 +5,60 @@ import Link from "next/link"
 import styles from "./familias.module.css"
 import modalStyles from "./modal.module.css"
 
-// Tipos existentes mantidos...
-interface Familia {
-  id_familia: number
+// ==================== TIPOS ====================
+interface FamiliaAgregada {
   nome_familia: string
-  total_plantas?: number
+  total_plantas: number
 }
 
-interface PaginatedResponse<T> {
-  familias?: T[]
+interface PaginatedResponse {
+  familias: FamiliaAgregada[]
   total: number
   page: number
   limit: number
   total_pages: number
   has_next: boolean
   has_prev: boolean
-  erro?: string
-  message?: string
-  search_applied?: string
-}
-
-interface FamiliasResponse {
-  familias: Familia[]
-  total: number
   search_applied?: string
 }
 
 type SortField = "nome_familia" | "total_plantas"
 type SortOrder = "asc" | "desc"
-type ModalMode = 'add' | 'edit' | 'view'
 
-interface FormData {
-  nome_familia: string
+interface RenameFormData {
+  old_name: string
+  new_name: string
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
-// ✅ MODAL DE CONFIRMAÇÃO - Componente separado e memoizado
-interface ModalConfirmacaoProps {
-  showConfirmModal: boolean
-  confirmModalData: {
-    type: 'delete' | 'warning'
-    title: string
-    message: string
-    familiaId?: number
-    familiaName?: string
-    totalPlantas?: number
-  } | null
-  onConfirmar: () => void
-  onFechar: () => void
-}
-
-const ModalConfirmacao = memo<ModalConfirmacaoProps>(({ 
-  showConfirmModal, 
-  confirmModalData, 
-  onConfirmar, 
-  onFechar 
-}) => {
-  if (!showConfirmModal || !confirmModalData) return null
-
-  return (
-    <div className={modalStyles.modalOverlay} onClick={onFechar}>
-      <div className={modalStyles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <div className={modalStyles.modalHeader}>
-          <h2 className={modalStyles.modalTitle}>
-            {confirmModalData.title}
-          </h2>
-          <button 
-            className={modalStyles.modalCloseButton}
-            onClick={onFechar}
-            aria-label="Fechar modal"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-
-        <div className={modalStyles.modalBody}>
-          {confirmModalData.type === 'warning' ? (
-            <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-              <div style={{ 
-                fontSize: '3rem', 
-                color: '#dc2626', 
-                marginBottom: '1rem' 
-              }}>
-                ⚠️
-              </div>
-              <p style={{ 
-                fontSize: '1rem', 
-                color: '#111827', 
-                marginBottom: '1.5rem',
-                lineHeight: '1.5'
-              }}>
-                {confirmModalData.message}
-              </p>
-              <div style={{
-                backgroundColor: '#fef2f2',
-                border: '1px solid #fecaca',
-                borderRadius: '0.5rem',
-                padding: '1rem',
-                marginBottom: '1.5rem'
-              }}>
-                <p style={{ 
-                  color: '#dc2626', 
-                  fontSize: '0.875rem',
-                  margin: '0 0 0.5rem 0',
-                  fontWeight: '500'
-                }}>
-                  Para excluir esta família, primeiro precisa:
-                </p>
-                <ul style={{ 
-                  color: '#dc2626', 
-                  fontSize: '0.875rem',
-                  margin: '0',
-                  paddingLeft: '1.5rem'
-                }}>
-                  <li>Mover as {confirmModalData.totalPlantas} plantas para outra família, OU</li>
-                  <li>Excluir todas as plantas desta família</li>
-                </ul>
-              </div>
-              <p style={{ 
-                fontSize: '0.75rem', 
-                color: '#6b7280',
-                fontStyle: 'italic'
-              }}>
-                Esta validação protege a integridade dos dados.
-              </p>
-            </div>
-          ) : (
-            <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-              <div style={{ 
-                fontSize: '3rem', 
-                color: '#dc2626', 
-                marginBottom: '1rem' 
-              }}>
-                🗑️
-              </div>
-              <p style={{ 
-                fontSize: '1rem', 
-                color: '#111827', 
-                marginBottom: '1rem',
-                lineHeight: '1.5'
-              }}>
-                {confirmModalData.message}
-              </p>
-              <p style={{ 
-                fontSize: '0.875rem', 
-                color: '#6b7280',
-                fontStyle: 'italic'
-              }}>
-                Esta família não tem plantas associadas.
-                <br />
-                Esta acção não pode ser desfeita.
-              </p>
-            </div>
-          )}
-        </div>
-
-        <div className={modalStyles.modalFooter}>
-          <button 
-            className={modalStyles.btnSecondary}
-            onClick={onFechar}
-          >
-            {confirmModalData.type === 'warning' ? 'Entendi' : 'Cancelar'}
-          </button>
-          
-          {confirmModalData.type === 'delete' && (
-            <button 
-              className={modalStyles.btnDanger}
-              onClick={onConfirmar}
-            >
-              Sim, Excluir
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-})
-
-// ✅ MODAL DE GESTÃO - Componente separado e memoizado
-interface ModalGestaoProps {
+// ==================== MODAL DE RENOMEAÇÃO ====================
+interface ModalRenomearProps {
   showModal: boolean
-  modalMode: ModalMode
   modalLoading: boolean
-  selectedFamilia: Familia | null
-  formData: FormData
+  selectedFamilia: FamiliaAgregada | null
+  formData: RenameFormData
   onFechar: () => void
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
-const ModalGestao = memo<ModalGestaoProps>(({ 
+const ModalRenomear = memo<ModalRenomearProps>(({ 
   showModal, 
-  modalMode, 
   modalLoading, 
   selectedFamilia, 
   formData, 
   onFechar, 
   onSubmit, 
-  onInputChange, 
-  onKeyDown 
+  onInputChange 
 }) => {
-  if (!showModal) return null
+  if (!showModal || !selectedFamilia) return null
 
   return (
-    <div 
-      className={modalStyles.modalOverlay} 
-      onClick={onFechar}
-      style={{ zIndex: 9999 }}
-    >
-      <div 
-        className={modalStyles.modalContent} 
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className={modalStyles.modalOverlay} onClick={onFechar}>
+      <div className={modalStyles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={modalStyles.modalHeader}>
-          <h2 className={modalStyles.modalTitle}>
-            {modalMode === 'add' && 'Adicionar Nova Família'}
-            {modalMode === 'edit' && 'Editar Família'}
-            {modalMode === 'view' && 'Detalhes da Família'}
-          </h2>
+          <h2 className={modalStyles.modalTitle}>Renomear Família</h2>
           <button 
             className={modalStyles.modalCloseButton}
             onClick={onFechar}
@@ -244,66 +75,98 @@ const ModalGestao = memo<ModalGestaoProps>(({
         {modalLoading ? (
           <div className={modalStyles.modalLoading}>
             <div className={modalStyles.loadingSpinner}></div>
-            <p>Processando...</p>
+            <p>Processando renomeação...</p>
           </div>
         ) : (
-          <form 
-            onSubmit={onSubmit}
-            noValidate
-          >
+          <form onSubmit={onSubmit} noValidate>
             <div className={modalStyles.modalBody}>
-              {modalMode === 'view' && selectedFamilia ? (
-                <div className={modalStyles.viewContent}>
-                  <div className={modalStyles.infoGrid}>
-                    <div className={modalStyles.infoItem}>
-                      <label>ID:</label>
-                      <span>{selectedFamilia.id_familia}</span>
-                    </div>
-                    <div className={modalStyles.infoItem}>
-                      <label>Nome da Família:</label>
-                      <span><strong>{selectedFamilia.nome_familia.toUpperCase()}</strong></span>
-                    </div>
-                    <div className={modalStyles.infoItem}>
-                      <label>Total de Plantas:</label>
-                      <span>{selectedFamilia.total_plantas || 0} plantas</span>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className={modalStyles.formGrid}>
-                  <div className={modalStyles.formItem}>
-                    <label htmlFor="nome_familia" className={modalStyles.formLabel}>
-                      Nome da Família *
-                    </label>
-                    <input
-                      type="text"
-                      id="nome_familia"
-                      name="nome_familia"
-                      value={formData.nome_familia}
-                      onChange={onInputChange}
-                      onKeyDown={onKeyDown}
-                      className={modalStyles.formInput}
-                      placeholder="Ex: Asteraceae, Fabaceae..."
-                      maxLength={100}
-                      disabled={modalLoading}
-                      autoComplete="off"
-                      autoFocus={modalMode !== 'view'}
-                    />
-                    <div className={modalStyles.formHint}>
-                      Nome científico da família botânica (máximo 100 caracteres)
-                    </div>
-                    
-                    <div style={{ 
-                      marginTop: '0.5rem', 
-                      fontSize: '0.75rem', 
-                      color: (formData.nome_familia?.length || 0) > 90 ? '#dc2626' : '#6b7280',
-                      textAlign: 'right'
+              <div style={{ 
+                backgroundColor: '#fef3c7', 
+                border: '1px solid #fbbf24',
+                borderRadius: '0.5rem',
+                padding: '1rem',
+                marginBottom: '1.5rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'start', gap: '0.75rem' }}>
+                  <div style={{ fontSize: '1.25rem' }}>⚠️</div>
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{ 
+                      margin: '0 0 0.5rem 0', 
+                      fontSize: '0.875rem', 
+                      fontWeight: '600',
+                      color: '#92400e'
                     }}>
-                      {formData.nome_familia?.length || 0}/100 caracteres
-                    </div>
+                      Atenção: Esta acção acfeta TODAS as plantas
+                    </h4>
+                    <p style={{ 
+                      margin: 0, 
+                      fontSize: '0.75rem', 
+                      color: '#92400e',
+                      lineHeight: '1.4'
+                    }}>
+                      Renomear esta família irá actualizar automaticamente <strong>todas as {selectedFamilia.total_plantas} plantas</strong> associadas.
+                      {formData.new_name && formData.new_name !== selectedFamilia.nome_familia && (
+                        <><br /><br />💡 <em>Se "{formData.new_name}" já existir, as famílias serão mescladas automaticamente.</em></>
+                      )}
+                    </p>
                   </div>
                 </div>
-              )}
+              </div>
+
+              <div className={modalStyles.formGrid}>
+                <div className={modalStyles.formItem}>
+                  <label htmlFor="old_name" className={modalStyles.formLabel}>
+                    Nome Actual (somente leitura)
+                  </label>
+                  <input
+                    type="text"
+                    id="old_name"
+                    name="old_name"
+                    value={formData.old_name}
+                    className={modalStyles.formInput}
+                    disabled
+                    style={{ 
+                      backgroundColor: '#f3f4f6', 
+                      cursor: 'not-allowed',
+                      fontWeight: '600'
+                    }}
+                  />
+                  <div className={modalStyles.formHint}>
+                    📊 Esta família tem {selectedFamilia.total_plantas} plantas associadas
+                  </div>
+                </div>
+
+                <div className={modalStyles.formItem}>
+                  <label htmlFor="new_name" className={modalStyles.formLabel}>
+                    Novo Nome da Família *
+                  </label>
+                  <input
+                    type="text"
+                    id="new_name"
+                    name="new_name"
+                    value={formData.new_name}
+                    onChange={onInputChange}
+                    className={modalStyles.formInput}
+                    placeholder="Digite o novo nome..."
+                    maxLength={100}
+                    disabled={modalLoading}
+                    autoComplete="off"
+                    autoFocus
+                  />
+                  <div className={modalStyles.formHint}>
+                    Nome científico da família botânica (máximo 100 caracteres)
+                  </div>
+                  
+                  <div style={{ 
+                    marginTop: '0.5rem', 
+                    fontSize: '0.75rem', 
+                    color: (formData.new_name?.length || 0) > 90 ? '#dc2626' : '#6b7280',
+                    textAlign: 'right'
+                  }}>
+                    {formData.new_name?.length || 0}/100 caracteres
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className={modalStyles.modalFooter}>
@@ -313,32 +176,33 @@ const ModalGestao = memo<ModalGestaoProps>(({
                 onClick={onFechar}
                 disabled={modalLoading}
               >
-                {modalMode === 'view' ? 'Fechar' : 'Cancelar'}
+                Cancelar
               </button>
               
-              {modalMode !== 'view' && (
-                <button 
-                  type="submit"
-                  className={modalStyles.btnPrimary}
-                  disabled={modalLoading || !formData.nome_familia.trim()}
-                >
-                  {modalLoading ? (
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <div style={{
-                        width: '14px',
-                        height: '14px',
-                        border: '2px solid transparent',
-                        borderTop: '2px solid white',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite'
-                      }}></div>
-                      Processando...
-                    </span>
-                  ) : (
-                    modalMode === 'edit' ? 'Actualizar' : 'Criar'
-                  )}
-                </button>
-              )}
+              <button 
+                type="submit"
+                className={modalStyles.btnPrimary}
+                disabled={modalLoading || !formData.new_name.trim() || formData.new_name === formData.old_name}
+                style={{
+                  opacity: (!formData.new_name.trim() || formData.new_name === formData.old_name) ? 0.5 : 1
+                }}
+              >
+                {modalLoading ? (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{
+                      width: '14px',
+                      height: '14px',
+                      border: '2px solid transparent',
+                      borderTop: '2px solid white',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }}></div>
+                    Renomeando...
+                  </span>
+                ) : (
+                  '✏️ Renomear Família'
+                )}
+              </button>
             </div>
           </form>
         )}
@@ -347,54 +211,122 @@ const ModalGestao = memo<ModalGestaoProps>(({
   )
 })
 
-// ✅ COMPONENTE PRINCIPAL
-export default function FamiliesPage() {
-  // Estados existentes mantidos...
-  const [familias, setFamilias] = useState<Familia[]>([])
+ModalRenomear.displayName = 'ModalRenomear'
+
+// ==================== MODAL DE VISUALIZAÇÃO ====================
+interface ModalVisualizarProps {
+  showModal: boolean
+  selectedFamilia: FamiliaAgregada | null
+  onFechar: () => void
+}
+
+const ModalVisualizar = memo<ModalVisualizarProps>(({ 
+  showModal, 
+  selectedFamilia, 
+  onFechar 
+}) => {
+  if (!showModal || !selectedFamilia) return null
+
+  return (
+    <div className={modalStyles.modalOverlay} onClick={onFechar}>
+      <div className={modalStyles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div className={modalStyles.modalHeader}>
+          <h2 className={modalStyles.modalTitle}>Detalhes da Família</h2>
+          <button 
+            className={modalStyles.modalCloseButton}
+            onClick={onFechar}
+            aria-label="Fechar modal"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div className={modalStyles.modalBody}>
+          <div className={modalStyles.viewContent}>
+            <div className={modalStyles.infoGrid}>
+              <div className={modalStyles.infoItem}>
+                <label>Nome da Família:</label>
+                <span><strong>{selectedFamilia.nome_familia.toUpperCase()}</strong></span>
+              </div>
+              <div className={modalStyles.infoItem}>
+                <label>Total de Plantas:</label>
+                <span>{selectedFamilia.total_plantas} plantas cadastradas</span>
+              </div>
+            </div>
+
+            <div style={{
+              marginTop: '1.5rem',
+              padding: '1rem',
+              backgroundColor: '#f0f9ff',
+              border: '1px solid #bae6fd',
+              borderRadius: '0.5rem'
+            }}>
+              <p style={{ 
+                margin: 0, 
+                fontSize: '0.875rem', 
+                color: '#075985',
+                lineHeight: '1.5'
+              }}>
+                💡 <strong>Informação:</strong> Esta família é gerada automaticamente a partir das plantas cadastradas no sistema. Para adicionar mais plantas a esta família, cadastre novas plantas com este nome de família.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className={modalStyles.modalFooter}>
+          <button 
+            type="button"
+            className={modalStyles.btnSecondary}
+            onClick={onFechar}
+          >
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+})
+
+ModalVisualizar.displayName = 'ModalVisualizar'
+
+// ==================== COMPONENTE PRINCIPAL ====================
+export default function FamiliasPage() {
+  // Estados principais
+  const [familias, setFamilias] = useState<FamiliaAgregada[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   
-  // Estados para filtros
+  // Estados de filtros
   const [searchTerm, setSearchTerm] = useState<string>("")
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("")
   
-  // Estados para paginação
+  // Estados de paginação
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [totalPages, setTotalPages] = useState<number>(1)
   const [totalFamilias, setTotalFamilias] = useState<number>(0)
   const [itemsPerPage, setItemsPerPage] = useState<number>(10)
   
-  // Estados para ordenação
+  // Estados de ordenação
   const [sortBy, setSortBy] = useState<SortField>('nome_familia')
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
 
-  // Estados para modal
-  const [showModal, setShowModal] = useState<boolean>(false)
-  const [modalMode, setModalMode] = useState<ModalMode>('add')
-  const [selectedFamilia, setSelectedFamilia] = useState<Familia | null>(null)
+  // Estados de modais
+  const [showModalRenomear, setShowModalRenomear] = useState<boolean>(false)
+  const [showModalVisualizar, setShowModalVisualizar] = useState<boolean>(false)
+  const [selectedFamilia, setSelectedFamilia] = useState<FamiliaAgregada | null>(null)
   const [modalLoading, setModalLoading] = useState<boolean>(false)
 
-  // Estados para formulário
-  const [formData, setFormData] = useState<FormData>({
-    nome_familia: ""
+  // Estados de formulário
+  const [formData, setFormData] = useState<RenameFormData>({
+    old_name: "",
+    new_name: ""
   })
 
-  // Estados para modal de confirmação
-  const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false)
-  const [confirmModalData, setConfirmModalData] = useState<{
-    type: 'delete' | 'warning'
-    title: string
-    message: string
-    familiaId?: number
-    familiaName?: string
-    totalPlantas?: number
-  } | null>(null)
-
-  // ✅ ADICIONAR esta função dentro do componente (antes do return)
-  // ✅ FUNÇÃO showHighlightIndicator com cores ajustadas para a página
-
-  const showHighlightIndicator = (element: Element, tipo: string) => {
-    // Criar notificação
+  // ==================== FUNÇÃO DE HIGHLIGHT ====================
+  const showHighlightIndicator = (element: Element) => {
     const indicator = document.createElement('div')
     indicator.innerHTML = `
       <div style="
@@ -412,7 +344,7 @@ export default function FamiliesPage() {
         animation: slideInRight 0.3s ease-out;
         border: 2px solid #a855f7;
       ">
-        ✨ ${tipo === 'planta' ? 'Planta' : 'Família'} encontrada!
+        ✨ Família encontrada!
         <div style="font-size: 12px; opacity: 0.9; margin-top: 4px;">
           📍 Item destacado abaixo
         </div>
@@ -421,7 +353,6 @@ export default function FamiliesPage() {
     
     document.body.appendChild(indicator)
     
-    // Remover após 4 segundos
     setTimeout(() => {
       if (indicator.parentNode) {
         indicator.style.animation = 'slideOutRight 0.3s ease-in'
@@ -431,7 +362,6 @@ export default function FamiliesPage() {
       }
     }, 4000)
     
-    // Adicionar seta apontando para o elemento
     const arrow = document.createElement('div')
     const rect = element.getBoundingClientRect()
     arrow.innerHTML = `
@@ -457,7 +387,7 @@ export default function FamiliesPage() {
     }, 3000)
   }
 
-  // ✅ Hook para debounce do termo de pesquisa
+  // ==================== DEBOUNCE DE BUSCA ====================
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm)
@@ -466,7 +396,7 @@ export default function FamiliesPage() {
     return () => clearTimeout(timer)
   }, [searchTerm])
 
-  // ✅ useEffect que carrega famílias COM FILTRO
+  // ==================== CARREGAR FAMÍLIAS ====================
   useEffect(() => {
     let isCancelled = false
     
@@ -474,14 +404,6 @@ export default function FamiliesPage() {
       await new Promise(resolve => setTimeout(resolve, 300))
       
       if (!isCancelled) {
-        console.log('🔄 Carregando famílias com estados:', {
-          currentPage,
-          itemsPerPage,
-          debouncedSearchTerm,
-          sortBy,
-          sortOrder
-        })
-        
         await carregarFamilias()
       }
     }
@@ -493,139 +415,73 @@ export default function FamiliesPage() {
     }
   }, [currentPage, itemsPerPage, debouncedSearchTerm, sortBy, sortOrder])
 
-  // ✅ useEffect para resetar página quando pesquisa muda
+  // ==================== RESETAR PÁGINA AO BUSCAR ====================
   useEffect(() => {
     if (debouncedSearchTerm !== searchTerm) {
       setCurrentPage(1)
     }
   }, [debouncedSearchTerm, searchTerm])
 
-  // ✅ NOVO: Hook para highlight vindos da pesquisa do header
+  // ==================== PROCESSAR URL PARAMS (HIGHLIGHT) ====================
   useEffect(() => {
     const processUrlParams = async () => {
-      // ✅ DELAY INICIAL para garantir carregamento
       await new Promise(resolve => setTimeout(resolve, 200))
       
       const urlParams = new URLSearchParams(window.location.search)
-      const highlightId = urlParams.get('highlight')
+      const highlightNome = urlParams.get('highlight')
       const pageParam = urlParams.get('page')
       const urlSearch = urlParams.get('search')
-      const timestamp = urlParams.get('t')
       
-      console.log('🔍 Processando parâmetros da URL (famílias):', {
-        highlight: highlightId,
-        page: pageParam,
-        search: urlSearch,
-        timestamp: timestamp
-      })
-      
-      // ✅ RESETAR ESTADOS ANTES DE APLICAR NOVOS
-      console.log('🧹 Resetando estados antes de aplicar URL...')
-      
-      // ✅ APLICAR FILTRO DE BUSCA PRIMEIRO
       if (urlSearch) {
-        console.log(`🎯 Aplicando busca da URL: "${urlSearch}"`)
         const decodedSearch = decodeURIComponent(urlSearch)
-        
-        // ✅ APLICAR ESTADOS COM DELAYS
         setSearchTerm(decodedSearch)
         await new Promise(resolve => setTimeout(resolve, 50))
-        
         setDebouncedSearchTerm(decodedSearch)
         await new Promise(resolve => setTimeout(resolve, 50))
-        
-        // ✅ RESETAR PÁGINA ANTES DE APLICAR A NOVA
         setCurrentPage(1)
         await new Promise(resolve => setTimeout(resolve, 100))
       }
       
-      // ✅ APLICAR PÁGINA APÓS APLICAR FILTROS
       if (pageParam) {
         const pageNumber = parseInt(pageParam, 10)
         if (!isNaN(pageNumber) && pageNumber > 0) {
-          console.log(`📄 Aplicando página da URL: ${pageNumber}`)
           setCurrentPage(pageNumber)
           await new Promise(resolve => setTimeout(resolve, 100))
         }
       }
       
-      // ✅ CONFIGURAR HIGHLIGHT COM DELAY MAIOR
-      if (highlightId) {
-        console.log(`✨ Configurando highlight para família ${highlightId}`)
-        
-        // ✅ PRIMEIRA TENTATIVA
+      if (highlightNome) {
         const highlightTimeout = setTimeout(() => {
-          console.log('🔍 Tentando encontrar elemento família para highlight...')
-          
-          const element = document.querySelector(`[data-familia-id="${highlightId}"]`)
+          const element = document.querySelector(`[data-familia-nome="${highlightNome}"]`)
           if (element) {
-            console.log('✅ Elemento família encontrado, aplicando highlight')
             element.scrollIntoView({ behavior: 'smooth', block: 'center' })
             element.classList.add('highlighted')
+            showHighlightIndicator(element)
             
-            // ✅ INDICADOR VISUAL
-            if (typeof showHighlightIndicator === 'function') {
-              showHighlightIndicator(element, 'família')
-            }
-            
-            // Remover highlight após 5 segundos
             setTimeout(() => {
               element.classList.remove('highlighted')
             }, 5000)
           } else {
-            console.log('❌ Elemento família não encontrado na primeira tentativa')
-            
-            // ✅ SEGUNDA TENTATIVA
             setTimeout(() => {
-              console.log('🔍 Segunda tentativa de encontrar elemento família...')
-              const retryElement = document.querySelector(`[data-familia-id="${highlightId}"]`)
+              const retryElement = document.querySelector(`[data-familia-nome="${highlightNome}"]`)
               if (retryElement) {
-                console.log('✅ Elemento família encontrado na segunda tentativa')
                 retryElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
                 retryElement.classList.add('highlighted')
-                
-                if (typeof showHighlightIndicator === 'function') {
-                  showHighlightIndicator(retryElement, 'família')
-                }
+                showHighlightIndicator(retryElement)
                 
                 setTimeout(() => {
                   retryElement.classList.remove('highlighted')
                 }, 5000)
-              } else {
-                console.log('❌ Elemento família ainda não encontrado')
-                
-                // ✅ TERCEIRA TENTATIVA
-                setTimeout(() => {
-                  console.log('🔍 Terceira tentativa família...')
-                  const finalElement = document.querySelector(`[data-familia-id="${highlightId}"]`)
-                  if (finalElement) {
-                    console.log('✅ Elemento família finalmente encontrado!')
-                    finalElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                    finalElement.classList.add('highlighted')
-                    
-                    if (typeof showHighlightIndicator === 'function') {
-                      showHighlightIndicator(finalElement, 'família')
-                    }
-                    
-                    setTimeout(() => {
-                      finalElement.classList.remove('highlighted')
-                    }, 5000)
-                  } else {
-                    console.log('❌ Elemento família definitivamente não encontrado')
-                  }
-                }, 3000)
               }
             }, 2000)
           }
-        }, 4000) // ✅ DELAY MAIOR: 4 segundos
+        }, 4000)
         
         return () => clearTimeout(highlightTimeout)
       }
       
-      // ✅ LIMPAR URL após processar
-      if (highlightId || pageParam || urlSearch) {
+      if (highlightNome || pageParam || urlSearch) {
         setTimeout(() => {
-          console.log('🧹 Limpando URL da família...')
           window.history.replaceState({}, document.title, window.location.pathname)
         }, 500)
       }
@@ -634,9 +490,9 @@ export default function FamiliesPage() {
     processUrlParams()
   }, [])
 
-  // ✅ EFFECT: Prevenir scroll quando modal aberto
+  // ==================== PREVENIR SCROLL QUANDO MODAL ABERTO ====================
   useEffect(() => {
-    if (showModal || showConfirmModal) {
+    if (showModalRenomear || showModalVisualizar) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = 'unset'
@@ -645,97 +501,37 @@ export default function FamiliesPage() {
     return () => {
       document.body.style.overflow = 'unset'
     }
-  }, [showModal, showConfirmModal])
+  }, [showModalRenomear, showModalVisualizar])
 
-  // ✅ Função carregarFamilias COM BUSCA
+  // ==================== FUNÇÃO: CARREGAR FAMÍLIAS ====================
   const carregarFamilias = async (): Promise<void> => {
     try {
-      console.log('🔄 Iniciando carregamento de famílias...')
       setLoading(true)
       setError(null)
       
       const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: itemsPerPage.toString()
+        limit: itemsPerPage.toString(),
+        sort_by: sortBy,
+        sort_order: sortOrder
       })
       
-      // ✅ LOGS DETALHADOS
-      console.log('📋 Estados atuais das famílias:', {
-        currentPage,
-        itemsPerPage,
-        debouncedSearchTerm,
-        sortBy,
-        sortOrder
-      })
-      
-      // ✅ APLICAR FILTRO DE BUSCA
       if (debouncedSearchTerm) {
-        console.log(`🔍 Aplicando busca de família: "${debouncedSearchTerm}"`)
         params.append('search', debouncedSearchTerm)
       }
       
       const finalUrl = `${API_BASE_URL}/api/admin/familias?${params}`
-      console.log(`🌐 URL final da requisição de famílias: ${finalUrl}`)
-      
       const response = await fetch(finalUrl)
       
       if (!response.ok) {
         throw new Error(`Erro ${response.status}: ${response.statusText}`)
       }
       
-      const data: FamiliasResponse = await response.json()
+      const data: PaginatedResponse = await response.json()
       
-      console.log('✅ Dados de famílias recebidos:', {
-        total: data.total,
-        familias_count: data.familias?.length || 0,
-        first_familia: data.familias?.[0]?.nome_familia || 'nenhuma',
-        search_applied: data.search_applied
-      })
-      
-      // ✅ APLICAR ORDENAÇÃO
-      let familiasOrdenadas = data.familias || []
-      
-      if (sortBy && familiasOrdenadas.length > 0) {
-        console.log(`🔄 Aplicando ordenação de famílias: ${sortBy} ${sortOrder}`)
-        
-        familiasOrdenadas = [...familiasOrdenadas].sort((a, b) => {
-          let aValue: string | number = ''
-          let bValue: string | number = ''
-          
-          switch (sortBy) {
-            case 'nome_familia':
-              aValue = a.nome_familia || ''
-              bValue = b.nome_familia || ''
-              break
-            case 'total_plantas':
-              aValue = a.total_plantas || 0
-              bValue = b.total_plantas || 0
-              break
-            default:
-              aValue = ''
-              bValue = ''
-          }
-          
-          if (sortOrder === 'asc') {
-            if (typeof aValue === 'string') {
-              return aValue.localeCompare(bValue as string, 'pt', { numeric: true })
-            }
-            return (aValue as number) - (bValue as number)
-          } else {
-            if (typeof aValue === 'string') {
-              return (bValue as string).localeCompare(aValue, 'pt', { numeric: true })
-            }
-            return (bValue as number) - (aValue as number)
-          }
-        })
-      }
-      
-      // ✅ ATUALIZAR ESTADOS
-      setFamilias(familiasOrdenadas)
+      setFamilias(data.familias || [])
       setTotalFamilias(data.total || 0)
-      setTotalPages(Math.ceil((data.total || 0) / itemsPerPage))
-      
-      console.log(`✅ Famílias carregadas com sucesso: ${familiasOrdenadas.length} de ${data.total} total`)
+      setTotalPages(data.total_pages || 1)
       
     } catch (err) {
       console.error('❌ Erro ao carregar famílias:', err)
@@ -746,7 +542,7 @@ export default function FamiliesPage() {
     }
   }
 
-  // ✅ Função handleSort resetar página
+  // ==================== FUNÇÃO: ORDENAÇÃO ====================
   const handleSort = (column: SortField): void => {
     if (sortBy === column) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
@@ -757,15 +553,14 @@ export default function FamiliesPage() {
     setCurrentPage(1)
   }
 
-  // ✅ Função handlePageSizeChange resetar página
+  // ==================== FUNÇÃO: MUDAR TAMANHO PÁGINA ====================
   const handlePageSizeChange = (newSize: number): void => {
     setItemsPerPage(newSize)
     setCurrentPage(1)
   }
 
-  // ✅ Função limparFiltros
+  // ==================== FUNÇÃO: LIMPAR FILTROS ====================
   const limparFiltros = (): void => {
-    console.log('🧹 Limpando todos os filtros')
     setSearchTerm("")
     setDebouncedSearchTerm("")
     setCurrentPage(1)
@@ -773,77 +568,82 @@ export default function FamiliesPage() {
     setSortOrder('asc')
   }
 
-  // ✅ CORREÇÃO: Função abrirModal com tipos corretos
-  const abrirModal = useCallback((mode: ModalMode, familia?: Familia) => {
-    console.log(`🔓 Abrindo modal em modo: ${mode}`)
-    
-    setModalMode(mode)
-    setSelectedFamilia(familia || null)
-    
-    if (mode === 'add') {
-      setFormData({ nome_familia: "" })
-    } else if (mode === 'edit' && familia) {
-      setFormData({ nome_familia: familia.nome_familia })
-    }
-    
-    setShowModal(true)
+  // ==================== FUNÇÃO: ABRIR MODAL VISUALIZAR ====================
+  const abrirModalVisualizar = useCallback((familia: FamiliaAgregada) => {
+    setSelectedFamilia(familia)
+    setShowModalVisualizar(true)
   }, [])
 
-  const fecharModal = useCallback(() => {
-    console.log(`🔒 Fechando modal`)
-    
-    setShowModal(false)
+  // ==================== FUNÇÃO: FECHAR MODAL VISUALIZAR ====================
+  const fecharModalVisualizar = useCallback(() => {
+    setShowModalVisualizar(false)
     setSelectedFamilia(null)
-    setFormData({ nome_familia: "" })
+  }, [])
+
+  // ==================== FUNÇÃO: ABRIR MODAL RENOMEAR ====================
+  const abrirModalRenomear = useCallback((familia: FamiliaAgregada) => {
+    setSelectedFamilia(familia)
+    setFormData({
+      old_name: familia.nome_familia,
+      new_name: familia.nome_familia
+    })
+    setShowModalRenomear(true)
+  }, [])
+
+  // ==================== FUNÇÃO: FECHAR MODAL RENOMEAR ====================
+  const fecharModalRenomear = useCallback(() => {
+    setShowModalRenomear(false)
+    setSelectedFamilia(null)
+    setFormData({ old_name: "", new_name: "" })
     setModalLoading(false)
   }, [])
 
-  // ✅ CORREÇÃO: handleSubmit com tipos corretos e estável
-  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
+  // ==================== FUNÇÃO: SUBMETER RENOMEAÇÃO ====================
+  const handleSubmitRename = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     e.stopPropagation()
     
-    if (!formData.nome_familia.trim()) {
-      alert('Nome da família é obrigatório')
-      return false
+    if (!formData.new_name.trim() || formData.new_name === formData.old_name) {
+      alert('Por favor, insira um novo nome diferente do atual')
+      return
     }
 
     try {
       setModalLoading(true)
       
-      const url = modalMode === 'edit' && selectedFamilia 
-        ? `${API_BASE_URL}/api/admin/familias/${selectedFamilia.id_familia}`
-        : `${API_BASE_URL}/api/admin/familias`
-      
-      const method = modalMode === 'edit' ? 'PUT' : 'POST'
-      
-      const response = await fetch(url, {
-        method,
+      const response = await fetch(`${API_BASE_URL}/api/admin/familias/rename`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          old_name: formData.old_name,
+          new_name: formData.new_name
+        }),
       })
       
+      const data = await response.json()
+      
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Erro ao salvar família')
+        throw new Error(data.error || 'Erro ao renomear família')
       }
       
-      console.log(`✅ Família ${modalMode === 'edit' ? 'atualizada' : 'criada'} com sucesso`)
+      // Mostrar mensagem de sucesso
+      const operation = data.operation === 'merge' ? 'unificadas' : 'renomeada'
+      alert(`✅ Família ${operation} com sucesso!\n\n${data.info || data.message}`)
       
-      fecharModal()
+      fecharModalRenomear()
       await carregarFamilias()
       
     } catch (err) {
-      console.error('❌ Erro ao salvar família:', err)
-      alert(err instanceof Error ? err.message : 'Erro ao salvar família')
+      console.error('❌ Erro ao renomear família:', err)
+      alert(err instanceof Error ? err.message : 'Erro ao renomear família')
     } finally {
       setModalLoading(false)
     }
-  }, [formData, modalMode, selectedFamilia, fecharModal])
+  }, [formData, fecharModalRenomear])
 
-  // ✅ CORREÇÃO CRÍTICA: handleInputChange ESTÁVEL sem dependências
+  // ==================== FUNÇÃO: INPUT CHANGE ====================
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     
@@ -853,99 +653,10 @@ export default function FamiliesPage() {
     }))
   }, [])
 
-  // ✅ CORREÇÃO: handleKeyDown com tipos corretos e estável
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && e.currentTarget.tagName === 'INPUT') {
-      e.preventDefault()
-      
-      if (e.currentTarget.name === 'nome_familia' && e.currentTarget.value?.trim()) {
-        const syntheticEvent = {
-          preventDefault: () => {},
-          stopPropagation: () => {},
-          currentTarget: e.currentTarget.form
-        } as React.FormEvent<HTMLFormElement>
-        
-        handleSubmit(syntheticEvent)
-      }
-    }
-  }, [handleSubmit])
-
-  // ✅ CORREÇÃO: handleDelete com tipos corretos
-  const handleDelete = async (id: number): Promise<void> => {
-    try {
-      console.log(`🔍 Verificando família ${id} antes de excluir`)
-      
-      const checkResponse = await fetch(`${API_BASE_URL}/api/admin/familias/${id}`)
-      
-      if (!checkResponse.ok) {
-        throw new Error('Erro ao verificar família')
-      }
-      
-      const familiaData = await checkResponse.json()
-      
-      if (familiaData.total_plantas && familiaData.total_plantas > 0) {
-        setConfirmModalData({
-          type: 'warning',
-          title: 'Não é possível excluir esta família',
-          message: `A família "${familiaData.nome_familia}" tem ${familiaData.total_plantas} plantas associadas.`,
-          familiaName: familiaData.nome_familia,
-          totalPlantas: familiaData.total_plantas
-        })
-        setShowConfirmModal(true)
-        return
-      }
-      
-      setConfirmModalData({
-        type: 'delete',
-        title: 'Confirmar exclusão',
-        message: `Tem certeza que deseja excluir a família "${familiaData.nome_familia}"?`,
-        familiaId: id,
-        familiaName: familiaData.nome_familia
-      })
-      setShowConfirmModal(true)
-      
-    } catch (err) {
-      console.error('❌ Erro ao verificar família:', err)
-      alert(err instanceof Error ? err.message : 'Erro ao verificar família')
-    }
-  }
-
-  // ✅ Handlers estáveis para os modais
-  const confirmarExclusao = useCallback(async () => {
-    if (!confirmModalData?.familiaId) return
-    
-    try {
-      console.log(`🗑️ Excluindo família ${confirmModalData.familiaId}`)
-      
-      const response = await fetch(`${API_BASE_URL}/api/admin/familias/${confirmModalData.familiaId}`, {
-        method: 'DELETE'
-      })
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Erro ao excluir família')
-      }
-      
-      console.log('✅ Família excluída com sucesso')
-      setShowConfirmModal(false)
-      setConfirmModalData(null)
-      await carregarFamilias()
-      
-    } catch (err) {
-      console.error('❌ Erro ao excluir família:', err)
-      alert(err instanceof Error ? err.message : 'Erro ao excluir família')
-    }
-  }, [confirmModalData?.familiaId])
-
-  const fecharConfirmModal = useCallback(() => {
-    setShowConfirmModal(false)
-    setConfirmModalData(null)
-  }, [])
-
-  // ✅ Indicador de busca
+  // ==================== INDICADOR DE BUSCA ====================
   const isSearching: boolean = searchTerm !== debouncedSearchTerm && searchTerm.length > 0
 
-  // Funções de paginação
+  // ==================== PAGINAÇÃO ====================
   const renderPaginationNumbers = () => {
     const pages = []
     const maxVisiblePages = 5
@@ -1001,12 +712,12 @@ export default function FamiliesPage() {
     return pages
   }
 
-  // Estados de carregamento e erro
+  // ==================== LOADING STATE ====================
   if (loading && familias.length === 0) {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <h1 className={styles.title}>Gerir Famílias</h1>
+          <h1 className={styles.title}>Consultar Famílias</h1>
         </div>
         <div className={styles.loadingContainer}>
           <div className={styles.loadingSpinner}></div>
@@ -1016,11 +727,12 @@ export default function FamiliesPage() {
     )
   }
 
+  // ==================== ERROR STATE ====================
   if (error) {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <h1 className={styles.title}>Gerir Famílias</h1>
+          <h1 className={styles.title}>Consultar Famílias</h1>
         </div>
         <div className={styles.errorMessage}>
           <h3>Erro ao conectar com a API</h3>
@@ -1033,34 +745,21 @@ export default function FamiliesPage() {
     )
   }
 
+  // ==================== RENDER PRINCIPAL ====================
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Gerir Famílias</h1>
-        <button 
-          onClick={() => abrirModal('add')}
-          className={styles.addButton}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={styles.icon}
-          >
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          Adicionar Nova Família
-        </button>
+        <h1 className={styles.title}>Consultar Famílias</h1>
+        <div style={{ 
+          fontSize: '0.875rem', 
+          color: '#6b7280',
+          fontStyle: 'italic' 
+        }}>
+          💡 Aqui encontras todas as famílias das plantas cadastradas
+        </div>
       </div>
 
-      {/* ✅ Filtros usando o mesmo estilo das plantas */}
+      {/* FILTROS */}
       <div className={styles.filterCard}>
         <div className={styles.filterGrid}>
           <div className={styles.filterItem}>
@@ -1170,7 +869,7 @@ export default function FamiliesPage() {
         </div>
       </div>
 
-      {/* ✅ Informações de resultados igual às plantas */}
+      {/* INFORMAÇÕES DE RESULTADOS */}
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -1186,7 +885,7 @@ export default function FamiliesPage() {
               {debouncedSearchTerm && ` (filtradas)`}
               {isSearching && (
                 <span style={{ color: '#059669', fontWeight: '500', marginLeft: '0.5rem' }}>
-                  - actualizando...
+                  - atualizando...
                 </span>
               )}
             </>
@@ -1197,7 +896,7 @@ export default function FamiliesPage() {
         <span>Página {currentPage} de {totalPages}</span>
       </div>
 
-      {/* ✅ Tabela usando o mesmo estilo das plantas */}
+      {/* TABELA */}
       <div className={styles.tableCard}>
         <div className={styles.tableContainer}>
           <table className={styles.table}>
@@ -1242,65 +941,70 @@ export default function FamiliesPage() {
                         <p style={{ margin: '0 0 1rem 0', color: '#6b7280' }}>
                           Não encontramos famílias que correspondam a "{debouncedSearchTerm}".
                           <br />
-                          Tente ajustar sua busca ou adicionar uma nova família.
+                          Tente ajustar sua busca ou verifique a ortografia.
                         </p>
                         <button 
-                          onClick={() => abrirModal('add')}
-                          className={styles.addButton}
-                          style={{ marginTop: 0 }}
+                          onClick={limparFiltros}
+                          className={styles.clearButton}
+                          style={{ marginTop: '1rem' }}
                         >
-                          Adicionar Nova Família
+                          Limpar Busca
                         </button>
                       </div>
                     ) : (
                       <div style={{ textAlign: 'center', padding: '2rem' }}>
                         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🌿</div>
-                        <h3 style={{ margin: '0 0 0.5rem 0', color: '#111827' }}>Nenhuma família cadastrada</h3>
+                        <h3 style={{ margin: '0 0 0.5rem 0', color: '#111827' }}>Nenhuma família no sistema</h3>
                         <p style={{ margin: '0 0 1rem 0', color: '#6b7280' }}>
-                          Comece adicionando sua primeira família de plantas.
+                          As famílias são geradas automaticamente quando você cadastra plantas.
+                          <br />
+                          Comece adicionando sua primeira planta no sistema.
                         </p>
-                        <button 
-                          onClick={() => abrirModal('add')}
+                        <Link 
+                          href="/admin/plantas"
                           className={styles.addButton}
-                          style={{ marginTop: 0 }}
+                          style={{ 
+                            marginTop: 0,
+                            textDecoration: 'none',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
+                          }}
                         >
-                          Adicionar Primeira Família
-                        </button>
+                          Ir para Plantas
+                        </Link>
                       </div>
                     )}
                   </td>
                 </tr>
               ) : (
                 familias.map((familia) => (
-                  <tr key={familia.id_familia} className={styles.tableRow} data-familia-id={familia.id_familia}>                    
+                  <tr 
+                    key={familia.nome_familia} 
+                    className={styles.tableRow} 
+                    data-familia-nome={familia.nome_familia}
+                  >                    
                     <td className={styles.tableCellName}>
                       <strong>{familia.nome_familia.toUpperCase()}</strong>
                     </td>
                     <td className={styles.tableCell}>
-                      {familia.total_plantas || 0} plantas
+                      {familia.total_plantas} {familia.total_plantas === 1 ? 'planta' : 'plantas'}
                     </td>
                     <td className={styles.tableCellActions}>
                       <div className={styles.actionButtons}>
                         <button
-                          onClick={() => abrirModal('view', familia)}
+                          onClick={() => abrirModalVisualizar(familia)}
                           className={styles.viewButton}
                           title="Ver detalhes"
                         >
                           Ver
                         </button>
                         <button
-                          onClick={() => abrirModal('edit', familia)}
+                          onClick={() => abrirModalRenomear(familia)}
                           className={styles.editButton}
-                          title="Editar"
+                          title="Renomear família"
                         >
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => handleDelete(familia.id_familia)}
-                          className={styles.deleteButton}
-                          title="Excluir"
-                        >
-                          Excluir
+                          Renomear
                         </button>
                       </div>
                     </td>
@@ -1312,7 +1016,7 @@ export default function FamiliesPage() {
         </div>
       </div>
 
-      {/* ✅ Paginação igual às plantas */}
+      {/* PAGINAÇÃO */}
       {!loading && familias.length > 0 && totalPages > 1 && (
         <div className={styles.pagination}>
           <div className={styles.paginationMobile}>
@@ -1395,29 +1099,22 @@ export default function FamiliesPage() {
         </div>
       )}
 
-      {/* ✅ MODAIS OTIMIZADOS - Componentes externos memoizados */}
-      <ModalGestao
-        showModal={showModal}
-        modalMode={modalMode}
+      {/* MODAIS */}
+      <ModalVisualizar
+        showModal={showModalVisualizar}
+        selectedFamilia={selectedFamilia}
+        onFechar={fecharModalVisualizar}
+      />
+
+      <ModalRenomear
+        showModal={showModalRenomear}
         modalLoading={modalLoading}
         selectedFamilia={selectedFamilia}
         formData={formData}
-        onFechar={fecharModal}
-        onSubmit={handleSubmit}
+        onFechar={fecharModalRenomear}
+        onSubmit={handleSubmitRename}
         onInputChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-      />
-
-      <ModalConfirmacao
-        showConfirmModal={showConfirmModal}
-        confirmModalData={confirmModalData}
-        onConfirmar={confirmarExclusao}
-        onFechar={fecharConfirmModal}
       />
     </div>
   )
 }
-
-// ✅ Definir nomes para os componentes memoizados (para debugging)
-ModalConfirmacao.displayName = 'ModalConfirmacao'
-ModalGestao.displayName = 'ModalGestao'

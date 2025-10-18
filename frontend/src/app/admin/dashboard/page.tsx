@@ -318,6 +318,13 @@ const AdminDashboardComponent: React.FC = () => {
     }
   };
 
+  // Função helper para extrair valor numérico de forma segura
+  const getStatValue = (stat: StatItem | number | undefined): number => {
+    if (!stat) return 0;
+    if (typeof stat === 'number') return stat;
+    return stat.value || 0;
+  };
+
   // Função para fazer fetch dos dados REAIS da API (existente)
   const fetchData = async (): Promise<void> => {
     try {
@@ -664,6 +671,20 @@ if (provinciasData.provincias) {
     );
   };
 
+  // Função para contar plantas adicionadas nos últimos X dias
+  const contarPlantasRecentes = (plantas: PlantaRecente[], dias: number = 7): number => {
+    if (!plantas || plantas.length === 0) return 0;
+    
+    const dataLimite = new Date();
+    dataLimite.setDate(dataLimite.getDate() - dias);
+    
+    return plantas.filter(planta => {
+      if (!planta.added_at) return false;
+      const dataAdicao = new Date(planta.added_at);
+      return dataAdicao >= dataLimite;
+    }).length;
+  };
+
   // Função para criar gráfico de pizza (mantida igual)
   const createPieChart = (data: FamiliaData[]) => {
     if (!data || data.length === 0) return null;
@@ -896,6 +917,7 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
         ) : stats ? (
           <div className={styles.statsGrid}>
             {/* ===== ÍCONE MELHORADO PARA PLANTAS ===== */}
+            {/* Card 1 - Total de Plantas */}
             <div className={styles.statCard}>
               <div className={styles.statContent}>
                 <div className={styles.iconContainerGreen}>
@@ -903,18 +925,36 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                 </div>
                 <div className={styles.statInfo}>
                   <p className={styles.statLabel}>Total de Plantas</p>
-                  <p className={styles.statValue}>{stats.total_plantas?.value || 0}</p>
+                  <p className={styles.statValue}>{getStatValue(stats?.total_plantas)}</p>
                 </div>
               </div>
               <div className={styles.statFooter}>
                 <div className={styles.statChange}>
-                  <span className={styles.statIncrease}>{stats.total_plantas?.change || '+0%'}</span>
-                  <span className={styles.statPeriod}> desde o mês passado</span>
+                  {(() => {
+                    const recentesCount = contarPlantasRecentes(plantasRecentes, 7);
+                    if (recentesCount > 0) {
+                      return (
+                        <span className={styles.statIncrease}>
+                          {recentesCount} {recentesCount === 1 ? 'adicionada' : 'adicionadas'} nos últimos 7 dias
+                        </span>
+                      );
+                    } else if (plantasRecentes.length > 0) {
+                      return (
+                        <span className={styles.statPeriod}>
+                          Última adição há mais de 7 dias
+                        </span>
+                      );
+                    }
+                    return (
+                      <span className={styles.statPeriod}>
+                        Base de dados actualizada
+                      </span>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
-
-            {/* ===== ÍCONE MELHORADO PARA FAMÍLIAS ===== */}
+            {/* Card 2 - Famílias Botânicas */}
             <div className={styles.statCard}>
               <div className={styles.statContent}>
                 <div className={styles.iconContainerPurple}>
@@ -922,18 +962,22 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                 </div>
                 <div className={styles.statInfo}>
                   <p className={styles.statLabel}>Famílias Botânicas</p>
-                  <p className={styles.statValue}>{stats.total_familias?.value || 0}</p>
+                  <p className={styles.statValue}>{getStatValue(stats?.total_familias)}</p>
                 </div>
               </div>
               <div className={styles.statFooter}>
                 <div className={styles.statChange}>
-                  <span className={styles.statIncrease}>{stats.total_familias?.change || '+0%'}</span>
-                  <span className={styles.statPeriod}> desde o mês passado</span>
+                  <span className={styles.statIncrease}>
+                    {plantasPorFamilia.length > 0 && plantasPorFamilia[0] 
+                      ? `${formatarNomeFamilia(plantasPorFamilia[0].name)} é a maior`
+                      : 'Diversidade taxonómica'
+                    }
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Manter outros cards iguais */}
+            {/* Card 3 - Idiomas Disponíveis */}
             <div className={styles.statCard}>
               <div className={styles.statContent}>
                 <div className={styles.iconContainerBlue}>
@@ -941,31 +985,17 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                 </div>
                 <div className={styles.statInfo}>
                   <p className={styles.statLabel}>Idiomas Disponíveis</p>
-                  <p className={styles.statValue}>{stats.idiomas_disponiveis?.value || 0}</p>
+                  <p className={styles.statValue}>{getStatValue(stats?.idiomas_disponiveis)}</p>
                 </div>
               </div>
               <div className={styles.statFooter}>
                 <div className={styles.statChange}>
-                  <span className={styles.statIncrease}>{stats.idiomas_disponiveis?.change || '+0%'}</span>
-                  <span className={styles.statPeriod}> desde o mês passado</span>
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div className={styles.statContent}>
-                <div className={styles.iconContainerYellow}>
-                  <SearchIcon />
-                </div>
-                <div className={styles.statInfo}>
-                  <p className={styles.statLabel}>Pesquisas Realizadas</p>
-                  <p className={styles.statValue}>{stats.pesquisas_realizadas?.value || 0}</p>
-                </div>
-              </div>
-              <div className={styles.statFooter}>
-                <div className={styles.statChange}>
-                  <span className={styles.statIncrease}>{stats.pesquisas_realizadas?.change || '+0%'}</span>
-                  <span className={styles.statPeriod}> desde o mês passado</span>
+                  <span className={styles.statIncrease}>
+                    {plantasPorIdioma.length > 0 && plantasPorIdioma[0]
+                      ? `${plantasPorIdioma[0].language} com ${plantasPorIdioma[0].count} plantas`
+                      : 'Sistema multilíngue'
+                    }
+                  </span>
                 </div>
               </div>
             </div>

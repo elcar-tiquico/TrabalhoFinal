@@ -82,11 +82,17 @@ interface ApiPlant {
   }>
   
   // Autores COM afiliações
+  // Autores COM afiliações
   autores?: Array<{ 
     id_autor: number
     nome_autor: string
     afiliacao?: string
     sigla_afiliacao?: string
+    afiliacoes?: Array<{
+      id_afiliacao: number
+      nome_afiliacao: string
+      sigla_afiliacao?: string
+    }>
   }>
   
   // Referências COM autores
@@ -148,6 +154,11 @@ export interface AutorDetalhado {
   nome_autor: string
   afiliacao?: string
   sigla_afiliacao?: string
+  afiliacoes?: Array<{  // ✅ ADICIONAR
+    id_afiliacao: number
+    nome_afiliacao: string
+    sigla_afiliacao?: string
+  }>
 }
 
 export interface UsoEspecifico {
@@ -251,7 +262,8 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       id_autor: a.id_autor,
       nome_autor: a.nome_autor,
       afiliacao: a.afiliacao,
-      sigla_afiliacao: a.sigla_afiliacao
+      sigla_afiliacao: a.sigla_afiliacao,
+      afiliacoes: a.afiliacoes || []
     })) || []
 
     // ✅ Processar usos específicos COM métodos
@@ -312,12 +324,28 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     console.log(`📸 Imagens processadas para planta ${apiPlant.id_planta}:`, imagens)
 
     // Criar strings resumidas
-    const autoresStr = autores_detalhados.map(a => {
-      let display = a.nome_autor
-      if (a.afiliacao) display += ` (${a.afiliacao})`
-      if (a.sigla_afiliacao) display += ` [${a.sigla_afiliacao}]`
-      return display
-    }).join(', ')
+    const autoresStr = autores_detalhados.map(a => a.nome_autor).join(', ')
+
+    const afiliacoesStr = autores_detalhados
+      .flatMap(autor => {
+        // Se tem array de afiliações, usar todas
+        if (autor.afiliacoes && autor.afiliacoes.length > 0) {
+          return autor.afiliacoes.map(aff => {
+            let text = aff.nome_afiliacao
+            if (aff.sigla_afiliacao) text += ` (${aff.sigla_afiliacao})`
+            return text
+          })
+        }
+        // Senão, usar a afiliação única (compatibilidade)
+        if (autor.afiliacao) {
+          let text = autor.afiliacao
+          if (autor.sigla_afiliacao) text += ` (${autor.sigla_afiliacao})`
+          return [text]
+        }
+        return []
+      })
+      .filter(Boolean)
+      .join(', ')
     
     const provinciasStr = provincias_detalhadas.map(p => {
       if (p.local) {
@@ -383,8 +411,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       return text
     }).filter(Boolean).join('; ')
     
-    const afiliacaoStr = autores_detalhados[0]?.afiliacao || ''
-
+    const afiliacaoStr = afiliacoesStr  // Usar a string completa de afiliações
     const metodosPreparacaoStr = usos_especificos
       .flatMap(uso => uso.metodos_preparacao.map(m => m.descricao))
       .filter(Boolean)

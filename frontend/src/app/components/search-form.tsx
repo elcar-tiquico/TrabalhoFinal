@@ -485,14 +485,7 @@ export function SearchForm() {
   }
 
   const formatAutorDisplay = (autor: Autor) => {
-    let display = autor.nome_autor || `Autor ${autor.id_autor}`
-    if (autor.afiliacao && autor.afiliacao.trim()) {
-      display += ` (${autor.afiliacao.trim()})`
-    }
-    if (autor.sigla_afiliacao && autor.sigla_afiliacao.trim()) {
-      display += ` [${autor.sigla_afiliacao.trim()}]`
-    }
-    return display
+    return autor.nome_autor || `Autor ${autor.id_autor}`
   }
 
   // Preparar opções

@@ -13,6 +13,11 @@ interface Autor {
   nome_autor: string
   afiliacao?: string
   sigla_afiliacao?: string
+  afiliacoes?: Array<{
+    id_afiliacao: number
+    nome_afiliacao: string
+    sigla_afiliacao?: string
+  }>
 }
 
 interface Plant {
@@ -210,14 +215,26 @@ function AuthorTooltip({ plant }: { plant: Plant }) {
             {autores.map((autor: any, index: number) => (
               <div key={autor.id_autor || index} className={styles.authorItem}>
                 <div className={styles.authorName}>{autor.nome_autor}</div>
-                {autor.afiliacao && (
+                
+                {/* Mostrar TODAS as afiliações */}
+                {autor.afiliacoes && autor.afiliacoes.length > 0 ? (
+                  autor.afiliacoes.map((aff: any, affIndex: number) => (
+                    <div key={affIndex} className={styles.authorAffiliation}>
+                      🏛️ {aff.nome_afiliacao}
+                      {aff.sigla_afiliacao && (
+                        <span className={styles.authorSigla}> ({aff.sigla_afiliacao})</span>
+                      )}
+                    </div>
+                  ))
+                ) : autor.afiliacao ? (
                   <div className={styles.authorAffiliation}>
                     🏛️ {autor.afiliacao}
                     {autor.sigla_afiliacao && (
                       <span className={styles.authorSigla}> ({autor.sigla_afiliacao})</span>
                     )}
                   </div>
-                )}
+                ) : null}
+                
                 {index < autores.length - 1 && <div className={styles.authorDivider}></div>}
               </div>
             ))}

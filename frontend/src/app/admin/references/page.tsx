@@ -4,24 +4,29 @@ import React, { useState, useEffect, useCallback, memo } from "react"
 import Link from "next/link"
 import styles from "./references.module.css"
 
-// Tipos para a estrutura de dados
+// ==================== INTERFACES ADAPTADAS ====================
+
+interface Afiliacao {
+  id_afiliacao: number
+  nome_afiliacao: string
+  sigla_afiliacao?: string
+}
+
+interface AutorReferenciasHover {
+  id_autor: number
+  referencias: {
+    id_referencia: number
+    titulo_referencia: string
+    ano_publicacao?: number | string
+  }[]
+}
+
 interface Autor {
   id_autor: number
   nome_autor: string
-  afiliacao?: string
-  sigla_afiliacao?: string
+  afiliacoes?: Afiliacao[]  // ✅ AGORA É ARRAY DE OBJETOS
   total_plantas?: number
   total_referencias?: number
-}
-
-interface Referencia {
-  id_referencia: number
-  titulo_referencia?: string
-  tipo_referencia?: 'URL' | 'Artigo' | 'Livro' | 'Tese'
-  ano?: string
-  link_referencia: string
-  total_plantas?: number
-  autores_especificos?: AutorReferencia[]
 }
 
 interface AutorReferencia {
@@ -29,8 +34,16 @@ interface AutorReferencia {
   nome_autor: string
   afiliacao?: string
   sigla_afiliacao?: string
-  ordem_autor: number
-  papel: 'primeiro' | 'correspondente' | 'coautor'
+}
+
+interface Referencia {
+  id_referencia: number
+  titulo_referencia: string  // ✅ AGORA É OBRIGATÓRIO
+  tipo_referencia?: 'URL' | 'Artigo' | 'Livro' | 'Tese' | 'Outro'  // ✅ Inferido do backend
+  ano_publicacao?: number | string
+  link_referencia: string
+  total_plantas?: number
+  autores_especificos?: AutorReferencia[]
 }
 
 interface PaginatedResponse<T> {
@@ -52,27 +65,25 @@ interface ReferenciasResponse extends PaginatedResponse<Referencia> {
 }
 
 type TabType = 'autores' | 'referencias'
-type SortField = 'nome_autor' | 'total_plantas' | 'total_referencias' | 'titulo_referencia' | 'ano' | 'tipo_referencia'
+type SortField = 'nome_autor' | 'total_plantas' | 'total_referencias' | 'titulo_referencia' | 'ano_publicacao' | 'tipo_referencia'
 type SortOrder = 'asc' | 'desc'
 type ModalMode = 'add' | 'edit' | 'view'
 
 interface FormDataAutor {
   nome_autor: string
-  afiliacao: string
-  sigla_afiliacao: string
+  afiliacoes_selecionadas: number[]
 }
 
 interface FormDataReferencia {
   titulo_referencia: string
-  tipo_referencia: 'URL' | 'Artigo' | 'Livro' | 'Tese' | ''
-  ano: string
+  tipo_referencia?: 'URL' | 'Artigo' | 'Livro' | 'Tese' | ''
+  ano_publicacao: string
   link_referencia: string
-  autores: AutorReferencia[]
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
-// ✅ MODAL DE CONFIRMAÇÃO
+// ==================== MODAL DE CONFIRMAÇÃO ====================
 interface ModalConfirmacaoProps {
   showConfirmModal: boolean
   confirmModalData: {
@@ -169,16 +180,27 @@ const ModalConfirmacao = memo<ModalConfirmacaoProps>(({
   )
 })
 
-// ✅ MODAL DE GESTÃO PARA AUTORES
+// ==================== MODAL DE GESTÃO PARA AUTORES ====================
 interface ModalGestaoAutorProps {
   showModal: boolean
   modalMode: ModalMode
   modalLoading: boolean
   selectedItem: Autor | null
   formData: FormDataAutor
+  todasAfiliacoes: Afiliacao[]
+  loadingAfiliacoes: boolean
+  showNovaAfiliacaoForm: boolean
+  novaAfiliacaoNome: string
+  novaAfiliacaoSigla: string
+  criandoAfiliacao: boolean
   onFechar: () => void
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void
+  onToggleAfiliacao: (idAfiliacao: number) => void
+  onToggleNovaAfiliacaoForm: () => void
+  onChangeNovaAfiliacaoNome: (value: string) => void
+  onChangeNovaAfiliacaoSigla: (value: string) => void
+  onCriarAfiliacao: () => void
 }
 
 const ModalGestaoAutor = memo<ModalGestaoAutorProps>(({ 
@@ -187,9 +209,20 @@ const ModalGestaoAutor = memo<ModalGestaoAutorProps>(({
   modalLoading, 
   selectedItem, 
   formData, 
+  todasAfiliacoes,
+  loadingAfiliacoes,
+  showNovaAfiliacaoForm,
+  novaAfiliacaoNome,
+  novaAfiliacaoSigla,
+  criandoAfiliacao,
   onFechar, 
   onSubmit, 
-  onInputChange
+  onInputChange,
+  onToggleAfiliacao,
+  onToggleNovaAfiliacaoForm,
+  onChangeNovaAfiliacaoNome,
+  onChangeNovaAfiliacaoSigla,
+  onCriarAfiliacao
 }) => {
   if (!showModal) return null
 
@@ -233,14 +266,30 @@ const ModalGestaoAutor = memo<ModalGestaoAutorProps>(({
                       <label>Nome do Autor:</label>
                       <span><strong>{selectedItem.nome_autor}</strong></span>
                     </div>
-                    <div className={styles.infoItem}>
-                      <label>Afiliação:</label>
-                      <span>{selectedItem.afiliacao || 'Não informado'}</span>
-                    </div>
-                    <div className={styles.infoItem}>
-                      <label>Sigla:</label>
-                      <span>{selectedItem.sigla_afiliacao || 'Não informado'}</span>
-                    </div>
+                    
+                    {selectedItem.afiliacoes && selectedItem.afiliacoes.length > 0 && (
+                      <div className={`${styles.infoItem} ${styles.formGridFull}`}>
+                        <label>Afiliações:</label>
+                        <div className={styles.afiliacoesContainer}>
+                          {selectedItem.afiliacoes.map((af) => (
+                            <div key={af.id_afiliacao} className={styles.afiliacaoCard}>
+                              <strong>{af.nome_afiliacao}</strong>
+                              {af.sigla_afiliacao && (
+                                <span className={styles.afiliacaoSigla}>({af.sigla_afiliacao})</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {(!selectedItem.afiliacoes || selectedItem.afiliacoes.length === 0) && (
+                      <div className={styles.infoItem}>
+                        <label>Afiliações:</label>
+                        <span className={styles.textMuted}>Sem afiliação registada</span>
+                      </div>
+                    )}
+                    
                     <div className={styles.infoItem}>
                       <label>Total de Plantas:</label>
                       <span>{selectedItem.total_plantas || 0} plantas</span>
@@ -253,6 +302,7 @@ const ModalGestaoAutor = memo<ModalGestaoAutorProps>(({
                 </div>
               ) : (
                 <div className={styles.formGrid}>
+                  {/* CAMPO DE NOME */}
                   <div className={`${styles.formItem} ${styles.formGridFull}`}>
                     <label htmlFor="nome_autor" className={styles.formLabel}>
                       Nome do Autor *
@@ -265,59 +315,274 @@ const ModalGestaoAutor = memo<ModalGestaoAutorProps>(({
                       onChange={onInputChange}
                       className={styles.formInput}
                       placeholder="Ex: João Silva, Maria Santos..."
-                      maxLength={150}
+                      maxLength={255}
                       disabled={modalLoading}
                       autoComplete="off"
                       autoFocus={modalMode !== 'view'}
                     />
                     <p className={styles.formHint}>
-                      Nome completo do autor (máximo 150 caracteres)
+                      Nome completo do autor (máximo 255 caracteres)
                     </p>
-                    <div className={`${styles.characterCount} ${(formData.nome_autor?.length || 0) > 135 ? styles.characterCountWarning : styles.characterCountNormal}`}>
-                      {formData.nome_autor?.length || 0}/150 caracteres
+                    <div className={`${styles.characterCount} ${(formData.nome_autor?.length || 0) > 235 ? styles.characterCountWarning : styles.characterCountNormal}`}>
+                      {formData.nome_autor?.length || 0}/255 caracteres
                     </div>
                   </div>
 
-                  <div className={styles.formItem}>
-                    <label htmlFor="afiliacao" className={styles.formLabel}>
-                      Afiliação
-                    </label>
-                    <input
-                      type="text"
-                      id="afiliacao"
-                      name="afiliacao"
-                      value={formData.afiliacao}
-                      onChange={onInputChange}
-                      className={styles.formInput}
-                      placeholder="Ex: Universidade Eduardo Mondlane..."
-                      maxLength={150}
-                      disabled={modalLoading}
-                      autoComplete="off"
-                    />
+                  {/* ✅ GESTÃO DE AFILIAÇÕES */}
+                  <div className={`${styles.formItem} ${styles.formGridFull}`}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <label className={styles.formLabel}>
+                        Afiliações
+                        {loadingAfiliacoes && (
+                          <span style={{ marginLeft: '0.5rem', fontSize: '0.875rem', color: '#059669' }}>
+                            (a carregar...)
+                          </span>
+                        )}
+                      </label>
+                      
+                      {!showNovaAfiliacaoForm && (
+                        <button
+                          type="button"
+                          onClick={onToggleNovaAfiliacaoForm}
+                          disabled={modalLoading || loadingAfiliacoes}
+                          style={{
+                            fontSize: '0.875rem',
+                            color: '#002856',
+                            backgroundColor: 'transparent',
+                            border: '1px solid #002856',
+                            padding: '0.25rem 0.75rem',
+                            borderRadius: '0.375rem',
+                            cursor: 'pointer',
+                            fontWeight: '500',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#ecfdf5'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent'
+                          }}
+                        >
+                          + Nova Afiliação
+                        </button>
+                      )}
+                    </div>
+                    
+                    {/* FORMULÁRIO PARA CRIAR NOVA AFILIAÇÃO */}
+                    {showNovaAfiliacaoForm && (
+                      <div style={{
+                        border: '2px dashed #002856',
+                        borderRadius: '0.5rem',
+                        padding: '1rem',
+                        marginBottom: '1rem',
+                        backgroundColor: '#f0f4f8'
+                      }}>
+                        <h4 style={{ 
+                          fontSize: '0.875rem', 
+                          fontWeight: '600', 
+                          marginBottom: '0.75rem',
+                          color: '#002856'
+                        }}>
+                          Criar Nova Afiliação
+                        </h4>
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                          <div>
+                            <label style={{ 
+                              fontSize: '0.875rem', 
+                              fontWeight: '500',
+                              display: 'block',
+                              marginBottom: '0.25rem',
+                              color: '#002856'
+                            }}>
+                              Nome da Afiliação *
+                            </label>
+                            <input
+                              type="text"
+                              value={novaAfiliacaoNome}
+                              onChange={(e) => onChangeNovaAfiliacaoNome(e.target.value)}
+                              placeholder="Ex: Instituto Superior de Ciências e Tecnologia de Moçambique"
+                              maxLength={255}
+                              disabled={criandoAfiliacao}
+                              className={styles.formInput}
+                              style={{ width: '100%' }}
+                            />
+                          </div>
+                          
+                          <div>
+                            <label style={{ 
+                              fontSize: '0.875rem', 
+                              fontWeight: '500',
+                              display: 'block',
+                              marginBottom: '0.25rem',
+                              color: '#002856'
+                            }}>
+                              Sigla (opcional)
+                            </label>
+                            <input
+                              type="text"
+                              value={novaAfiliacaoSigla}
+                              onChange={(e) => onChangeNovaAfiliacaoSigla(e.target.value)}
+                              placeholder="Ex: ISCTEM"
+                              maxLength={20}
+                              disabled={criandoAfiliacao}
+                              className={styles.formInput}
+                              style={{ width: '100%' }}
+                            />
+                          </div>
+                          
+                          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                            <button
+                              type="button"
+                              onClick={onToggleNovaAfiliacaoForm}
+                              disabled={criandoAfiliacao}
+                              style={{
+                                fontSize: '0.875rem',
+                                padding: '0.5rem 1rem',
+                                border: '1px solid #002856',
+                                borderRadius: '0.375rem',
+                                backgroundColor: 'white',
+                                color: '#002856',
+                                cursor: 'pointer',
+                                fontWeight: '500',
+                                transition: 'all 0.2s'
+                              }}
+                              onMouseEnter={(e) => {
+                                if (!criandoAfiliacao) {
+                                  e.currentTarget.style.backgroundColor = '#f0f4f8'
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = 'white'
+                              }}
+                            >
+                              Cancelar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={onCriarAfiliacao}
+                              disabled={criandoAfiliacao || !novaAfiliacaoNome.trim()}
+                              style={{
+                                fontSize: '0.875rem',
+                                padding: '0.5rem 1rem',
+                                border: 'none',
+                                borderRadius: '0.375rem',
+                                backgroundColor: '#eba900',
+                                color: '#002856',
+                                cursor: 'pointer',
+                                fontWeight: '600',
+                                opacity: criandoAfiliacao || !novaAfiliacaoNome.trim() ? 0.5 : 1,
+                                transition: 'all 0.2s'
+                              }}
+                              onMouseEnter={(e) => {
+                                if (!criandoAfiliacao && novaAfiliacaoNome.trim()) {
+                                  e.currentTarget.style.backgroundColor = '#d19700'
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#eba900'
+                              }}
+                            >
+                              {criandoAfiliacao ? 'A criar...' : 'Criar e Selecionar'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {loadingAfiliacoes ? (
+                      <div style={{ padding: '1rem', textAlign: 'center' }}>
+                        <div className={styles.modalLoadingSpinner}></div>
+                      </div>
+                    ) : todasAfiliacoes.length === 0 ? (
+                      <div style={{ 
+                        padding: '1rem', 
+                        backgroundColor: '#f3f4f6', 
+                        borderRadius: '0.375rem',
+                        textAlign: 'center',
+                        color: '#6b7280'
+                      }}>
+                        Nenhuma afiliação disponível. Clique em "Nova Afiliação" para criar.
+                      </div>
+                    ) : (
+                      <div style={{
+                        maxHeight: '200px',
+                        overflowY: 'auto',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '0.375rem',
+                        padding: '0.5rem'
+                      }}>
+                        {todasAfiliacoes.map((afiliacao) => {
+                          const isSelected = formData.afiliacoes_selecionadas.includes(afiliacao.id_afiliacao)
+                          
+                          return (
+                            <label
+                              key={afiliacao.id_afiliacao}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                padding: '0.5rem',
+                                cursor: 'pointer',
+                                borderRadius: '0.25rem',
+                                backgroundColor: isSelected ? '#ecfdf5' : 'transparent',
+                                border: isSelected ? '1px solid #059669' : '1px solid transparent',
+                                marginBottom: '0.25rem',
+                                transition: 'all 0.2s'
+                              }}
+                              onMouseEnter={(e) => {
+                                if (!isSelected) {
+                                  e.currentTarget.style.backgroundColor = '#f9fafb'
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (!isSelected) {
+                                  e.currentTarget.style.backgroundColor = 'transparent'
+                                }
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => onToggleAfiliacao(afiliacao.id_afiliacao)}
+                                disabled={modalLoading}
+                                style={{
+                                  marginRight: '0.5rem',
+                                  cursor: 'pointer',
+                                  width: '16px',
+                                  height: '16px'
+                                }}
+                              />
+                              <div style={{ flex: 1 }}>
+                                <span style={{ fontWeight: isSelected ? '600' : '400' }}>
+                                  {afiliacao.nome_afiliacao}
+                                </span>
+                                {afiliacao.sigla_afiliacao && (
+                                  <span style={{ 
+                                    marginLeft: '0.5rem', 
+                                    color: '#6b7280',
+                                    fontSize: '0.875rem'
+                                  }}>
+                                    ({afiliacao.sigla_afiliacao})
+                                  </span>
+                                )}
+                              </div>
+                            </label>
+                          )
+                        })}
+                      </div>
+                    )}
+                    
                     <p className={styles.formHint}>
-                      Instituição de afiliação do autor (opcional)
+                      💡 Selecione uma ou mais afiliações para este autor
                     </p>
-                  </div>
-
-                  <div className={styles.formItem}>
-                    <label htmlFor="sigla_afiliacao" className={styles.formLabel}>
-                      Sigla da Afiliação
-                    </label>
-                    <input
-                      type="text"
-                      id="sigla_afiliacao"
-                      name="sigla_afiliacao"
-                      value={formData.sigla_afiliacao}
-                      onChange={onInputChange}
-                      className={styles.formInput}
-                      placeholder="Ex: UEM, INS..."
-                      maxLength={50}
-                      disabled={modalLoading}
-                      autoComplete="off"
-                    />
-                    <p className={styles.formHint}>
-                      Sigla ou abreviação da instituição (opcional)
-                    </p>
+                    
+                    {formData.afiliacoes_selecionadas.length > 0 && (
+                      <div style={{ marginTop: '0.5rem' }}>
+                        <span style={{ fontSize: '0.875rem', color: '#059669', fontWeight: '500' }}>
+                          ✓ {formData.afiliacoes_selecionadas.length} afiliação(ões) selecionada(s)
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -357,7 +622,7 @@ const ModalGestaoAutor = memo<ModalGestaoAutorProps>(({
   )
 })
 
-// ✅ MODAL DE GESTÃO PARA REFERÊNCIAS
+// ==================== MODAL DE GESTÃO PARA REFERÊNCIAS ====================
 interface ModalGestaoReferenciaProps {
   showModal: boolean
   modalMode: ModalMode
@@ -419,11 +684,13 @@ const ModalGestaoReferencia = memo<ModalGestaoReferenciaProps>(({
                     </div>
                     <div className={styles.infoItem}>
                       <label>Tipo:</label>
-                      <span>{selectedItem.tipo_referencia || 'Não informado'}</span>
+                      <span className={styles.badge}>
+                        {selectedItem.tipo_referencia || 'Outro'}
+                      </span>
                     </div>
                     <div className={styles.infoItem}>
                       <label>Ano:</label>
-                      <span>{selectedItem.ano || 'Não informado'}</span>
+                      <span>{selectedItem.ano_publicacao || 'Não informado'}</span>
                     </div>
                     <div className={styles.infoItem}>
                       <label>Total de Plantas:</label>
@@ -433,7 +700,7 @@ const ModalGestaoReferencia = memo<ModalGestaoReferenciaProps>(({
                   
                   <div className={styles.infoItem}>
                     <label>Título:</label>
-                    <p><strong>{selectedItem.titulo_referencia || 'Sem título'}</strong></p>
+                    <p><strong>{selectedItem.titulo_referencia}</strong></p>
                   </div>
                   
                   <div className={styles.infoItem}>
@@ -452,7 +719,7 @@ const ModalGestaoReferencia = memo<ModalGestaoReferenciaProps>(({
                     <div className={styles.autoresSection}>
                       <label>Autores:</label>
                       <div>
-                        {selectedItem.autores_especificos.map((autor, index) => (
+                        {selectedItem.autores_especificos.map((autor) => (
                           <div key={autor.id_autor} className={styles.autorCard}>
                             <div className={styles.autorCardHeader}>
                               <div className={styles.autorCardInfo}>
@@ -460,10 +727,6 @@ const ModalGestaoReferencia = memo<ModalGestaoReferenciaProps>(({
                                 {autor.afiliacao && (
                                   <p className={styles.autorAffiliation}>{autor.afiliacao}</p>
                                 )}
-                              </div>
-                              <div className={styles.autorCardMeta}>
-                                <p>Ordem: {autor.ordem_autor}</p>
-                                <p>Papel: {autor.papel}</p>
                               </div>
                             </div>
                           </div>
@@ -474,47 +737,10 @@ const ModalGestaoReferencia = memo<ModalGestaoReferenciaProps>(({
                 </div>
               ) : (
                 <div className={styles.formGrid}>
-                  <div className={styles.formItem}>
-                    <label htmlFor="tipo_referencia" className={styles.formLabel}>
-                      Tipo de Referência
-                    </label>
-                    <select
-                      id="tipo_referencia"
-                      name="tipo_referencia"
-                      value={formData.tipo_referencia}
-                      onChange={onInputChange}
-                      className={styles.formSelect}
-                      disabled={modalLoading}
-                    >
-                      <option value="">Seleccionar tipo...</option>
-                      <option value="URL">URL</option>
-                      <option value="Artigo">Artigo</option>
-                      <option value="Livro">Livro</option>
-                      <option value="Tese">Tese</option>
-                    </select>
-                  </div>
-
-                  <div className={styles.formItem}>
-                    <label htmlFor="ano" className={styles.formLabel}>
-                      Ano
-                    </label>
-                    <input
-                      type="text"
-                      id="ano"
-                      name="ano"
-                      value={formData.ano}
-                      onChange={onInputChange}
-                      className={styles.formInput}
-                      placeholder="Ex: 2023, 2024..."
-                      maxLength={4}
-                      disabled={modalLoading}
-                      autoComplete="off"
-                    />
-                  </div>
-
+                  {/* ✅ TÍTULO AGORA É OBRIGATÓRIO */}
                   <div className={`${styles.formItem} ${styles.formGridFull}`}>
                     <label htmlFor="titulo_referencia" className={styles.formLabel}>
-                      Título da Referência
+                      Título da Referência *
                     </label>
                     <input
                       type="text"
@@ -524,17 +750,43 @@ const ModalGestaoReferencia = memo<ModalGestaoReferenciaProps>(({
                       onChange={onInputChange}
                       className={styles.formInput}
                       placeholder="Ex: Plantas Medicinais de Moçambique..."
+                      maxLength={255}
+                      disabled={modalLoading}
+                      autoComplete="off"
+                      autoFocus={modalMode !== 'view'}
+                    />
+                    <p className={styles.formHint}>
+                      Título completo da obra ou publicação (obrigatório)
+                    </p>
+                    <div className={`${styles.characterCount} ${(formData.titulo_referencia?.length || 0) > 235 ? styles.characterCountWarning : styles.characterCountNormal}`}>
+                      {formData.titulo_referencia?.length || 0}/255 caracteres
+                    </div>
+                  </div>
+
+                  <div className={styles.formItem}>
+                    <label htmlFor="ano_publicacao" className={styles.formLabel}>
+                      Ano de Publicação
+                    </label>
+                    <input
+                      type="text"
+                      id="ano_publicacao"
+                      name="ano_publicacao"
+                      value={formData.ano_publicacao}
+                      onChange={onInputChange}
+                      className={styles.formInput}
+                      placeholder="Ex: 2023, 2024..."
+                      maxLength={4}
                       disabled={modalLoading}
                       autoComplete="off"
                     />
                     <p className={styles.formHint}>
-                      Título completo da obra ou publicação
+                      Ano de publicação (opcional)
                     </p>
                   </div>
 
                   <div className={`${styles.formItem} ${styles.formGridFull}`}>
                     <label htmlFor="link_referencia" className={styles.formLabel}>
-                      Link/URL da Referência *
+                      Link/URL da Referência
                     </label>
                     <input
                       type="url"
@@ -544,12 +796,12 @@ const ModalGestaoReferencia = memo<ModalGestaoReferenciaProps>(({
                       onChange={onInputChange}
                       className={styles.formInput}
                       placeholder="Ex: https://exemplo.com/artigo..."
+                      maxLength={255}
                       disabled={modalLoading}
                       autoComplete="off"
-                      autoFocus={modalMode !== 'view'}
                     />
                     <p className={styles.formHint}>
-                      URL completa da referência (obrigatório)
+                      URL completa da referência (opcional)
                     </p>
                   </div>
                 </div>
@@ -570,7 +822,7 @@ const ModalGestaoReferencia = memo<ModalGestaoReferenciaProps>(({
                 <button 
                   type="submit"
                   className={styles.btnPrimary}
-                  disabled={modalLoading || !formData.link_referencia.trim()}
+                  disabled={modalLoading || !formData.titulo_referencia.trim()}
                 >
                   {modalLoading ? (
                     <span className={styles.btnLoading}>
@@ -590,7 +842,7 @@ const ModalGestaoReferencia = memo<ModalGestaoReferenciaProps>(({
   )
 })
 
-// ✅ COMPONENTE PRINCIPAL
+// ==================== COMPONENTE PRINCIPAL ====================
 export default function AutoresReferenciasPage() {
   // Estados principais
   const [activeTab, setActiveTab] = useState<TabType>('autores')
@@ -625,19 +877,16 @@ export default function AutoresReferenciasPage() {
   const [selectedReferencia, setSelectedReferencia] = useState<Referencia | null>(null)
   const [modalLoading, setModalLoading] = useState<boolean>(false)
 
-  // Estados para formulários
+  // ✅ ESTADOS DE FORMULÁRIO SIMPLIFICADOS
   const [formDataAutor, setFormDataAutor] = useState<FormDataAutor>({
     nome_autor: "",
-    afiliacao: "",
-    sigla_afiliacao: ""
+    afiliacoes_selecionadas: []
   })
 
   const [formDataReferencia, setFormDataReferencia] = useState<FormDataReferencia>({
     titulo_referencia: "",
-    tipo_referencia: "",
-    ano: "",
-    link_referencia: "",
-    autores: []
+    ano_publicacao: "",
+    link_referencia: ""
   })
 
   // Estados para modal de confirmação
@@ -651,36 +900,26 @@ export default function AutoresReferenciasPage() {
     totalRelacionados?: number
   } | null>(null)
 
-  // ✅ DEBOUNCE HOOKS
+  //Estados para hover
+  const [hoverAutorId, setHoverAutorId] = useState<number | null>(null)
+  const [hoverReferencias, setHoverReferencias] = useState<AutorReferenciasHover | null>(null)
+  const [loadingHover, setLoadingHover] = useState<boolean>(false)
+
+  // Estados para afiliações
+  const [todasAfiliacoes, setTodasAfiliacoes] = useState<Afiliacao[]>([])
+  const [loadingAfiliacoes, setLoadingAfiliacoes] = useState<boolean>(false)
+  const [showNovaAfiliacaoForm, setShowNovaAfiliacaoForm] = useState<boolean>(false)
+  const [novaAfiliacaoNome, setNovaAfiliacaoNome] = useState<string>("")
+  const [novaAfiliacaoSigla, setNovaAfiliacaoSigla] = useState<string>("")
+  const [criandoAfiliacao, setCriandoAfiliacao] = useState<boolean>(false)
+
+  // ==================== DEBOUNCE HOOKS ====================
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTermAutores(searchTermAutores)
     }, 500)
     return () => clearTimeout(timer)
   }, [searchTermAutores])
-
-  // REMOVER o useEffect anterior e usar este:
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const tabParam = urlParams.get('tab')
-    
-    console.log('🔍 Parâmetro tab detectado:', tabParam)
-    
-    if (tabParam === 'autores') {
-      console.log('✅ Mudando para aba autores')
-      setActiveTab('autores')
-    } else if (tabParam === 'referencias') {
-      console.log('✅ Mudando para aba referencias')
-      setActiveTab('referencias')
-    }
-    
-    // Limpar URL após definir a aba
-    if (tabParam) {
-      setTimeout(() => {
-        window.history.replaceState({}, document.title, window.location.pathname)
-      }, 100)
-    }
-  }, []) // Executar apenas uma vez ao montar o componente
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -689,127 +928,50 @@ export default function AutoresReferenciasPage() {
     return () => clearTimeout(timer)
   }, [searchTermReferencias])
 
-  // ✅ HIGHLIGHT FUNCTION
-  const showHighlightIndicator = (element: Element, tipo: string) => {
-    const indicator = document.createElement('div')
-    indicator.innerHTML = `
-      <div style="
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: linear-gradient(135deg, #9333ea, #7e22ce);
-        color: white;
-        padding: 12px 16px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(147, 51, 234, 0.25);
-        z-index: 10000;
-        font-weight: 600;
-        font-size: 14px;
-        animation: slideInRight 0.3s ease-out;
-        border: 2px solid #a855f7;
-      ">
-        ✨ ${tipo === 'autor' ? 'Autor' : 'Referência'} encontrada!
-        <div style="font-size: 12px; opacity: 0.9; margin-top: 4px;">
-          📍 Item destacado abaixo
-        </div>
-      </div>
-    `
-    
-    document.body.appendChild(indicator)
-    
-    setTimeout(() => {
-      if (indicator.parentNode) {
-        indicator.style.animation = 'slideOutRight 0.3s ease-in'
-        setTimeout(() => {
-          document.body.removeChild(indicator)
-        }, 300)
-      }
-    }, 4000)
-    
-    const arrow = document.createElement('div')
-    const rect = element.getBoundingClientRect()
-    arrow.innerHTML = `
-      <div style="
-        position: fixed;
-        left: ${rect.left - 30}px;
-        top: ${rect.top + rect.height/2 - 10}px;
-        font-size: 20px;
-        color: #9333ea;
-        z-index: 9999;
-        animation: pulse 1s infinite;
-      ">
-        👉
-      </div>
-    `
-    
-    document.body.appendChild(arrow)
-    
-    setTimeout(() => {
-      if (arrow.parentNode) {
-        document.body.removeChild(arrow)
-      }
-    }, 3000)
-  }
-
-  // ✅ NOVO: useEffect para processar highlights de autores vindos do header
+  // ==================== URL PARAMS & HIGHLIGHT ====================
   useEffect(() => {
     const processUrlParams = async () => {
-      // ✅ DELAY INICIAL para garantir carregamento
       await new Promise(resolve => setTimeout(resolve, 200))
     
       const urlParams = new URLSearchParams(window.location.search)
       const highlightId = urlParams.get('highlight')
       const pageParam = urlParams.get('page')
       const urlSearch = urlParams.get('search')
-      const highlightType = urlParams.get('type') // 'autor' ou 'referencia'
-      const timestamp = urlParams.get('t')
+      const highlightType = urlParams.get('type')
+      const tabParam = urlParams.get('tab')
     
-      console.log('🔍 Processando parâmetros da URL (autores/referências):', {
+      console.log('🔍 Processando parâmetros da URL:', {
         highlight: highlightId,
         type: highlightType,
         page: pageParam,
         search: urlSearch,
-        timestamp: timestamp
+        tab: tabParam
       })
     
-      // ✅ DEFINIR ABA ATIVA baseada no tipo
-      const tabParam = urlParams.get('tab')
       if (tabParam === 'autores') {
         setActiveTab('autores')
-        console.log('🎯 Definindo aba ativa via parâmetro: autores')
       } else if (tabParam === 'referencias') {
         setActiveTab('referencias')
-        console.log('🎯 Definindo aba ativa via parâmetro: referências')
       } else if (highlightType === 'autor') {
         setActiveTab('autores')
-        console.log('🎯 Definindo aba ativa: autores')
       } else if (highlightType === 'referencia') {
         setActiveTab('referencias')
-        console.log('🎯 Definindo aba ativa: referências')
       }
     
-      // ✅ APLICAR FILTRO DE BUSCA
       if (urlSearch) {
         const decodedSearch = decodeURIComponent(urlSearch)
-        console.log('🔍 Aplicando busca decodificada:', decodedSearch)
-      
         if (highlightType === 'autor') {
           setSearchTermAutores(decodedSearch)
           setDebouncedSearchTermAutores(decodedSearch)
-          console.log('✅ Busca aplicada na aba de autores')
         } else {
           setSearchTermReferencias(decodedSearch)
           setDebouncedSearchTermReferencias(decodedSearch)
-          console.log('✅ Busca aplicada na aba de referências')
         }
       }
     
-      // ✅ APLICAR PÁGINA
       if (pageParam) {
         const pageNumber = parseInt(pageParam, 10)
         if (!isNaN(pageNumber) && pageNumber > 0) {
-          console.log('📄 Aplicando página:', pageNumber)
-        
           if (highlightType === 'autor') {
             setCurrentPageAutores(pageNumber)
           } else {
@@ -818,35 +980,19 @@ export default function AutoresReferenciasPage() {
         }
       }
     
-      // ✅ CONFIGURAR HIGHLIGHT
       if (highlightId && highlightType) {
         const dataAttribute = highlightType === 'autor' ? 'data-autor-id' : 'data-referencia-id'
-      
-        console.log('🎯 Configurando highlight:', { highlightId, highlightType, dataAttribute })
-      
         setTimeout(() => {
           const element = document.querySelector(`[${dataAttribute}="${highlightId}"]`)
           if (element) {
-            console.log('✅ Elemento encontrado para highlight')
             element.scrollIntoView({ behavior: 'smooth', block: 'center' })
             element.classList.add('highlighted')
-          
-            // ✅ INDICADOR VISUAL usando a função existente
-            if (typeof showHighlightIndicator === 'function') {
-              showHighlightIndicator(element, highlightType)
-            }
-          
-            setTimeout(() => {
-              element.classList.remove('highlighted')
-            }, 5000)
-          } else {
-            console.log('⚠️ Elemento não encontrado para highlight:', `[${dataAttribute}="${highlightId}"]`)
+            setTimeout(() => element.classList.remove('highlighted'), 5000)
           }
         }, 4000)
       }
     
-      // ✅ LIMPAR URL
-      if (highlightId || pageParam || urlSearch || highlightType) {
+      if (highlightId || pageParam || urlSearch || highlightType || tabParam) {
         setTimeout(() => {
           window.history.replaceState({}, document.title, window.location.pathname)
         }, 500)
@@ -856,7 +1002,7 @@ export default function AutoresReferenciasPage() {
     processUrlParams()
   }, [])
   
-  // ✅ EFFECT: Load data based on active tab
+  // ==================== LOAD DATA ====================
   useEffect(() => {
     if (activeTab === 'autores') {
       carregarAutores()
@@ -869,12 +1015,9 @@ export default function AutoresReferenciasPage() {
     currentPageReferencias,
     itemsPerPage,
     debouncedSearchTermAutores,
-    debouncedSearchTermReferencias,
-    sortBy,
-    sortOrder
+    debouncedSearchTermReferencias
   ])
 
-  // ✅ EFFECT: Reset page when search changes
   useEffect(() => {
     if (activeTab === 'autores' && debouncedSearchTermAutores !== searchTermAutores) {
       setCurrentPageAutores(1)
@@ -887,7 +1030,7 @@ export default function AutoresReferenciasPage() {
     }
   }, [debouncedSearchTermReferencias, searchTermReferencias, activeTab])
 
-  // ✅ FUNCTION: Load authors
+  // ==================== CARREGAR AUTORES ====================
   const carregarAutores = async (): Promise<void> => {
     try {
       setLoading(true)
@@ -910,48 +1053,9 @@ export default function AutoresReferenciasPage() {
       
       const data: AutoresResponse = await response.json()
       
-      let autoresOrdenados = data.autores || []
-      
-      if (sortBy && autoresOrdenados.length > 0) {
-        autoresOrdenados = [...autoresOrdenados].sort((a, b) => {
-          let aValue: string | number = ''
-          let bValue: string | number = ''
-          
-          switch (sortBy) {
-            case 'nome_autor':
-              aValue = a.nome_autor || ''
-              bValue = b.nome_autor || ''
-              break
-            case 'total_plantas':
-              aValue = a.total_plantas || 0
-              bValue = b.total_plantas || 0
-              break
-            case 'total_referencias':
-              aValue = a.total_referencias || 0
-              bValue = b.total_referencias || 0
-              break
-            default:
-              aValue = ''
-              bValue = ''
-          }
-          
-          if (sortOrder === 'asc') {
-            if (typeof aValue === 'string') {
-              return aValue.localeCompare(bValue as string, 'pt', { numeric: true })
-            }
-            return (aValue as number) - (bValue as number)
-          } else {
-            if (typeof aValue === 'string') {
-              return (bValue as string).localeCompare(aValue, 'pt', { numeric: true })
-            }
-            return (bValue as number) - (aValue as number)
-          }
-        })
-      }
-      
-      setAutores(autoresOrdenados)
+      setAutores(data.autores || [])
       setTotalAutores(data.total || 0)
-      setTotalPagesAutores(Math.ceil((data.total || 0) / itemsPerPage))
+      setTotalPagesAutores(data.total_pages || 1)
       
     } catch (err) {
       console.error('❌ Erro ao carregar autores:', err)
@@ -962,7 +1066,7 @@ export default function AutoresReferenciasPage() {
     }
   }
 
-  // ✅ FUNCTION: Load references  
+  // ==================== CARREGAR REFERÊNCIAS ====================
   const carregarReferencias = async (): Promise<void> => {
     try {
       setLoading(true)
@@ -985,48 +1089,9 @@ export default function AutoresReferenciasPage() {
       
       const data: ReferenciasResponse = await response.json()
       
-      let referenciasOrdenadas = data.referencias || []
-      
-      if (sortBy && referenciasOrdenadas.length > 0) {
-        referenciasOrdenadas = [...referenciasOrdenadas].sort((a, b) => {
-          let aValue: string | number = ''
-          let bValue: string | number = ''
-          
-          switch (sortBy) {
-            case 'titulo_referencia':
-              aValue = a.titulo_referencia || ''
-              bValue = b.titulo_referencia || ''
-              break
-            case 'ano':
-              aValue = parseInt(a.ano || '0') || 0
-              bValue = parseInt(b.ano || '0') || 0
-              break
-            case 'tipo_referencia':
-              aValue = a.tipo_referencia || ''
-              bValue = b.tipo_referencia || ''
-              break
-            default:
-              aValue = ''
-              bValue = ''
-          }
-          
-          if (sortOrder === 'asc') {
-            if (typeof aValue === 'string') {
-              return aValue.localeCompare(bValue as string, 'pt', { numeric: true })
-            }
-            return (aValue as number) - (bValue as number)
-          } else {
-            if (typeof aValue === 'string') {
-              return (bValue as string).localeCompare(aValue, 'pt', { numeric: true })
-            }
-            return (bValue as number) - (aValue as number)
-          }
-        })
-      }
-      
-      setReferencias(referenciasOrdenadas)
+      setReferencias(data.referencias || [])
       setTotalReferencias(data.total || 0)
-      setTotalPagesReferencias(Math.ceil((data.total || 0) / itemsPerPage))
+      setTotalPagesReferencias(data.total_pages || 1)
       
     } catch (err) {
       console.error('❌ Erro ao carregar referências:', err)
@@ -1037,7 +1102,75 @@ export default function AutoresReferenciasPage() {
     }
   }
 
-  // ✅ FUNCTION: Handle sort
+  // Carregar referências do autor para hover
+  const carregarReferenciasAutor = async (idAutor: number): Promise<void> => {
+    if (hoverReferencias && hoverReferencias.id_autor === idAutor) {
+      return // Já carregou
+    }
+    
+    try {
+      setLoadingHover(true)
+      
+      const response = await fetch(`${API_BASE_URL}/api/admin/autores/${idAutor}`)
+      
+      if (!response.ok) {
+        throw new Error('Erro ao carregar referências')
+      }
+      
+      const data = await response.json()
+      
+      setHoverReferencias({
+        id_autor: idAutor,
+        referencias: data.referencias_recentes || []
+      })
+      
+    } catch (err) {
+      console.error('❌ Erro ao carregar referências:', err)
+    } finally {
+      setLoadingHover(false)
+    }
+  }
+
+  // Limpar hover
+  const limparHover = (): void => {
+    setHoverAutorId(null)
+    // Não limpar hoverReferencias para manter cache
+  }
+
+  const carregarAfiliacoes = async (): Promise<void> => {
+    try {
+      setLoadingAfiliacoes(true)
+      const response = await fetch(`${API_BASE_URL}/api/admin/afiliacoes`)
+      
+      if (!response.ok) {
+        throw new Error('Erro ao carregar afiliações')
+      }
+      
+      const data = await response.json()
+      setTodasAfiliacoes(data.afiliacoes || [])
+      
+    } catch (err) {
+      console.error('❌ Erro ao carregar afiliações:', err)
+      setTodasAfiliacoes([])
+    } finally {
+      setLoadingAfiliacoes(false)
+    }
+  }
+
+  const handleToggleAfiliacao = useCallback((idAfiliacao: number) => {
+    setFormDataAutor(prev => {
+      const isSelected = prev.afiliacoes_selecionadas.includes(idAfiliacao)
+      
+      return {
+        ...prev,
+        afiliacoes_selecionadas: isSelected
+          ? prev.afiliacoes_selecionadas.filter(id => id !== idAfiliacao)
+          : [...prev.afiliacoes_selecionadas, idAfiliacao]
+      }
+    })
+  }, [])
+
+  // ==================== HANDLERS ====================
   const handleSort = (column: SortField): void => {
     if (sortBy === column) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
@@ -1053,14 +1186,67 @@ export default function AutoresReferenciasPage() {
     }
   }
 
-  // ✅ FUNCTION: Handle page size change
+  // Criar nova afiliação
+  const handleCriarAfiliacao = async () => {
+    const nome = novaAfiliacaoNome.trim()
+    
+    if (!nome) {
+      alert('Nome da afiliação é obrigatório')
+      return
+    }
+    
+    try {
+      setCriandoAfiliacao(true)
+      
+      const response = await fetch(`${API_BASE_URL}/api/admin/afiliacoes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nome_afiliacao: nome,
+          sigla_afiliacao: novaAfiliacaoSigla.trim() || null
+        }),
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Erro ao criar afiliação')
+      }
+      
+      const data = await response.json()
+      const novaAfiliacao = data.afiliacao
+      
+      // Adicionar à lista
+      setTodasAfiliacoes(prev => [...prev, novaAfiliacao].sort((a, b) => 
+        a.nome_afiliacao.localeCompare(b.nome_afiliacao)
+      ))
+      
+      // Selecionar automaticamente a nova afiliação
+      setFormDataAutor(prev => ({
+        ...prev,
+        afiliacoes_selecionadas: [...prev.afiliacoes_selecionadas, novaAfiliacao.id_afiliacao]
+      }))
+      
+      // Limpar form e fechar
+      setNovaAfiliacaoNome("")
+      setNovaAfiliacaoSigla("")
+      setShowNovaAfiliacaoForm(false)
+      
+    } catch (err) {
+      console.error('❌ Erro ao criar afiliação:', err)
+      alert(err instanceof Error ? err.message : 'Erro ao criar afiliação')
+    } finally {
+      setCriandoAfiliacao(false)
+    }
+  }
+
   const handlePageSizeChange = (newSize: number): void => {
     setItemsPerPage(newSize)
     setCurrentPageAutores(1)
     setCurrentPageReferencias(1)
   }
 
-  // ✅ FUNCTION: Clear filters
   const limparFiltros = (): void => {
     if (activeTab === 'autores') {
       setSearchTermAutores("")
@@ -1076,23 +1262,30 @@ export default function AutoresReferenciasPage() {
     setSortOrder('asc')
   }
 
-  // ✅ MODAL FUNCTIONS
-  const abrirModal = useCallback((mode: ModalMode, item?: Autor | Referencia) => {
-    // Remover funcionalidade de adicionar - apenas view e edit
+  // ==================== MODAL FUNCTIONS ====================
+  const abrirModal = useCallback(async (mode: ModalMode, item?: Autor | Referencia) => {
     if (mode === 'add') {
-      return
+      return // Funcionalidade de adicionar removida
     }
     
     setModalMode(mode)
     
     if (activeTab === 'autores') {
+      // Carregar afiliações se ainda não foram carregadas
+      if (todasAfiliacoes.length === 0) {
+        await carregarAfiliacoes()
+      }
+      
       setSelectedAutor(item as Autor || null)
       if (mode === 'edit' && item) {
         const autor = item as Autor
+        
+        // Extrair IDs das afiliações atuais
+        const afiliacoesIds = autor.afiliacoes?.map(af => af.id_afiliacao) || []
+        
         setFormDataAutor({
           nome_autor: autor.nome_autor,
-          afiliacao: autor.afiliacao || "",
-          sigla_afiliacao: autor.sigla_afiliacao || ""
+          afiliacoes_selecionadas: afiliacoesIds
         })
       }
     } else {
@@ -1101,38 +1294,39 @@ export default function AutoresReferenciasPage() {
         const referencia = item as Referencia
         setFormDataReferencia({
           titulo_referencia: referencia.titulo_referencia || "",
-          tipo_referencia: referencia.tipo_referencia || "",
-          ano: referencia.ano || "",
-          link_referencia: referencia.link_referencia,
-          autores: referencia.autores_especificos || []
+          ano_publicacao: referencia.ano_publicacao?.toString() || "",
+          link_referencia: referencia.link_referencia || ""
         })
       }
     }
     
     setShowModal(true)
-  }, [activeTab])
+  }, [activeTab, todasAfiliacoes.length])
 
   const fecharModal = useCallback(() => {
     setShowModal(false)
     setSelectedAutor(null)
     setSelectedReferencia(null)
-    setFormDataAutor({ nome_autor: "", afiliacao: "", sigla_afiliacao: "" })
+    setFormDataAutor({ 
+      nome_autor: "",
+      afiliacoes_selecionadas: []
+    })
     setFormDataReferencia({
       titulo_referencia: "",
-      tipo_referencia: "",
-      ano: "",
-      link_referencia: "",
-      autores: []
+      ano_publicacao: "",
+      link_referencia: ""
     })
     setModalLoading(false)
+    setShowNovaAfiliacaoForm(false)
+    setNovaAfiliacaoNome("")
+    setNovaAfiliacaoSigla("")
   }, [])
 
-  // ✅ HANDLE SUBMIT
+  // ==================== HANDLE SUBMIT ====================
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     e.stopPropagation()
     
-    // Apenas permitir edição, não criação
     if (modalMode !== 'edit') {
       return false
     }
@@ -1146,71 +1340,132 @@ export default function AutoresReferenciasPage() {
       try {
         setModalLoading(true)
         
-        const url = selectedAutor 
-          ? `${API_BASE_URL}/api/admin/autores/${selectedAutor.id_autor}`
-          : `${API_BASE_URL}/api/admin/autores`
+        if (!selectedAutor) {
+          throw new Error('Nenhum autor selecionado')
+        }
         
-        const response = await fetch(url, {
+        // 1. Atualizar nome do autor
+        const responseAutor = await fetch(`${API_BASE_URL}/api/admin/autores/${selectedAutor.id_autor}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(formDataAutor),
+          body: JSON.stringify({
+            nome_autor: formDataAutor.nome_autor.trim()
+          }),
         })
         
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.error || 'Erro ao salvar autor')
+        if (!responseAutor.ok) {
+          const errorData = await responseAutor.json()
+          throw new Error(errorData.error || 'Erro ao atualizar autor')
+        }
+        
+        // 2. Gerenciar afiliações
+        // Afiliações atuais (antes da edição)
+        const afiliacoesAtuaisIds = selectedAutor.afiliacoes?.map(af => af.id_afiliacao) || []
+        
+        // Afiliações para adicionar (estão selecionadas mas não estavam antes)
+        const paraAdicionar = formDataAutor.afiliacoes_selecionadas.filter(
+          id => !afiliacoesAtuaisIds.includes(id)
+        )
+        
+        // Afiliações para remover (estavam antes mas não estão selecionadas)
+        const paraRemover = afiliacoesAtuaisIds.filter(
+          id => !formDataAutor.afiliacoes_selecionadas.includes(id)
+        )
+        
+        // Adicionar novas afiliações
+        for (const idAfiliacao of paraAdicionar) {
+          const addResponse = await fetch(
+            `${API_BASE_URL}/api/admin/autores/${selectedAutor.id_autor}/afiliacoes`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ id_afiliacao: idAfiliacao }),
+            }
+          )
+          
+          if (!addResponse.ok) {
+            console.warn(`⚠️ Erro ao adicionar afiliação ${idAfiliacao}`)
+          }
+        }
+        
+        // Remover afiliações desmarcadas
+        for (const idAfiliacao of paraRemover) {
+          const removeResponse = await fetch(
+            `${API_BASE_URL}/api/admin/autores/${selectedAutor.id_autor}/afiliacoes/${idAfiliacao}`,
+            {
+              method: 'DELETE'
+            }
+          )
+          
+          if (!removeResponse.ok) {
+            console.warn(`⚠️ Erro ao remover afiliação ${idAfiliacao}`)
+          }
         }
         
         fecharModal()
         await carregarAutores()
         
       } catch (err) {
-        console.error('❌ Erro ao salvar autor:', err)
-        alert(err instanceof Error ? err.message : 'Erro ao salvar autor')
+        console.error('❌ Erro ao atualizar autor:', err)
+        alert(err instanceof Error ? err.message : 'Erro ao atualizar autor')
       } finally {
         setModalLoading(false)
       }
     } else {
-      if (!formDataReferencia.link_referencia.trim()) {
-        alert('Link da referência é obrigatório')
+      if (!formDataReferencia.titulo_referencia.trim()) {
+        alert('Título da referência é obrigatório')
         return false
       }
 
       try {
         setModalLoading(true)
         
-        const url = selectedReferencia 
-          ? `${API_BASE_URL}/api/admin/referencias/${selectedReferencia.id_referencia}`
-          : `${API_BASE_URL}/api/admin/referencias`
+        if (!selectedReferencia) {
+          throw new Error('Nenhuma referência selecionada')
+        }
         
-        const response = await fetch(url, {
+        const payload: any = {
+          titulo_referencia: formDataReferencia.titulo_referencia.trim()
+        }
+        
+        if (formDataReferencia.link_referencia.trim()) {
+          payload.link_referencia = formDataReferencia.link_referencia.trim()
+        }
+        
+        if (formDataReferencia.ano_publicacao.trim()) {
+          payload.ano_publicacao = formDataReferencia.ano_publicacao.trim()
+        }
+        
+        const response = await fetch(`${API_BASE_URL}/api/admin/referencias/${selectedReferencia.id_referencia}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(formDataReferencia),
+          body: JSON.stringify(payload),
         })
         
         if (!response.ok) {
           const errorData = await response.json()
-          throw new Error(errorData.error || 'Erro ao salvar referência')
+          throw new Error(errorData.error || 'Erro ao atualizar referência')
         }
         
         fecharModal()
         await carregarReferencias()
         
       } catch (err) {
-        console.error('❌ Erro ao salvar referência:', err)
-        alert(err instanceof Error ? err.message : 'Erro ao salvar referência')
+        console.error('❌ Erro ao atualizar referência:', err)
+        alert(err instanceof Error ? err.message : 'Erro ao atualizar referência')
       } finally {
         setModalLoading(false)
       }
     }
   }, [activeTab, formDataAutor, formDataReferencia, modalMode, selectedAutor, selectedReferencia, fecharModal])
 
-  // ✅ INPUT CHANGE HANDLERS
+  // ==================== INPUT CHANGE HANDLERS ====================
   const handleInputChangeAutor = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormDataAutor(prevFormData => ({
@@ -1227,7 +1482,7 @@ export default function AutoresReferenciasPage() {
     }))
   }, [])
 
-  // ✅ DELETE FUNCTIONS
+  // ==================== DELETE FUNCTIONS ====================
   const handleDelete = async (id: number): Promise<void> => {
     try {
       if (activeTab === 'autores') {
@@ -1239,13 +1494,13 @@ export default function AutoresReferenciasPage() {
         
         const autorData = await checkResponse.json()
         
-        const totalRelacionados = (autorData.total_plantas || 0) + (autorData.total_referencias || 0)
+        const totalRelacionados = (autorData.total_referencias || 0)
         
         if (totalRelacionados > 0) {
           setConfirmModalData({
             type: 'warning',
             title: 'Não é possível excluir este autor',
-            message: `O autor "${autorData.nome_autor}" tem ${totalRelacionados} associações (${autorData.total_plantas || 0} plantas e ${autorData.total_referencias || 0} referências).`,
+            message: `O autor "${autorData.nome_autor}" tem ${totalRelacionados} referência(s) associada(s).`,
             itemName: autorData.nome_autor,
             totalRelacionados: totalRelacionados
           })
@@ -1274,8 +1529,8 @@ export default function AutoresReferenciasPage() {
           setConfirmModalData({
             type: 'warning',
             title: 'Não é possível excluir esta referência',
-            message: `A referência "${referenciaData.titulo_referencia || 'Sem título'}" tem ${referenciaData.total_plantas} plantas associadas.`,
-            itemName: referenciaData.titulo_referencia || 'Sem título',
+            message: `A referência "${referenciaData.titulo_referencia}" tem ${referenciaData.total_plantas} planta(s) associada(s).`,
+            itemName: referenciaData.titulo_referencia,
             totalRelacionados: referenciaData.total_plantas
           })
           setShowConfirmModal(true)
@@ -1285,9 +1540,9 @@ export default function AutoresReferenciasPage() {
         setConfirmModalData({
           type: 'delete',
           title: 'Confirmar exclusão',
-          message: `Tem certeza que deseja excluir a referência "${referenciaData.titulo_referencia || 'Sem título'}"?`,
+          message: `Tem certeza que deseja excluir a referência "${referenciaData.titulo_referencia}"?`,
           itemId: id,
-          itemName: referenciaData.titulo_referencia || 'Sem título'
+          itemName: referenciaData.titulo_referencia
         })
         setShowConfirmModal(true)
       }
@@ -1331,7 +1586,7 @@ export default function AutoresReferenciasPage() {
     setConfirmModalData(null)
   }, [])
 
-  // ✅ PAGINATION FUNCTIONS
+  // ==================== PAGINATION ====================
   const renderPaginationNumbers = () => {
     const totalPages = activeTab === 'autores' ? totalPagesAutores : totalPagesReferencias
     const currentPage = activeTab === 'autores' ? currentPageAutores : currentPageReferencias
@@ -1391,7 +1646,7 @@ export default function AutoresReferenciasPage() {
     return pages
   }
 
-  // ✅ COMPUTED VALUES
+  // ==================== COMPUTED VALUES ====================
   const currentData = activeTab === 'autores' ? autores : referencias
   const currentTotal = activeTab === 'autores' ? totalAutores : totalReferencias
   const currentPage = activeTab === 'autores' ? currentPageAutores : currentPageReferencias
@@ -1400,7 +1655,7 @@ export default function AutoresReferenciasPage() {
   const currentDebouncedSearchTerm = activeTab === 'autores' ? debouncedSearchTermAutores : debouncedSearchTermReferencias
   const isSearching = currentSearchTerm !== currentDebouncedSearchTerm && currentSearchTerm.length > 0
 
-  // ✅ RENDER STATES
+  // ==================== RENDER STATES ====================
   if (loading && currentData.length === 0) {
     return (
       <div className={styles.container}>
@@ -1479,7 +1734,7 @@ export default function AutoresReferenciasPage() {
                 type="text"
                 id="search"
                 name="search"
-                placeholder={activeTab === 'autores' ? "Buscar autores por nome ou afiliação..." : "Buscar referências por título ou link..."}
+                placeholder={activeTab === 'autores' ? "Buscar autores por nome..." : "Buscar referências por título ou link..."}
                 value={currentSearchTerm}
                 onChange={(e) => activeTab === 'autores' ? setSearchTermAutores(e.target.value) : setSearchTermReferencias(e.target.value)}
                 className={styles.input}
@@ -1580,47 +1835,29 @@ export default function AutoresReferenciasPage() {
               <tr>
                 {activeTab === 'autores' ? (
                   <>
-                    <th 
-                      className={`${styles.tableHeaderCell} ${styles.sortable}`}
-                      onClick={() => handleSort('nome_autor')}
-                    >
-                      Nome do Autor {sortBy === 'nome_autor' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    <th className={styles.tableHeaderCell}>
+                      Nome do Autor
                     </th>
                     <th className={styles.tableHeaderCell}>
-                      Afiliação
+                      Afiliações
                     </th>
-                    <th 
-                      className={`${styles.tableHeaderCell} ${styles.sortable}`}
-                      onClick={() => handleSort('total_plantas')}
-                    >
-                      Plantas {sortBy === 'total_plantas' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    <th className={styles.tableHeaderCell}>
+                      Plantas
                     </th>
-                    <th 
-                      className={`${styles.tableHeaderCell} ${styles.sortable}`}
-                      onClick={() => handleSort('total_referencias')}
-                    >
-                      Referências {sortBy === 'total_referencias' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    <th className={styles.tableHeaderCell}>
+                      Referências
                     </th>
                   </>
                 ) : (
                   <>
-                    <th 
-                      className={`${styles.tableHeaderCell} ${styles.sortable}`}
-                      onClick={() => handleSort('titulo_referencia')}
-                    >
-                      Título {sortBy === 'titulo_referencia' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    <th className={styles.tableHeaderCell}>
+                      Título
                     </th>
-                    <th 
-                      className={`${styles.tableHeaderCell} ${styles.sortable}`}
-                      onClick={() => handleSort('tipo_referencia')}
-                    >
-                      Tipo {sortBy === 'tipo_referencia' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    <th className={styles.tableHeaderCell}>
+                      Tipo
                     </th>
-                    <th 
-                      className={`${styles.tableHeaderCell} ${styles.sortable}`}
-                      onClick={() => handleSort('ano')}
-                    >
-                      Ano {sortBy === 'ano' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    <th className={styles.tableHeaderCell}>
+                      Ano
                     </th>
                     <th className={styles.tableHeaderCell}>
                       Link
@@ -1635,7 +1872,7 @@ export default function AutoresReferenciasPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={activeTab === 'autores' ? 5 : 6} className={styles.emptyMessage}>
+                  <td colSpan={activeTab === 'autores' ? 5 : 5} className={styles.emptyMessage}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                       <div className={styles.loadingSpinner}></div>
                       Carregando...
@@ -1644,7 +1881,7 @@ export default function AutoresReferenciasPage() {
                 </tr>
               ) : currentData.length === 0 ? (
                 <tr>
-                  <td colSpan={activeTab === 'autores' ? 5 : 6} className={styles.emptyMessage}>
+                  <td colSpan={activeTab === 'autores' ? 5 : 5} className={styles.emptyMessage}>
                     {currentDebouncedSearchTerm ? (
                       <div className={styles.emptyContent}>
                         <div className={styles.emptyIcon}>🔍</div>
@@ -1654,10 +1891,10 @@ export default function AutoresReferenciasPage() {
                         <p className={styles.emptyDescription}>
                           Não encontramos {activeTab} que correspondam a "{currentDebouncedSearchTerm}".
                           <br />
-                          Tente ajustar sua busca ou adicionar um novo {activeTab.slice(0, -1)}.
+                          Tente ajustar sua busca.
                         </p>
                         <button 
-                          onClick={() => abrirModal('add')}
+                          onClick={limparFiltros}
                           className={styles.addButton}
                           style={{ marginTop: 0 }}
                         >
@@ -1671,15 +1908,8 @@ export default function AutoresReferenciasPage() {
                           Nenhum {activeTab.slice(0, -1)} cadastrado
                         </h3>
                         <p className={styles.emptyDescription}>
-                          Comece adicionando seu primeiro {activeTab.slice(0, -1)}.
+                          A base de dados está vazia.
                         </p>
-                        <button 
-                          onClick={() => limparFiltros()}
-                          className={styles.addButton}
-                          style={{ marginTop: 0 }}
-                        >
-                          Ver Primeiro {activeTab === 'autores' ? 'Autor' : 'Referência'}
-                        </button>
                       </div>
                     )}
                   </td>
@@ -1698,27 +1928,203 @@ export default function AutoresReferenciasPage() {
                           <div className={styles.cellTitle}>
                             {(item as Autor).nome_autor}
                           </div>
-                          {(item as Autor).sigla_afiliacao && (
-                            <div className={styles.cellSubtitle}>
-                              {(item as Autor).sigla_afiliacao}
+                        </td>
+                        <td className={styles.tableCell}>
+                          {/* ✅ MOSTRAR PRIMEIRA AFILIAÇÃO + CONTADOR */}
+                          {(item as Autor).afiliacoes && (item as Autor).afiliacoes!.length > 0 ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                              <span className={styles.afiliacaoTag}>
+                                {(item as Autor).afiliacoes![0].nome_afiliacao}
+                                {(item as Autor).afiliacoes![0].sigla_afiliacao && 
+                                  ` (${(item as Autor).afiliacoes![0].sigla_afiliacao})`
+                                }
+                              </span>
+                              {(item as Autor).afiliacoes!.length > 1 && (
+                                <span style={{
+                                  fontSize: '0.75rem',
+                                  fontWeight: '600',
+                                  color: '#002856',
+                                  backgroundColor: '#eba900',
+                                  padding: '0.125rem 0.5rem',
+                                  borderRadius: '9999px',
+                                  whiteSpace: 'nowrap'
+                                }}>
+                                  +{(item as Autor).afiliacoes!.length - 1}
+                                </span>
+                              )}
                             </div>
+                          ) : (
+                            <span className={styles.textMuted}>Sem afiliação</span>
                           )}
                         </td>
                         <td className={styles.tableCell}>
-                          {(item as Autor).afiliacao || 'Não informado'}
+                          {(item as Autor).total_plantas || 0}
                         </td>
                         <td className={styles.tableCell}>
-                          {(item as Autor).total_plantas || 0} plantas
-                        </td>
                         <td className={styles.tableCell}>
-                          {(item as Autor).total_referencias || 0} referências
+                          <div 
+                            style={{ position: 'relative', display: 'inline-block' }}
+                            onMouseEnter={() => {
+                              setHoverAutorId((item as Autor).id_autor)
+                              carregarReferenciasAutor((item as Autor).id_autor)
+                            }}
+                            onMouseLeave={limparHover}
+                          >
+                            <span style={{ 
+                              cursor: 'pointer',
+                              fontWeight: '500',
+                              color: (item as Autor).total_referencias ? '#002856' : 'inherit',
+                              borderBottom: (item as Autor).total_referencias ? '1px dashed #002856' : 'none'
+                            }}>
+                              {(item as Autor).total_referencias || 0}
+                            </span>
+                            
+                            {/* TOOLTIP COM REFERÊNCIAS - CORES DO SITE */}
+                            {hoverAutorId === (item as Autor).id_autor && (item as Autor).total_referencias! > 0 && (
+                              <div style={{
+                                position: 'fixed',
+                                left: '50%',
+                                top: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                backgroundColor: 'white',
+                                border: '2px solid #002856',
+                                borderRadius: '0.5rem',
+                                padding: '1rem',
+                                boxShadow: '0 20px 25px -5px rgba(0, 40, 86, 0.3), 0 10px 10px -5px rgba(0, 40, 86, 0.2)',
+                                zIndex: 9999,
+                                minWidth: '350px',
+                                maxWidth: '500px',
+                                maxHeight: '400px',
+                                overflowY: 'auto'
+                              }}>
+                                <div style={{
+                                  fontSize: '0.875rem',
+                                  fontWeight: '700',
+                                  color: '#002856',
+                                  marginBottom: '0.75rem',
+                                  paddingBottom: '0.5rem',
+                                  borderBottom: '2px solid #eba900',
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.05em'
+                                }}>
+                                  📚 Referências de {(item as Autor).nome_autor}
+                                </div>
+                                
+                                {loadingHover ? (
+                                  <div style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center',
+                                    padding: '2rem',
+                                    gap: '0.5rem'
+                                  }}>
+                                    <div className={styles.loadingSpinner} style={{ 
+                                      width: '20px', 
+                                      height: '20px',
+                                      borderWidth: '2px',
+                                      borderTopColor: '#002856'
+                                    }}></div>
+                                    <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                                      A carregar referências...
+                                    </span>
+                                  </div>
+                                ) : hoverReferencias && hoverReferencias.referencias.length > 0 ? (
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    {hoverReferencias.referencias.slice(0, 10).map((ref, idx) => (
+                                      <div 
+                                        key={ref.id_referencia}
+                                        style={{
+                                          padding: '0.75rem',
+                                          backgroundColor: '#f8fafc',
+                                          border: '1px solid #e5e7eb',
+                                          borderRadius: '0.375rem',
+                                          fontSize: '0.875rem',
+                                          transition: 'all 0.2s'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                          e.currentTarget.style.backgroundColor = '#fff7ed'
+                                          e.currentTarget.style.borderColor = '#eba900'
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          e.currentTarget.style.backgroundColor = '#f8fafc'
+                                          e.currentTarget.style.borderColor = '#e5e7eb'
+                                        }}
+                                      >
+                                        <div style={{
+                                          display: 'flex',
+                                          alignItems: 'flex-start',
+                                          gap: '0.5rem'
+                                        }}>
+                                          <span style={{
+                                            fontSize: '0.75rem',
+                                            fontWeight: '700',
+                                            color: '#002856',
+                                            backgroundColor: '#eba900',
+                                            padding: '0.125rem 0.375rem',
+                                            borderRadius: '0.25rem',
+                                            flexShrink: 0
+                                          }}>
+                                            {idx + 1}
+                                          </span>
+                                          <div style={{ flex: 1 }}>
+                                            <div style={{ 
+                                              fontWeight: '500',
+                                              color: '#002856',
+                                              marginBottom: '0.25rem',
+                                              lineHeight: '1.4'
+                                            }}>
+                                              {ref.titulo_referencia}
+                                            </div>
+                                            {ref.ano_publicacao && (
+                                              <div style={{ 
+                                                fontSize: '0.75rem',
+                                                color: '#6b7280',
+                                                fontWeight: '500'
+                                              }}>
+                                                📅 {ref.ano_publicacao}
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                    {hoverReferencias.referencias.length > 10 && (
+                                      <div style={{
+                                        fontSize: '0.75rem',
+                                        color: '#002856',
+                                        textAlign: 'center',
+                                        marginTop: '0.25rem',
+                                        fontWeight: '600',
+                                        padding: '0.5rem',
+                                        backgroundColor: '#fff7ed',
+                                        borderRadius: '0.375rem',
+                                        border: '1px solid #eba900'
+                                      }}>
+                                        + {hoverReferencias.referencias.length - 10} referências adicionais
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div style={{
+                                    fontSize: '0.875rem',
+                                    color: '#6b7280',
+                                    textAlign: 'center',
+                                    padding: '2rem'
+                                  }}>
+                                    Nenhuma referência encontrada
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </td>
                         </td>
                       </>
                     ) : (
                       <>
                         <td className={styles.tableCellMain}>
                           <div className={styles.cellTitle}>
-                            {(item as Referencia).titulo_referencia || 'Sem título'}
+                            {(item as Referencia).titulo_referencia}
                           </div>
                           {(item as Referencia).total_plantas && (item as Referencia).total_plantas! > 0 && (
                             <div className={styles.cellSubtitle}>
@@ -1728,24 +2134,28 @@ export default function AutoresReferenciasPage() {
                         </td>
                         <td className={styles.tableCell}>
                           <span className={styles.badge}>
-                            {(item as Referencia).tipo_referencia || 'Não definido'}
+                            {(item as Referencia).tipo_referencia || 'Outro'}
                           </span>
                         </td>
                         <td className={styles.tableCell}>
-                          {(item as Referencia).ano || 'N/A'}
+                          {(item as Referencia).ano_publicacao || 'N/A'}
                         </td>
                         <td className={styles.tableCell}>
-                          <a 
-                            href={(item as Referencia).link_referencia} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className={styles.cellLink}
-                          >
-                            {(item as Referencia).link_referencia.length > 50 
-                              ? `${(item as Referencia).link_referencia.substring(0, 50)}...` 
-                              : (item as Referencia).link_referencia
-                            }
-                          </a>
+                          {(item as Referencia).link_referencia ? (
+                            <a 
+                              href={(item as Referencia).link_referencia} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className={styles.cellLink}
+                            >
+                              {(item as Referencia).link_referencia.length > 50 
+                                ? `${(item as Referencia).link_referencia.substring(0, 50)}...` 
+                                : (item as Referencia).link_referencia
+                              }
+                            </a>
+                          ) : (
+                            <span className={styles.textMuted}>Sem link</span>
+                          )}
                         </td>
                       </>
                     )}
@@ -1866,9 +2276,20 @@ export default function AutoresReferenciasPage() {
           modalLoading={modalLoading}
           selectedItem={selectedAutor}
           formData={formDataAutor}
+          todasAfiliacoes={todasAfiliacoes}
+          loadingAfiliacoes={loadingAfiliacoes}
+          showNovaAfiliacaoForm={showNovaAfiliacaoForm}
+          novaAfiliacaoNome={novaAfiliacaoNome}
+          novaAfiliacaoSigla={novaAfiliacaoSigla}
+          criandoAfiliacao={criandoAfiliacao}
           onFechar={fecharModal}
           onSubmit={handleSubmit}
           onInputChange={handleInputChangeAutor}
+          onToggleAfiliacao={handleToggleAfiliacao}
+          onToggleNovaAfiliacaoForm={() => setShowNovaAfiliacaoForm(!showNovaAfiliacaoForm)}
+          onChangeNovaAfiliacaoNome={setNovaAfiliacaoNome}
+          onChangeNovaAfiliacaoSigla={setNovaAfiliacaoSigla}
+          onCriarAfiliacao={handleCriarAfiliacao}
         />
       ) : (
         <ModalGestaoReferencia

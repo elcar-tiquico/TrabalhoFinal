@@ -161,7 +161,7 @@
 
 @media (min-width: 1024px) {
   .statsGrid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -172,6 +172,10 @@
   border-radius: 0.5rem;
   overflow: hidden;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  min-height: 120px; /* ✅ ADICIONAR ESTA LINHA */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .statContent {
@@ -238,7 +242,9 @@
 }
 
 .statPeriod {
-  color: #6b7280;
+  color: #eab308;
+  font-weight: 500;
+  font-size: 0.875rem;
 }
 
 /* Tabs */

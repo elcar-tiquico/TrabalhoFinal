@@ -78,32 +78,41 @@ class Planta_medicinal(db.Model):
                             'local': local_obj.nome_local
                         })
 
-                autores_dict = {}  # Usar dict para evitar duplicatas
-    
-                for pr in self.referencias:
-                    if pr.referencia:
-                        for ra in pr.referencia.autores_relacao:
-                            if ra.autor and ra.autor.id_autor not in autores_dict:
-                                autor = ra.autor
-                                
-                                # Buscar afiliações deste autor
-                                afiliacao_nome = None
-                                afiliacao_sigla = None
-                                
-                                if autor.afiliacoes and len(autor.afiliacoes) > 0:
-                                    primeira_afiliacao = autor.afiliacoes[0]
-                                    if primeira_afiliacao.afiliacao:
-                                        afiliacao_nome = primeira_afiliacao.afiliacao.nome_afiliacao
-                                        afiliacao_sigla = primeira_afiliacao.afiliacao.sigla_afiliacao
-                                
-                                autores_dict[autor.id_autor] = {
-                                    'id_autor': autor.id_autor,
-                                    'nome_autor': autor.nome_autor,
-                                    'afiliacao': afiliacao_nome,
-                                    'sigla_afiliacao': afiliacao_sigla
-                                }
-                
-                autores_list = list(autores_dict.values())
+                        # ✅ Buscar TODOS os autores com TODAS as suas afiliações
+                        autores_dict = {}  # Usar dict para evitar duplicatas
+
+                        for pr in self.referencias:
+                            if pr.referencia:
+                                for ra in pr.referencia.autores_relacao:
+                                    if ra.autor and ra.autor.id_autor not in autores_dict:
+                                        autor = ra.autor
+                                        
+                                        # ✅ Buscar TODAS as afiliações deste autor
+                                        afiliacoes_list = []
+                                        for aa in autor.afiliacoes:
+                                            if aa.afiliacao:
+                                                afiliacoes_list.append({
+                                                    'id_afiliacao': aa.afiliacao.id_afiliacao,
+                                                    'nome_afiliacao': aa.afiliacao.nome_afiliacao,
+                                                    'sigla_afiliacao': aa.afiliacao.sigla_afiliacao
+                                                })
+                                        
+                                        # ✅ Manter compatibilidade: primeira afiliação nos campos diretos
+                                        afiliacao_nome = None
+                                        afiliacao_sigla = None
+                                        if afiliacoes_list:
+                                            afiliacao_nome = afiliacoes_list[0]['nome_afiliacao']
+                                            afiliacao_sigla = afiliacoes_list[0]['sigla_afiliacao']
+                                        
+                                        autores_dict[autor.id_autor] = {
+                                            'id_autor': autor.id_autor,
+                                            'nome_autor': autor.nome_autor,
+                                            'afiliacao': afiliacao_nome,  # Primeira afiliação (compatibilidade)
+                                            'sigla_afiliacao': afiliacao_sigla,  # Primeira afiliação (compatibilidade)
+                                            'afiliacoes': afiliacoes_list  # ✅ TODAS as afiliações
+                                        }
+
+                        autores_list = list(autores_dict.values())
             
             # 2. ✅ Buscar partes usadas com indicações, métodos de preparação e extração
             partes_com_indicacoes = []
