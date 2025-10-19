@@ -48,6 +48,11 @@ from routes.familias import admin_familias_bp
 # Depois dos outros imports de routes
 from routes.admin_autores_referencias import admin_autores_refs_bp
 
+# =====================================================
+# REGISTRAR O BLUEPRINT DO WIZARD
+# =====================================================
+from routes.wizard_plantas import wizard_plantas_bp
+
 # ===== Registrar Blueprints EXISTENTES =====
 app.register_blueprint(plantas_bp, url_prefix='/api')
 app.register_blueprint(busca_bp, url_prefix='/api')
@@ -69,6 +74,9 @@ app.register_blueprint(admin_familias_bp, url_prefix='/api/admin')
 
 #==== Bluefprint Autores e Referências =====
 app.register_blueprint(admin_autores_refs_bp)
+
+#===Gestao de Plantas pelo Wizard===
+app.register_blueprint(wizard_plantas_bp)
 
 # ===== Rota de health check =====
 @app.route('/health')

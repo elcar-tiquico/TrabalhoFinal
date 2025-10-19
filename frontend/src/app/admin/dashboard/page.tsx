@@ -969,7 +969,7 @@ const abrirModalVisualizacao = async (tipo: 'autor' | 'referencia' | 'planta', i
                 <div className={styles.statChange}>
                   <span className={styles.statIncrease}>
                     {plantasPorFamilia.length > 0 && plantasPorFamilia[0] 
-                      ? `${formatarNomeFamilia(plantasPorFamilia[0].name)} é a maior`
+                      ? `${formatarNomeFamilia(plantasPorFamilia[0].name)} é a maior família`
                       : 'Diversidade taxonómica'
                     }
                   </span>
