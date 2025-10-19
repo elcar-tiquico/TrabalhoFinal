@@ -4,17 +4,39 @@
 Rotas Auxiliares (Províncias, Partes Usadas, Indicações, etc)
 """
 from flask import Blueprint, jsonify
-from models.localizacao import Provincia
+from models.localizacao import Provincia, Local_colheita, Planta_local
 from models.uso_medicinal import Parte_usada, Indicacao
+from models.planta import db
+from sqlalchemy import func, distinct
 
 dashboard_auxiliares_bp = Blueprint('dashboard_auxiliares', __name__)
 
 @dashboard_auxiliares_bp.route('/provincias', methods=['GET'])
 def get_provincias():
-    """Listar províncias"""
+    """Listar províncias com contagem de plantas"""
     try:
-        provincias = Provincia.query.order_by(Provincia.provincia).all()
-        return jsonify({'provincias': [p.to_dict() for p in provincias]}), 200
+        # ✅ Query que conta plantas por província através de Local_colheita
+        provincias_com_count = db.session.query(
+            Provincia,
+            func.count(distinct(Planta_local.id_planta)).label('total_plantas')
+        ).outerjoin(
+            Local_colheita, Local_colheita.id_provincia == Provincia.id_provincia
+        ).outerjoin(
+            Planta_local, Planta_local.id_local == Local_colheita.id_local
+        ).group_by(
+            Provincia.id_provincia
+        ).order_by(
+            Provincia.provincia
+        ).all()
+        
+        # Formatar resultado
+        result = []
+        for provincia, total in provincias_com_count:
+            provincia_dict = provincia.to_dict()
+            provincia_dict['total_plantas'] = total
+            result.append(provincia_dict)
+        
+        return jsonify({'provincias': result}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

@@ -6,7 +6,7 @@ Rotas de Busca do Dashboard
 from flask import Blueprint, jsonify, request
 from models.planta import db, Planta_medicinal, Nome_comum
 from models.referencia import Autor
-from sqlalchemy import func, or_
+from sqlalchemy import func
 
 dashboard_busca_bp = Blueprint('dashboard_busca', __name__)
 

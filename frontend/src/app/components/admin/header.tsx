@@ -14,12 +14,14 @@ interface AdminHeaderProps {
 interface SearchResult {
   id: number
   tipo: 'planta' | 'familia' | 'autor'
+  // ✅ Campos que VÊM da API
   nome_cientifico?: string
   nome_comum?: string
   familia?: string
   nome?: string
-  afiliacao?: string
-  total_nomes_comuns?: number
+  nome_familia?: string
+  nome_autor?: string
+  total_plantas?: number
 }
 
 interface SearchResponse {
@@ -46,7 +48,7 @@ export function AdminHeader({ onToggleMobileMenu }: AdminHeaderProps) {
   const profileRef = useRef<HTMLDivElement>(null)
 
   // API base URL
-  const API_BASE_URL = process.env.REACT_APP_ADMIN_API_URL || 'http://localhost:5001'
+  const API_BASE_URL = process.env.REACT_APP_ADMIN_API_URL || 'http://localhost:5000'
 
   const [isMobile, setIsMobile] = useState(false)
 
@@ -166,180 +168,110 @@ export function AdminHeader({ onToggleMobileMenu }: AdminHeaderProps) {
     return () => clearTimeout(timer)
   }, [searchTerm])
 
-  const handleResultClick = async (result: SearchResult) => {
-    console.log('🔍 Clicando em resultado:', result)
-    
-    setIsSearchOpen(false)
-    setSearchTerm("")
+const handleResultClick = async (result: SearchResult) => {
+  console.log('🔍 Clicando em resultado:', result)
+  
+  setIsSearchOpen(false)
+  setSearchTerm("")
+  setSearchResults(null)
+  setSearchError("")
+  setIsSearching(false)
+  
+  await new Promise(resolve => setTimeout(resolve, 100))
+  
+  const timestamp = Date.now()
+  let url = ""
+  
+  switch (result.tipo) {
+    case 'planta':
+      // Navega diretamente com busca pelo nome científico
+      url = `/admin/plants?search_type=geral&search_term=${encodeURIComponent(result.nome_cientifico || '')}&highlight=${result.id}&t=${timestamp}`
+      break
+      
+    case 'familia':
+      // Navega para plantas filtrando por família
+      url = `/admin/plants?familia=${encodeURIComponent(result.nome || '')}&highlight_familia=true&t=${timestamp}`
+      break
+      
+    case 'autor':
+      // Navega para busca por autor
+      url = `/admin/references?tab=autores&search=${encodeURIComponent(result.nome || '')}&highlight=${result.id}&type=autor&t=${timestamp}`
+      break
+  }
+
+  console.log('🚀 Navegando para:', url)
+
+  if (url) {
+    window.location.href = url
+  }
+}
+
+const performSearchWithPages = async (term: string, filter: string = activeSearchFilter) => {
+  if (!term.trim()) {
     setSearchResults(null)
-    setSearchError("")
+    return
+  }
+
+  setIsSearching(true)
+  setSearchError("")
+
+  try {
+    console.log(`🔍 Buscando "${term}" em ${filter}`)
+    
+    const filterMap: { [key: string]: string } = {
+      "Plantas": "plantas",
+      "Famílias": "familias", 
+      "Autores": "autores"
+    }
+
+    const apiFilter = filter === "Todos" ? "todos" : filterMap[filter] || "plantas"
+    
+    const response = await fetch(
+      `${API_BASE_URL}/api/admin/dashboard/busca?q=${encodeURIComponent(term)}&tipo=${apiFilter}&limit=10`
+    )
+
+    if (!response.ok) {
+      throw new Error(`Erro na pesquisa: ${response.status}`)
+    }
+
+    const data = await response.json()
+    console.log('✅ Resultados de busca:', data)
+    
+    // ✅ CORREÇÃO: Mapear corretamente os campos da API
+    const searchResults: SearchResponse = {
+      plantas: (data.plantas || []).map((planta: any) => ({
+        id: planta.id,
+        tipo: 'planta' as const,
+        nome_cientifico: planta.nome_cientifico,
+        nome_comum: planta.nome_comum,
+        familia: planta.familia
+      })),
+      familias: (data.familias || []).map((familia: any) => ({
+        id: familia.id || 0,
+        tipo: 'familia' as const,
+        nome: familia.nome || familia.nome_familia,
+        nome_familia: familia.nome || familia.nome_familia,
+        total_plantas: familia.total_plantas
+      })),
+      autores: (data.autores || []).map((autor: any) => ({
+        id: autor.id,
+        tipo: 'autor' as const,
+        nome: autor.nome || autor.nome_autor,
+        nome_autor: autor.nome || autor.nome_autor
+      })),
+      total_encontrado: data.total_encontrado || 0
+    }
+
+    setSearchResults(searchResults)
+
+  } catch (error) {
+    console.error("❌ Erro na pesquisa:", error)
+    setSearchError("Erro ao pesquisar. Tente novamente.")
+    setSearchResults(null)
+  } finally {
     setIsSearching(false)
-    
-    await new Promise(resolve => setTimeout(resolve, 100))
-    
-    let url = ""
-    
-    try {
-      switch (result.tipo) {
-        case 'planta':
-          console.log('📊 Calculando página da planta...', result.id)
-          
-          const plantaParams = new URLSearchParams({
-            limit: '10',
-            search: result.nome_cientifico || '',
-            search_type: 'geral'
-          })
-          
-          console.log('📋 Parâmetros da busca:', Object.fromEntries(plantaParams))
-          
-          const plantaResponse = await fetch(`${API_BASE_URL}/api/admin/plantas/${result.id}/page-info?${plantaParams}`)
-          
-          if (plantaResponse.ok) {
-            const pageInfo = await plantaResponse.json()
-            console.log('✅ Página da planta calculada:', pageInfo)
-            
-            const timestamp = Date.now()
-            url = `/admin/plants?page=${pageInfo.page}&highlight=${result.id}&search_type=geral&search_term=${encodeURIComponent(result.nome_cientifico || '')}&t=${timestamp}`
-          } else {
-            console.log('⚠️ Falha ao calcular página:', await plantaResponse.text())
-            const timestamp = Date.now()
-            url = `/admin/plants?search_type=geral&search_term=${encodeURIComponent(result.nome_cientifico || '')}&highlight=${result.id}&t=${timestamp}`
-          }
-          break
-          
-        case 'familia':
-          console.log('📊 Calculando página da família...', result.id)
-          
-          const familiaParams = new URLSearchParams({
-            limit: '10',
-            search: result.nome || ''
-          })
-          
-          const familiaResponse = await fetch(`${API_BASE_URL}/api/admin/familias/${result.id}/page-info?${familiaParams}`)
-          
-          if (familiaResponse.ok) {
-            const pageInfo = await familiaResponse.json()
-            console.log('✅ Página da família calculada:', pageInfo)
-            
-            const timestamp = Date.now()
-            url = `/admin/familias?page=${pageInfo.page}&highlight=${result.id}&search=${encodeURIComponent(result.nome || '')}&t=${timestamp}`
-          } else {
-            console.log('⚠️ Falha ao calcular página da família')
-            const timestamp = Date.now()
-            url = `/admin/familias?search=${encodeURIComponent(result.nome || '')}&highlight=${result.id}&t=${timestamp}`
-          }
-          break
-          
-        case 'autor':
-          console.log('📊 Calculando página do autor...', result.id)
-          
-          const autorParams = new URLSearchParams({
-            limit: '10',
-            search: result.nome || ''
-          })
-          
-          const autorResponse = await fetch(`${API_BASE_URL}/api/admin/autores/${result.id}/page-info?${autorParams}`)
-          
-          if (autorResponse.ok) {
-            const pageInfo = await autorResponse.json()
-            console.log('✅ Página do autor calculada:', pageInfo)
-            
-            const timestamp = Date.now()
-            url = `/admin/references?page=${pageInfo.page}&highlight=${result.id}&search=${encodeURIComponent(result.nome || '')}&type=autor&t=${timestamp}`
-          } else {
-            console.log('⚠️ Falha ao calcular página do autor')
-            const timestamp = Date.now()
-            url = `/admin/references?search=${encodeURIComponent(result.nome || '')}&highlight=${result.id}&type=autor&t=${timestamp}`
-          }
-          break
-      }
-
-      console.log('🚀 Navegando para:', url)
-
-      if (url) {
-        window.location.href = url
-      }
-      
-    } catch (error) {
-      console.error('❌ Erro ao processar resultado:', error)
-      
-      const timestamp = Date.now()
-      switch (result.tipo) {
-        case 'planta':
-          window.location.href = `/admin/plants?highlight=${result.id}&t=${timestamp}`
-          break
-        case 'familia':
-          window.location.href = `/admin/familias?highlight=${result.id}&t=${timestamp}`
-          break
-        case 'autor':
-          window.location.href = `/admin/authors-references?highlight=${result.id}&type=autor&t=${timestamp}`
-          break
-      }
-    }
   }
-
-  const performSearchWithPages = async (term: string, filter: string = activeSearchFilter) => {
-    if (!term.trim()) {
-      setSearchResults(null)
-      return
-    }
-
-    setIsSearching(true)
-    setSearchError("")
-
-    try {
-      console.log(`🔍 Buscando "${term}" em ${filter}`)
-      
-      const filterMap: { [key: string]: string } = {
-        "Plantas": "plantas",
-        "Famílias": "familias", 
-        "Autores": "autores"
-      }
-
-      const apiFilter = filter === "Todos" ? "todos" : filterMap[filter] || "plantas"
-      
-      const response = await fetch(
-        `${API_BASE_URL}/api/admin/dashboard/busca?q=${encodeURIComponent(term)}&tipo=${apiFilter}&limit=10`
-      )
-
-      if (!response.ok) {
-        throw new Error(`Erro na pesquisa: ${response.status}`)
-      }
-
-      const data = await response.json()
-      console.log('✅ Resultados de busca:', data)
-      
-      const searchResults: SearchResponse = {
-        plantas: data.plantas?.map((planta: any) => ({
-          ...planta,
-          tipo: 'planta' as const,
-          nome_cientifico: planta.nome_cientifico,
-          nome_comum: planta.nome_comum,
-          familia: planta.familia
-        })) || [],
-        familias: data.familias?.map((familia: any) => ({
-          ...familia,
-          tipo: 'familia' as const,
-          nome: familia.nome
-        })) || [],
-        autores: data.autores?.map((autor: any) => ({
-          ...autor,
-          tipo: 'autor' as const,
-          nome: autor.nome
-        })) || [],
-        total_encontrado: data.total_encontrado || 0
-      }
-
-      setSearchResults(searchResults)
-
-    } catch (error) {
-      console.error("❌ Erro na pesquisa:", error)
-      setSearchError("Erro ao pesquisar. Tente novamente.")
-      setSearchResults(null)
-    } finally {
-      setIsSearching(false)
-    }
-  }
+}
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && searchResults && searchResults.total_encontrado > 0) {

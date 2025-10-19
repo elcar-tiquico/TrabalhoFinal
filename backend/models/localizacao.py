@@ -23,7 +23,7 @@ class Provincia(db.Model):
     def to_dict(self):
         return {
             'id_provincia': self.id_provincia,
-            'nome_provincia': self.provincia,
+            'provincia': self.provincia,  # ✅ CORRIGIDO: era 'nome_provincia'
             'label': self.provincia,
             'value': self.id_provincia
         }
